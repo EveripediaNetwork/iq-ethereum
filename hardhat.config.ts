@@ -60,7 +60,8 @@ const config: HardhatUserConfig = {
     rinkeby: {
       gasPrice: parseInt(utils.parseUnits('123', 'gwei').toString()),
       url: node_url('rinkeby'),
-      accounts: keys('rinkeby')[0] !== '' ? keys('rinkeby') : accounts('rinkeby'),
+      accounts:
+        keys('rinkeby')[0] !== '' ? keys('rinkeby') : accounts('rinkeby'),
     },
     kovan: {
       url: node_url('kovan'),

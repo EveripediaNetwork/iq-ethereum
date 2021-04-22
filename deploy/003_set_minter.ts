@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
   const IQERC20 = <IIQERC20>await ethers.getContract('IQERC20', deployer);
   const TokenMinter = <IIQERC20>await ethers.getContract('TokenMinter');
-  if (TokenMinter.address === await IQERC20.minter()) {
+  if (TokenMinter.address === (await IQERC20.minter())) {
     hre.deployments.log(
       `🚀 setMinter has same address than the deployed - ${TokenMinter.address}`
     );
