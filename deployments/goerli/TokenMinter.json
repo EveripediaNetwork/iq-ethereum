@@ -1,0 +1,208 @@
+{
+  "address": "0x483488B7D897b429AE851FEef1fA02d96475cc23",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IIQERC20",
+          "name": "iQ",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IERC20",
+          "name": "wrappedIQ",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "Burned",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "Minted",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "iQ",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "mint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_addr",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferWrapped",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "wrappedIQ",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x312e8a9ed518ab2035a23c410a2d919fd83987e7aebfea4eabf704ea02ce0d54",
+  "receipt": {
+    "to": null,
+    "from": "0x59bBEbA0608959D8cC68e7367ca9bF937901b423",
+    "contractAddress": "0x483488B7D897b429AE851FEef1fA02d96475cc23",
+    "transactionIndex": 0,
+    "gasUsed": "546590",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x5faaef8d783002c010ba485ea77a517d27d042d784f0f812d36db80814d5daa7",
+    "transactionHash": "0x312e8a9ed518ab2035a23c410a2d919fd83987e7aebfea4eabf704ea02ce0d54",
+    "logs": [],
+    "blockNumber": 4484844,
+    "cumulativeGasUsed": "546590",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x0552D756a3E92Aa874EF60F61b7a29030373e869",
+    "0xBFf1365cF0A67431484c00C63bf14cFD9ABBce5D"
+  ],
+  "solcInputHash": "ab423d4b4ff2705e539187758698faf7",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.1+commit.f4a555be\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract IIQERC20\",\"name\":\"iQ\",\"type\":\"address\"},{\"internalType\":\"contract IERC20\",\"name\":\"wrappedIQ\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"_sender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"Burned\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"_sender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"Minted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"burn\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"iQ\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"mint\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_addr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"transferWrapped\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"wrappedIQ\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/Minters/TokenMinter.sol\":\"TokenMinter\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":1000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.7.0;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Returns the amount of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the amount of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves `amount` tokens from the caller's account to `recipient`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address recipient, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Moves `amount` tokens from `sender` to `recipient` using the\\n     * allowance mechanism. `amount` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n}\\n\",\"keccak256\":\"0xbd74f587ab9b9711801baf667db1426e4a03fd2d7f15af33e0e0d0394e7cef76\",\"license\":\"MIT\"},\"src/Interfaces/IIQERC20.sol\":{\"content\":\"// SPDX-License-Identifier: AGPL-3.0\\n\\npragma solidity 0.7.1;\\n\\nimport \\\"./IMinter.sol\\\";\\n\\n// solhint-disable-next-line no-empty-blocks\\ninterface IIQERC20 {\\n    function mint(address _addr, uint256 _amount) external;\\n\\n    function burn(address _addr, uint256 _amount) external;\\n\\n    function setMinter(IMinter _addr) external;\\n\\n    function minter() external view returns (address);\\n}\\n\",\"keccak256\":\"0x666c6ad31711af77f6aef23fb7c917a5fddd72ba433c56860142b4c29d63eac8\",\"license\":\"AGPL-3.0\"},\"src/Interfaces/IMinter.sol\":{\"content\":\"// SPDX-License-Identifier: AGPL-3.0\\n\\npragma solidity 0.7.1;\\n\\ninterface IMinter {\\n    event Minted(address _sender, uint256 _amount);\\n    event Burned(address _sender, uint256 _amount);\\n\\n    function mint(uint256 _amount) external;\\n\\n    function burn(uint256 _amount) external;\\n\\n    function iQ() external view returns (address);\\n\\n    function wrappedIQ() external view returns (address);\\n}\\n\",\"keccak256\":\"0xb53706764f97f44c8df69ba90fca03cbad4b88820172eee043643e9fc797301a\",\"license\":\"AGPL-3.0\"},\"src/Minters/TokenMinter.sol\":{\"content\":\"// SPDX-License-Identifier: AGPL-3.0\\npragma solidity 0.7.1;\\n\\nimport \\\"../Interfaces/IMinter.sol\\\";\\nimport \\\"../Interfaces/IIQERC20.sol\\\";\\nimport \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\n\\ncontract TokenMinter is IMinter {\\n    IIQERC20 private _iQ;\\n    IERC20 private _wrappedIQ;\\n    bool internal locked;\\n\\n    modifier blockReentrancy {\\n        require(!locked, \\\"Contract is locked\\\");\\n        locked = true;\\n        _;\\n        locked = false;\\n    }\\n\\n    constructor(IIQERC20 iQ, IERC20 wrappedIQ) {\\n        _iQ = iQ;\\n        _wrappedIQ = wrappedIQ;\\n    }\\n\\n    function mint(uint256 _amount) external override blockReentrancy {\\n        require(_wrappedIQ.transferFrom(msg.sender, address(this), _amount), \\\"Transfer has failed\\\");\\n        _iQ.mint(msg.sender, _amount);\\n        emit Minted(msg.sender, _amount);\\n    }\\n\\n    function burn(uint256 _amount) external override blockReentrancy {\\n        _iQ.burn(msg.sender, _amount);\\n        require(_wrappedIQ.transfer(msg.sender, _amount), \\\"Transfer has failed\\\");\\n        emit Burned(msg.sender, _amount);\\n    }\\n\\n    function transferWrapped(address _addr, uint256 _amount) external {\\n        require(msg.sender == Ownable(address(_iQ)).owner(), \\\"Only IQ owner can tranfer wrapped tokens\\\");\\n        require(address(this) != _iQ.minter(), \\\"Minter is still in use\\\");\\n        require(_wrappedIQ.transfer(_addr, _amount), \\\"Transfer has failed\\\");\\n    }\\n\\n    function iQ() external view override returns (address) {\\n        return address(_iQ);\\n    }\\n\\n    function wrappedIQ() external view override returns (address) {\\n        return address(_wrappedIQ);\\n    }\\n}\\n\\nabstract contract Ownable {\\n    function owner() public view virtual returns (address);\\n}\\n\",\"keccak256\":\"0x78444f8fd67c54697c2e438964eefb16d45425f53b28088382dec3d6e3b108b7\",\"license\":\"AGPL-3.0\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506040516108983803806108988339818101604052604081101561003357600080fd5b508051602090910151600080546001600160a01b039384166001600160a01b0319918216179091556001805493909216921691909117905561081e8061007a6000396000f3fe608060405234801561001057600080fd5b50600436106100675760003560e01c8063189def1611610050578063189def16146100be57806342966c68146100c6578063a0712d68146100e357610067565b806307ca0f271461006c57806314969f031461009a575b600080fd5b6100986004803603604081101561008257600080fd5b506001600160a01b038135169060200135610100565b005b6100a261036a565b604080516001600160a01b039092168252519081900360200190f35b6100a2610379565b610098600480360360208110156100dc57600080fd5b5035610388565b610098600480360360208110156100f957600080fd5b5035610595565b60008054906101000a90046001600160a01b03166001600160a01b0316638da5cb5b6040518163ffffffff1660e01b815260040160206040518083038186803b15801561014c57600080fd5b505afa158015610160573d6000803e3d6000fd5b505050506040513d602081101561017657600080fd5b50516001600160a01b031633146101be5760405162461bcd60e51b81526004018080602001828103825260288152602001806107c16028913960400191505060405180910390fd5b60008054906101000a90046001600160a01b03166001600160a01b031663075461726040518163ffffffff1660e01b815260040160206040518083038186803b15801561020a57600080fd5b505afa15801561021e573d6000803e3d6000fd5b505050506040513d602081101561023457600080fd5b50516001600160a01b0316301415610293576040805162461bcd60e51b815260206004820152601660248201527f4d696e746572206973207374696c6c20696e2075736500000000000000000000604482015290519081900360640190fd5b6001546040805163a9059cbb60e01b81526001600160a01b038581166004830152602482018590529151919092169163a9059cbb9160448083019260209291908290030181600087803b1580156102e957600080fd5b505af11580156102fd573d6000803e3d6000fd5b505050506040513d602081101561031357600080fd5b5051610366576040805162461bcd60e51b815260206004820152601360248201527f5472616e7366657220686173206661696c656400000000000000000000000000604482015290519081900360640190fd5b5050565b6000546001600160a01b031690565b6001546001600160a01b031690565b600154600160a01b900460ff16156103e7576040805162461bcd60e51b815260206004820152601260248201527f436f6e7472616374206973206c6f636b65640000000000000000000000000000604482015290519081900360640190fd5b6001805460ff60a01b1916600160a01b17905560008054604080517f9dc29fac0000000000000000000000000000000000000000000000000000000081523360048201526024810185905290516001600160a01b0390921692639dc29fac9260448084019382900301818387803b15801561046157600080fd5b505af1158015610475573d6000803e3d6000fd5b50506001546040805163a9059cbb60e01b81523360048201526024810186905290516001600160a01b03909216935063a9059cbb92506044808201926020929091908290030181600087803b1580156104cd57600080fd5b505af11580156104e1573d6000803e3d6000fd5b505050506040513d60208110156104f757600080fd5b505161054a576040805162461bcd60e51b815260206004820152601360248201527f5472616e7366657220686173206661696c656400000000000000000000000000604482015290519081900360640190fd5b604080513381526020810183905281517f696de425f79f4a40bc6d2122ca50507f0efbeabbff86a84871b7196ab8ea8df7929181900390910190a1506001805460ff60a01b19169055565b600154600160a01b900460ff16156105f4576040805162461bcd60e51b815260206004820152601260248201527f436f6e7472616374206973206c6f636b65640000000000000000000000000000604482015290519081900360640190fd5b6001805460ff60a01b1916600160a01b1790819055604080517f23b872dd0000000000000000000000000000000000000000000000000000000081523360048201523060248201526044810184905290516001600160a01b03909216916323b872dd916064808201926020929091908290030181600087803b15801561067957600080fd5b505af115801561068d573d6000803e3d6000fd5b505050506040513d60208110156106a357600080fd5b50516106f6576040805162461bcd60e51b815260206004820152601360248201527f5472616e7366657220686173206661696c656400000000000000000000000000604482015290519081900360640190fd5b60008054604080517f40c10f190000000000000000000000000000000000000000000000000000000081523360048201526024810185905290516001600160a01b03909216926340c10f199260448084019382900301818387803b15801561075d57600080fd5b505af1158015610771573d6000803e3d6000fd5b5050604080513381526020810185905281517f30385c845b448a36257a6a1716e6ad2e1bc2cbe333cde1e69fe849ad6511adfe9450908190039091019150a1506001805460ff60a01b1916905556fe4f6e6c79204951206f776e65722063616e207472616e666572207772617070656420746f6b656e73a26469706673582212208f92c74c60721e733c31f0375744d7f9c250a6c64a603598d75c31804f8ca21c64736f6c63430007010033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100675760003560e01c8063189def1611610050578063189def16146100be57806342966c68146100c6578063a0712d68146100e357610067565b806307ca0f271461006c57806314969f031461009a575b600080fd5b6100986004803603604081101561008257600080fd5b506001600160a01b038135169060200135610100565b005b6100a261036a565b604080516001600160a01b039092168252519081900360200190f35b6100a2610379565b610098600480360360208110156100dc57600080fd5b5035610388565b610098600480360360208110156100f957600080fd5b5035610595565b60008054906101000a90046001600160a01b03166001600160a01b0316638da5cb5b6040518163ffffffff1660e01b815260040160206040518083038186803b15801561014c57600080fd5b505afa158015610160573d6000803e3d6000fd5b505050506040513d602081101561017657600080fd5b50516001600160a01b031633146101be5760405162461bcd60e51b81526004018080602001828103825260288152602001806107c16028913960400191505060405180910390fd5b60008054906101000a90046001600160a01b03166001600160a01b031663075461726040518163ffffffff1660e01b815260040160206040518083038186803b15801561020a57600080fd5b505afa15801561021e573d6000803e3d6000fd5b505050506040513d602081101561023457600080fd5b50516001600160a01b0316301415610293576040805162461bcd60e51b815260206004820152601660248201527f4d696e746572206973207374696c6c20696e2075736500000000000000000000604482015290519081900360640190fd5b6001546040805163a9059cbb60e01b81526001600160a01b038581166004830152602482018590529151919092169163a9059cbb9160448083019260209291908290030181600087803b1580156102e957600080fd5b505af11580156102fd573d6000803e3d6000fd5b505050506040513d602081101561031357600080fd5b5051610366576040805162461bcd60e51b815260206004820152601360248201527f5472616e7366657220686173206661696c656400000000000000000000000000604482015290519081900360640190fd5b5050565b6000546001600160a01b031690565b6001546001600160a01b031690565b600154600160a01b900460ff16156103e7576040805162461bcd60e51b815260206004820152601260248201527f436f6e7472616374206973206c6f636b65640000000000000000000000000000604482015290519081900360640190fd5b6001805460ff60a01b1916600160a01b17905560008054604080517f9dc29fac0000000000000000000000000000000000000000000000000000000081523360048201526024810185905290516001600160a01b0390921692639dc29fac9260448084019382900301818387803b15801561046157600080fd5b505af1158015610475573d6000803e3d6000fd5b50506001546040805163a9059cbb60e01b81523360048201526024810186905290516001600160a01b03909216935063a9059cbb92506044808201926020929091908290030181600087803b1580156104cd57600080fd5b505af11580156104e1573d6000803e3d6000fd5b505050506040513d60208110156104f757600080fd5b505161054a576040805162461bcd60e51b815260206004820152601360248201527f5472616e7366657220686173206661696c656400000000000000000000000000604482015290519081900360640190fd5b604080513381526020810183905281517f696de425f79f4a40bc6d2122ca50507f0efbeabbff86a84871b7196ab8ea8df7929181900390910190a1506001805460ff60a01b19169055565b600154600160a01b900460ff16156105f4576040805162461bcd60e51b815260206004820152601260248201527f436f6e7472616374206973206c6f636b65640000000000000000000000000000604482015290519081900360640190fd5b6001805460ff60a01b1916600160a01b1790819055604080517f23b872dd0000000000000000000000000000000000000000000000000000000081523360048201523060248201526044810184905290516001600160a01b03909216916323b872dd916064808201926020929091908290030181600087803b15801561067957600080fd5b505af115801561068d573d6000803e3d6000fd5b505050506040513d60208110156106a357600080fd5b50516106f6576040805162461bcd60e51b815260206004820152601360248201527f5472616e7366657220686173206661696c656400000000000000000000000000604482015290519081900360640190fd5b60008054604080517f40c10f190000000000000000000000000000000000000000000000000000000081523360048201526024810185905290516001600160a01b03909216926340c10f199260448084019382900301818387803b15801561075d57600080fd5b505af1158015610771573d6000803e3d6000fd5b5050604080513381526020810185905281517f30385c845b448a36257a6a1716e6ad2e1bc2cbe333cde1e69fe849ad6511adfe9450908190039091019150a1506001805460ff60a01b1916905556fe4f6e6c79204951206f776e65722063616e207472616e666572207772617070656420746f6b656e73a26469706673582212208f92c74c60721e733c31f0375744d7f9c250a6c64a603598d75c31804f8ca21c64736f6c63430007010033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 1300,
+        "contract": "src/Minters/TokenMinter.sol:TokenMinter",
+        "label": "_iQ",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_contract(IIQERC20)1256"
+      },
+      {
+        "astId": 1302,
+        "contract": "src/Minters/TokenMinter.sol:TokenMinter",
+        "label": "_wrappedIQ",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_contract(IERC20)912"
+      },
+      {
+        "astId": 1304,
+        "contract": "src/Minters/TokenMinter.sol:TokenMinter",
+        "label": "locked",
+        "offset": 20,
+        "slot": "1",
+        "type": "t_bool"
+      }
+    ],
+    "types": {
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_contract(IERC20)912": {
+        "encoding": "inplace",
+        "label": "contract IERC20",
+        "numberOfBytes": "20"
+      },
+      "t_contract(IIQERC20)1256": {
+        "encoding": "inplace",
+        "label": "contract IIQERC20",
+        "numberOfBytes": "20"
+      }
+    }
+  }
+}
