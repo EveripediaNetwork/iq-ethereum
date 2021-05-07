@@ -5,14 +5,14 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {IQERC20, VeIQ} from '../typechain';
+import {IQERC20, VEIQ} from '../typechain';
 import {setupUser, setupUsers} from './utils';
 
 const setup = deployments.createFixture(async () => {
   const {deployer} = await getNamedAccounts();
   await deployments.fixture();
   const IQERC20 = <IQERC20>await ethers.getContract('IQERC20');
-  const VEIQ = <VeIQ>await ethers.getContract('veIQ');
+  const VEIQ = <VEIQ>await ethers.getContract('VEIQ');
 
   const contracts = {
     IQERC20: IQERC20,
@@ -26,8 +26,8 @@ const setup = deployments.createFixture(async () => {
   };
 });
 
-describe('veIQ', function () {
-  it('veIQ can get IQ and vote', async function () {
+describe('VEIQ', function () {
+  it('VEIQ can get IQ and vote', async function () {
     const lockTime = Math.round(new Date().getTime() / 1000) + 6000000;
     const amount = 5 ** 18;
     const {users, VEIQ, deployer} = await setup();
