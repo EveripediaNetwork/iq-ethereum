@@ -5,7 +5,7 @@ import 'hardhat-deploy-ethers';
 import 'hardhat-gas-reporter';
 import 'hardhat-typechain';
 import 'solidity-coverage';
-import "@nomiclabs/hardhat-vyper";
+import '@nomiclabs/hardhat-vyper';
 import {node_url, accounts, keys} from './utils/network';
 import {utils} from 'ethers';
 
@@ -20,7 +20,7 @@ const config: HardhatUserConfig = {
     },
   },
   vyper: {
-    version: "0.2.8"
+    version: '0.2.8',
   },
   namedAccounts: {
     deployer: {

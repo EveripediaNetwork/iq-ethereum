@@ -13,8 +13,8 @@
 # Curve Finance's veCRV
 # https://resources.curve.fi/faq/vote-locking-boost
 # https://github.com/curvefi/curve-dao-contracts/blob/master/contracts/VotingEscrow.vy
-# veFXS is basically a fork, with the key difference that 1 FXS locked for 1 second would be ~ 1 veFXS,
-# As opposed to ~ 0 veFXS (as it is with veCRV)
+# veIQ is basically a fork, with the key difference that 1 IQ locked for 1 second would be ~ 1 veIQ,
+# As opposed to ~ 0 veIQ (as it is with veCRV)
 
 # Voting escrow to have time-weighted votes
 # Votes have a weight depending on time, so that users are committed
@@ -131,7 +131,7 @@ future_admin: public(address)
 def __init__(token_addr: address, _name: String[64], _symbol: String[32], _version: String[32]):
     """
     @notice Contract constructor
-    @param token_addr `ERC20CRV` token address
+    @param token_addr `ERC20` token address
     @param _name Token name
     @param _symbol Token symbol
     @param _version Contract version - required for Aragon compatibility
@@ -197,7 +197,7 @@ def apply_smart_wallet_checker():
 @external
 def toggleEmergencyUnlock():
     """
-    @dev Used to allow early withdrawals of veFXS back into FXS, in case of an emergency
+    @dev Used to allow early withdrawals of veIQ back into IQ, in case of an emergency
     """
     assert msg.sender == self.admin  # dev: admin only
     self.emergencyUnlockActive = not (self.emergencyUnlockActive)
@@ -205,10 +205,10 @@ def toggleEmergencyUnlock():
 @external
 def recoverERC20(token_addr: address, amount: uint256):
     """
-    @dev Used to recover non-FXS ERC20 tokens
+    @dev Used to recover non-IQ ERC20 tokens
     """
     assert msg.sender == self.admin  # dev: admin only
-    assert token_addr != self.token  # Cannot recover FXS. Use toggleEmergencyUnlock instead and have users pull theirs out individually
+    assert token_addr != self.token  # Cannot recover IQ. Use toggleEmergencyUnlock instead and have users pull theirs out individually
     ERC20(token_addr).transfer(self.admin, amount)
 
 @internal
@@ -531,7 +531,7 @@ def withdraw():
 # The following ERC20/minime-compatible methods are not real balanceOf and supply!
 # They measure the weights for the purpose of voting, so they don't represent
 # real coins.
-# FRAX adds minimal 1-1 FXS/veFXS, as well as a voting multiplier
+# FRAX adds minimal 1-1 IQ/veIQ, as well as a voting multiplier
 
 @internal
 @view
@@ -708,21 +708,21 @@ def totalSupplyAt(_block: uint256) -> uint256:
 
 @external
 @view
-def totalFXSSupply() -> uint256:
+def totalIQSupply() -> uint256:
     """
-    @notice Calculate FXS supply
+    @notice Calculate IQ supply
     @dev Adheres to the ERC20 `totalSupply` interface for Aragon compatibility
-    @return Total FXS supply
+    @return Total IQ supply
     """
     return ERC20(self.token).balanceOf(self)
 
 @external
 @view
-def totalFXSSupplyAt(_block: uint256) -> uint256:
+def totalIQSupplyAt(_block: uint256) -> uint256:
     """
-    @notice Calculate total FXS at some point in the past
+    @notice Calculate total IQ at some point in the past
     @param _block Block to calculate the total voting power at
-    @return Total FXS supply at `_block`
+    @return Total IQ supply at `_block`
     """
     assert _block <= block.number
     _epoch: uint256 = self.epoch
