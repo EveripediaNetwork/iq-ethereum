@@ -5,18 +5,18 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {IQERC20, VEIQ} from '../typechain';
+import {IQERC20, HIIQ} from '../typechain';
 import {setupUser, setupUsers} from './utils';
 
 const setup = deployments.createFixture(async () => {
   const {deployer} = await getNamedAccounts();
   await deployments.fixture();
   const IQERC20 = <IQERC20>await ethers.getContract('IQERC20');
-  const VEIQ = <VEIQ>await ethers.getContract('VEIQ');
+  const HIIQ = <HIIQ>await ethers.getContract('HIIQ');
 
   const contracts = {
     IQERC20: IQERC20,
-    VEIQ: VEIQ,
+    HIIQ: HIIQ,
   };
   const users = await setupUsers(await getUnnamedAccounts(), contracts);
   return {
@@ -26,25 +26,25 @@ const setup = deployments.createFixture(async () => {
   };
 });
 
-describe('VEIQ', function () {
-  it('VEIQ can get IQ and vote', async function () {
+describe('HIIQ', function () {
+  it('HIIQ can get IQ and vote', async function () {
     const lockTime = Math.round(new Date().getTime() / 1000) + 6000000;
     const amount = 5 ** 18;
-    const {users, VEIQ, deployer} = await setup();
+    const {users, HIIQ, deployer} = await setup();
 
     await expect(deployer.IQERC20.mint(users[0].address, amount)).to.be.not
       .reverted;
-    await expect(users[0].IQERC20.approve(VEIQ.address, amount)).to.be.not
+    await expect(users[0].IQERC20.approve(HIIQ.address, amount)).to.be.not
       .reverted;
-    await users[0].VEIQ.create_lock(amount, lockTime);
+    await users[0].HIIQ.create_lock(amount, lockTime);
     const blockNumber = await ethers.provider.getBlockNumber();
     expect(
       await (
-        await users[0].VEIQ.balanceOfAt(users[0].address, blockNumber)
+        await users[0].HIIQ.balanceOfAt(users[0].address, blockNumber)
       ).toNumber()
     ).to.be.greaterThan(amount);
     expect(
-      await (await users[0].VEIQ.locked__end(users[0].address)).toNumber()
+      await (await users[0].HIIQ.locked__end(users[0].address)).toNumber()
     ).to.be.below(lockTime);
   });
 });

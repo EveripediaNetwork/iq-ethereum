@@ -13,8 +13,8 @@
 # Curve Finance's veCRV
 # https://resources.curve.fi/faq/vote-locking-boost
 # https://github.com/curvefi/curve-dao-contracts/blob/master/contracts/VotingEscrow.vy
-# veIQ is basically a fork, with the key difference that 1 IQ locked for 1 second would be ~ 1 veIQ,
-# As opposed to ~ 0 veIQ (as it is with veCRV)
+# HIIQ is basically a fork, with the key difference that 1 IQ locked for 1 second would be ~ 1 HIIQ,
+# As opposed to ~ 0 HIIQ (as it is with veCRV)
 
 # Voting escrow to have time-weighted votes
 # Votes have a weight depending on time, so that users are committed
@@ -197,7 +197,7 @@ def apply_smart_wallet_checker():
 @external
 def toggleEmergencyUnlock():
     """
-    @dev Used to allow early withdrawals of veIQ back into IQ, in case of an emergency
+    @dev Used to allow early withdrawals of HIIQ back into IQ, in case of an emergency
     """
     assert msg.sender == self.admin  # dev: admin only
     self.emergencyUnlockActive = not (self.emergencyUnlockActive)
@@ -531,7 +531,7 @@ def withdraw():
 # The following ERC20/minime-compatible methods are not real balanceOf and supply!
 # They measure the weights for the purpose of voting, so they don't represent
 # real coins.
-# FRAX adds minimal 1-1 IQ/veIQ, as well as a voting multiplier
+# FRAX adds minimal 1-1 IQ/HIIQ, as well as a voting multiplier
 
 @internal
 @view

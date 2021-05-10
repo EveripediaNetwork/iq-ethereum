@@ -6,15 +6,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = hre.deployments;
   const iQ = await hre.deployments.get('IQERC20');
 
-  const result = await deploy('VEIQ', {
+  const result = await deploy('HIIQ', {
     from: deployer,
-    args: [iQ.address, 'veIQ', 'veIQ', '1.0.0'],
+    args: [iQ.address, 'hiIQ', 'hiIQ', '1.0.0'],
     log: true,
   });
   hre.deployments.log(
-    `🚀 contract VEIQ deployed at ${result.address} using ${result.receipt?.gasUsed} gas`
+    `🚀 contract HIIQ deployed at ${result.address} using ${result.receipt?.gasUsed} gas`
   );
 };
 export default func;
-func.tags = ['VEIQ'];
+func.tags = ['HIIQ'];
 func.dependencies = ['IQERC20'];
