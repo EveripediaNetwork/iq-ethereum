@@ -5,6 +5,7 @@ import 'hardhat-deploy-ethers';
 import 'hardhat-gas-reporter';
 import 'hardhat-typechain';
 import 'solidity-coverage';
+import '@nomiclabs/hardhat-vyper';
 import {node_url, accounts, keys} from './utils/network';
 import {utils} from 'ethers';
 
@@ -17,6 +18,9 @@ const config: HardhatUserConfig = {
         runs: 1000,
       },
     },
+  },
+  vyper: {
+    version: '0.2.8',
   },
   namedAccounts: {
     deployer: {
@@ -33,6 +37,10 @@ const config: HardhatUserConfig = {
     },
     pTokenHolder: {
       default: '0x9feab70f3c4a944b97b7565bac4991df5b7a69ff', // for testing forking mainnet
+    },
+    iQ: {
+      mainnet: '0x579cea1889991f68acc35ff5c3dd0621ff29b0c9', // everipediaIQ
+      matic: '0xB9638272aD6998708de56BBC0A290a1dE534a578', // everipediaIQ
     },
   },
   networks: {
@@ -78,7 +86,7 @@ const config: HardhatUserConfig = {
     },
     matic: {
       url: node_url('matic'),
-      accounts: accounts('matic'),
+      accounts: keys('matic')[0] !== '' ? keys('matic') : accounts('matic'),
     },
     staging: {
       url: node_url('goerli'),
