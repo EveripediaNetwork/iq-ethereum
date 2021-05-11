@@ -1,6 +1,11 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
+// if you want to deploy in matic:
+// yarn deploy matic --tags HIIQ
+//   const {deployer, iQ} = await hre.getNamedAccounts();
+//   args: [iQ, 'hiIQ', 'hiIQ', '1.0.0'],
+//   remove: func.dependencies = ['IQERC20'];
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await hre.getNamedAccounts();
   const {deploy} = hre.deployments;
