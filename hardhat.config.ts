@@ -34,11 +34,13 @@ const config: HardhatUserConfig = {
       mainnet: '0xa23d33d5e0a61ba81919bfd727c671bb03ab0fea', // pTokens address
       goerli: '0xBFf1365cF0A67431484c00C63bf14cFD9ABBce5D', // dummyERC20
       rinkeby: '0xa8a7e24779a858E756BC94d4b80bfb2adE6EEF84', // dummyERC20
+      matic: '0xa23d33d5e0a61ba81919bfd727c671bb03ab0fea', // pTokens address TODO: add
     },
     pTokenHolder: {
       default: '0x9feab70f3c4a944b97b7565bac4991df5b7a69ff', // for testing forking mainnet
     },
     iQ: {
+      default: 2,
       mainnet: '0x579cea1889991f68acc35ff5c3dd0621ff29b0c9', // everipediaIQ
       matic: '0xB9638272aD6998708de56BBC0A290a1dE534a578', // everipediaIQ
     },
