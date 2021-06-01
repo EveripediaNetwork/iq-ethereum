@@ -41,7 +41,14 @@ const config: HardhatUserConfig = {
     iQ: {
       mainnet: '0x579cea1889991f68acc35ff5c3dd0621ff29b0c9', // everipediaIQ
       matic: '0xB9638272aD6998708de56BBC0A290a1dE534a578', // everipediaIQ
+      goerli: '0x0552D756a3E92Aa874EF60F61b7a29030373e869', // everipediaIQ
     },
+    hiIQ: {
+      mainnet: '0x1bf5457ecaa14ff63cc89efd560e251e814e16ba',
+      matic: '0xfC0fA725E8fB4D87c38EcE56e8852258219C64Ee',
+      goerli: '0xc03bcacc5377b7cc6634537650a7a1d14711c1a3',
+      rinkeby: '0x279926cca1ccd061ee423c633f7376e2bdecc53a'
+    }
   },
   networks: {
     hardhat: {
@@ -60,13 +67,13 @@ const config: HardhatUserConfig = {
       accounts: accounts(),
     },
     mainnet: {
-      gasPrice: parseInt(utils.parseUnits('123', 'gwei').toString()),
+      gasPrice: parseInt(utils.parseUnits('32', 'gwei').toString()),
       url: node_url('mainnet'),
       accounts:
         keys('mainnet')[0] !== '' ? keys('mainnet') : accounts('mainnet'),
     },
     rinkeby: {
-      gasPrice: parseInt(utils.parseUnits('123', 'gwei').toString()),
+      gasPrice: parseInt(utils.parseUnits('30', 'gwei').toString()),
       url: node_url('rinkeby'),
       accounts:
         keys('rinkeby')[0] !== '' ? keys('rinkeby') : accounts('rinkeby'),
@@ -76,7 +83,7 @@ const config: HardhatUserConfig = {
       accounts: accounts('kovan'),
     },
     goerli: {
-      gasPrice: parseInt(utils.parseUnits('123', 'gwei').toString()),
+      gasPrice: parseInt(utils.parseUnits('30', 'gwei').toString()),
       url: node_url('goerli'),
       accounts: keys('goerli')[0] !== '' ? keys('goerli') : accounts('goerli'),
     },
