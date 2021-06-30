@@ -75,10 +75,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(
-        address _emittedToken,
-        address _hiIQ_address
-    ) {
+    constructor(address _emittedToken, address _hiIQ_address) {
         emitted_token_address = _emittedToken;
         emittedToken = ERC20(_emittedToken);
 
@@ -104,8 +101,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         // Only unexpired hiIQ should be eligible
         if (int256(curr_locked_bal_pack.amount) == int256(curr_hiiq_bal)) {
             return 0;
-        }
-        else {
+        } else {
             return curr_hiiq_bal;
         }
     }
@@ -119,13 +115,9 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
             return yieldPerHiIQStored;
         } else {
             return (
-            yieldPerHiIQStored.add(
-                lastTimeYieldApplicable()
-                .sub(lastUpdateTime)
-                .mul(yieldRate)
-                .mul(1e18)
-                .div(totalHiIQSupplyStored)
-            )
+                yieldPerHiIQStored.add(
+                    lastTimeYieldApplicable().sub(lastUpdateTime).mul(yieldRate).mul(1e18).div(totalHiIQSupplyStored)
+                )
             );
         }
     }
@@ -143,12 +135,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         // Analogous to midpoint Riemann sum
         uint256 midpoint_hiiq_balance = ((new_hiiq_balance).add(old_hiiq_balance)).div(2);
 
-        return (
-        midpoint_hiiq_balance
-        .mul(yield0.sub(userYieldPerTokenPaid[account]))
-        .div(1e18)
-        .add(yields[account])
-        );
+        return (midpoint_hiiq_balance.mul(yield0.sub(userYieldPerTokenPaid[account])).div(1e18).add(yields[account]));
     }
 
     function getYieldForDuration() external view returns (uint256) {
@@ -197,17 +184,19 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         _checkpointUser(msg.sender);
     }
 
-    function getYield() external nonReentrant notYieldCollectionPaused checkpointUser(msg.sender) returns (uint256 yield0) {
+    function getYield()
+        external
+        nonReentrant
+        notYieldCollectionPaused
+        checkpointUser(msg.sender)
+        returns (uint256 yield0)
+    {
         require(greylist[msg.sender] == false, "Address has been greylisted");
 
         yield0 = yields[msg.sender];
         if (yield0 > 0) {
             yields[msg.sender] = 0;
-            TransferHelper.safeTransfer(
-                emitted_token_address,
-                msg.sender,
-                yield0
-            );
+            TransferHelper.safeTransfer(emitted_token_address, msg.sender, yield0);
             emit YieldCollected(msg.sender, yield0, emitted_token_address);
         }
     }
@@ -221,17 +210,15 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         // This keeps the yield rate in the right range, preventing overflows due to
         // very high values of yieldRate in the earned and yieldPerToken functions;
         // Yield + leftover must be less than 2^256 / 10^18 to avoid overflow.
-        uint256 num_periods_elapsed = uint256(block.timestamp.sub(periodFinish)) / yieldDuration; // Floor division to the nearest period
+        uint256 num_periods_elapsed = uint256(block.timestamp.sub(periodFinish)) / yieldDuration;
+        // Floor division to the nearest period
         uint256 balance0 = emittedToken.balanceOf(address(this));
         require(
-            yieldRate.mul(yieldDuration).mul(num_periods_elapsed + 1) <=
-            balance0,
+            yieldRate.mul(yieldDuration).mul(num_periods_elapsed + 1) <= balance0,
             "Not enough emittedToken available for yield distribution!"
         );
 
-        periodFinish = periodFinish.add(
-            (num_periods_elapsed.add(1)).mul(yieldDuration)
-        );
+        periodFinish = periodFinish.add((num_periods_elapsed.add(1)).mul(yieldDuration));
 
         uint256 yield0 = yieldPerHiIQ();
         yieldPerHiIQStored = yield0;
@@ -263,7 +250,10 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     }
 
     function setYieldDuration(uint256 _yieldDuration) external onlyOwner {
-        require( periodFinish == 0 || block.timestamp > periodFinish, "Previous yield period must be complete before changing the duration for the new period");
+        require(
+            periodFinish == 0 || block.timestamp > periodFinish,
+            "Previous yield period must be complete before changing the duration for the new period"
+        );
         yieldDuration = _yieldDuration;
         emit YieldDurationUpdated(yieldDuration);
     }
