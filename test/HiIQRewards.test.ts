@@ -29,21 +29,24 @@ describe('HiIQRewards', () => {
     const {users, deployer} = await setup();
     const temp = users[0];
 
-    expect(deployer.HiIQRewards.setYieldDuration(604800)).to.be.not.reverted;
-    expect(temp.HiIQRewards.setYieldDuration(604800)).to.be.reverted;
-
-    expect(deployer.HiIQRewards.initializeDefault()).to.be.not.reverted;
-    expect(temp.HiIQRewards.initializeDefault()).to.be.reverted;
-
-    expect(deployer.HiIQRewards.greylistAddress(temp.address)).to.be.not
+    await expect(deployer.HiIQRewards.setYieldDuration(604800)).to.be.not
       .reverted;
-    expect(temp.HiIQRewards.greylistAddress(deployer.address)).to.be.reverted;
+    await expect(temp.HiIQRewards.setYieldDuration(604800)).to.be.reverted;
 
-    expect(deployer.HiIQRewards.setPauses(true)).to.be.not.reverted;
-    expect(temp.HiIQRewards.setPauses(true)).to.be.reverted;
+    await expect(deployer.HiIQRewards.initializeDefault()).to.be.not.reverted;
+    await expect(temp.HiIQRewards.initializeDefault()).to.be.reverted;
 
-    expect(deployer.HiIQRewards.setYieldRate(7 * 86400, false)).to.be.not
+    await expect(deployer.HiIQRewards.greylistAddress(temp.address)).to.be.not
       .reverted;
-    expect(temp.HiIQRewards.setYieldRate(7 * 86400, false)).to.be.reverted;
+    await expect(temp.HiIQRewards.greylistAddress(deployer.address)).to.be
+      .reverted;
+
+    await expect(deployer.HiIQRewards.setPauses(true)).to.be.not.reverted;
+    await expect(temp.HiIQRewards.setPauses(true)).to.be.reverted;
+
+    await expect(deployer.HiIQRewards.setYieldRate(7 * 86400, false)).to.be.not
+      .reverted;
+    await expect(temp.HiIQRewards.setYieldRate(7 * 86400, false)).to.be
+      .reverted;
   });
 });
