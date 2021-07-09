@@ -9,9 +9,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const iQ = await deployments.get('IQERC20');
 
+  console.log(hiIQ);
+
   const result = await deploy(contractName, {
     from: deployer,
-    args: [iQ.address, hiIQ],
+    args: [hiIQ, iQ.address],
     log: true,
   });
 
@@ -22,3 +24,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = [contractName];
+func.dependencies = ['HIIQ'];

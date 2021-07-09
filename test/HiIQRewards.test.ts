@@ -25,15 +25,25 @@ const setup = deployments.createFixture(async () => {
 });
 
 describe('HiIQRewards', () => {
-  it('Validates earnings', async () => {
+  it('Only owner can call restrictive functions', async () => {
     const {users, deployer} = await setup();
-
     const temp = users[0];
 
-    expect(temp.HiIQRewards.earned(temp.address)).to.be.not.reverted;
-    // Division by zero
-    expect(temp.HiIQRewards.fractionParticipating()).to.be.reverted;
-    expect(deployer.HiIQRewards.eligibleCurrentHiIQ(users[4].address)).to.be.
+    expect(deployer.HiIQRewards.setYieldDuration(604800)).to.be.not.reverted;
+    expect(temp.HiIQRewards.setYieldDuration(604800)).to.be.reverted;
+
+    expect(deployer.HiIQRewards.initializeDefault()).to.be.not.reverted;
+    expect(temp.HiIQRewards.initializeDefault()).to.be.reverted;
+
+    expect(deployer.HiIQRewards.greylistAddress(temp.address)).to.be.not
       .reverted;
+    expect(temp.HiIQRewards.greylistAddress(deployer.address)).to.be.reverted;
+
+    expect(deployer.HiIQRewards.setPauses(true)).to.be.not.reverted;
+    expect(temp.HiIQRewards.setPauses(true)).to.be.reverted;
+
+    expect(deployer.HiIQRewards.setYieldRate(7 * 86400, false)).to.be.not
+      .reverted;
+    expect(temp.HiIQRewards.setYieldRate(7 * 86400, false)).to.be.reverted;
   });
 });

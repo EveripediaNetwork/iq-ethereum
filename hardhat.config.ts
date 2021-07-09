@@ -44,7 +44,7 @@ const config: HardhatUserConfig = {
       goerli: '0x0552D756a3E92Aa874EF60F61b7a29030373e869', // everipediaIQ
     },
     hiIQ: {
-      default: 4,
+      default: 2,
       mainnet: '0x1bf5457ecaa14ff63cc89efd560e251e814e16ba',
       matic: '0xfC0fA725E8fB4D87c38EcE56e8852258219C64Ee',
       goerli: '0xc03bcacc5377b7cc6634537650a7a1d14711c1a3',
