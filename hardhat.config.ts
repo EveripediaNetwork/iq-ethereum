@@ -50,6 +50,10 @@ const config: HardhatUserConfig = {
       goerli: '0xc03bcacc5377b7cc6634537650a7a1d14711c1a3',
       rinkeby: '0x279926cca1ccd061ee423c633f7376e2bdecc53a',
     },
+    hiIQRewards: {
+      goerli: '0xEEE465152C74f7763dec52B1d4E6C90F7d6E1fd6',
+      rinkeby: '0x2c0D8F23e254188d5019c3E9DD5CBB92Fc9D9aD7'
+    }
   },
   networks: {
     hardhat: {

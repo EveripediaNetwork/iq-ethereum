@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.7.1;
 
 // helper methods for interacting with ERC20 tokens and sending ETH that do not consistently return true/false
