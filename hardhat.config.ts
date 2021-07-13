@@ -24,7 +24,7 @@ const config: HardhatUserConfig = {
   },
   namedAccounts: {
     deployer: {
-      default: 0,
+      default: 1,
       mainnet: '0xaCa39B187352D9805DECEd6E73A3d72ABf86E7A0', // IQ deployer
       goerli: '0x59bBEbA0608959D8cC68e7367ca9bF937901b423',
       rinkeby: '0x59bBEbA0608959D8cC68e7367ca9bF937901b423',
@@ -39,6 +39,7 @@ const config: HardhatUserConfig = {
       default: '0x9feab70f3c4a944b97b7565bac4991df5b7a69ff', // for testing forking mainnet
     },
     iQ: {
+      default: 2,
       mainnet: '0x579cea1889991f68acc35ff5c3dd0621ff29b0c9', // everipediaIQ
       matic: '0xB9638272aD6998708de56BBC0A290a1dE534a578', // everipediaIQ
       goerli: '0x0552D756a3E92Aa874EF60F61b7a29030373e869', // everipediaIQ
@@ -51,9 +52,10 @@ const config: HardhatUserConfig = {
       rinkeby: '0x279926cca1ccd061ee423c633f7376e2bdecc53a',
     },
     hiIQRewards: {
+      default: 0,
       goerli: '0xEEE465152C74f7763dec52B1d4E6C90F7d6E1fd6',
-      rinkeby: '0x2c0D8F23e254188d5019c3E9DD5CBB92Fc9D9aD7'
-    }
+      rinkeby: '0x2c0D8F23e254188d5019c3E9DD5CBB92Fc9D9aD7',
+    },
   },
   networks: {
     hardhat: {

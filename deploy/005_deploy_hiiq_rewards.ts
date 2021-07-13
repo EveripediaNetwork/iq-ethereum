@@ -22,4 +22,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['HiIQRewards'];
-func.dependencies = ['IQERC20'];
+func.dependencies = ['IQERC20', 'HIIQ'];
