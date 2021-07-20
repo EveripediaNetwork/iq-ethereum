@@ -9,13 +9,20 @@ import {
 import {setupUser, setupUsers} from './utils';
 
 const setup = deployments.createFixture(async () => {
-  await deployments.fixture();
+  await deployments.fixture('HIIQ');
   const {deployer} = await getNamedAccounts();
+  const HIIQ = <HIIQ>await ethers.getContract('HIIQ');
+  const IQERC20 = <IQERC20>await ethers.getContract('IQERC20');
+  await deployments.deploy('HiIQRewards', {
+    from: deployer,
+    args: [IQERC20.address, HIIQ.address],
+    log: true,
+  });
 
   const contracts = {
     HiIQRewards: <HiIQRewards>await ethers.getContract('HiIQRewards'),
-    HIIQ: <HIIQ>await ethers.getContract('HIIQ'),
-    IQERC20: <IQERC20>await ethers.getContract('IQERC20'),
+    HIIQ,
+    IQERC20,
   };
 
   const users = await setupUsers(await getUnnamedAccounts(), contracts);
@@ -29,7 +36,7 @@ const setup = deployments.createFixture(async () => {
 
 describe('HiIQRewards', () => {
   it('Only owner can call restrictive functions', async () => {
-    const {users, deployer, HIIQ} = await setup();
+    const {users, deployer} = await setup();
     const temp = users[0];
 
     await expect(deployer.HiIQRewards.setYieldDuration(604800)).to.be.not
@@ -69,7 +76,6 @@ describe('HiIQRewards', () => {
     await expect(user.HIIQ.create_lock(amount, lockTime)).to.be.not.reverted;
 
     console.log(await deployer.HIIQ['balanceOf(address)'](user.address));
-
     console.log(await deployer.HiIQRewards.eligibleCurrentHiIQ(user.address));
 
     // await expect(deployer.IQERC20.mint(user.address, amount)).to.be.not
