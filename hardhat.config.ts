@@ -72,7 +72,7 @@ const config: HardhatUserConfig = {
       accounts: accounts(),
     },
     mainnet: {
-      gasPrice: parseInt(utils.parseUnits('32', 'gwei').toString()),
+      gasPrice: parseInt(utils.parseUnits('20', 'gwei').toString()),
       url: node_url('mainnet'),
       accounts:
         keys('mainnet')[0] !== '' ? keys('mainnet') : accounts('mainnet'),
@@ -110,7 +110,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     currency: 'USD',
-    gasPrice: 185,
+    gasPrice: 15,
     enabled: process.env.REPORT_GAS ? true : false,
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     maxMethodDiff: 10,

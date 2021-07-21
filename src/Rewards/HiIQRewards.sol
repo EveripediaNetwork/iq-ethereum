@@ -8,6 +8,7 @@ pragma experimental ABIEncoderV2;
 // Originally inspired by Synthetixio, but heavily modified by the Frax team (hiIQ portion) & EP Team
 // https://raw.githubusercontent.com/Synthetixio/synthetix/develop/contracts/StakingYield.sol
 
+import "hardhat/console.sol";
 import "./TransferHelper.sol";
 import "../Lock/IhiIQ.sol";
 import "@openzeppelin/contracts/math/Math.sol";
@@ -166,6 +167,9 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
             uint256 weight_diff = old_hiiq_balance.sub(new_hiiq_balance);
             totalHiIQParticipating = totalHiIQParticipating.sub(weight_diff);
         }
+        console.log(totalHiIQParticipating);
+        console.log(new_hiiq_balance);
+        console.log(old_hiiq_balance);
 
         // Mark the user as initialized
         if (!userIsInitialized[account]) userIsInitialized[account] = true;
@@ -194,6 +198,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         require(greylist[msg.sender] == false, "Address has been greylisted");
 
         yield0 = yields[msg.sender];
+        console.log(yield0);
         if (yield0 > 0) {
             yields[msg.sender] = 0;
             TransferHelper.safeTransfer(emitted_token_address, msg.sender, yield0);

@@ -24,7 +24,6 @@ const setup = deployments.createFixture(async () => {
     HIIQ,
     IQERC20,
   };
-
   const users = await setupUsers(await getUnnamedAccounts(), contracts);
 
   return {
@@ -43,7 +42,6 @@ describe('HiIQRewards', () => {
       .reverted;
     await expect(temp.HiIQRewards.setYieldDuration(604800)).to.be.reverted;
 
-    // await expect(deployer.HiIQRewards.initializeDefault()).to.be.not.reverted;
     await expect(temp.HiIQRewards.initializeDefault()).to.be.reverted;
 
     await expect(deployer.HiIQRewards.greylistAddress(temp.address)).to.be.not
@@ -64,35 +62,33 @@ describe('HiIQRewards', () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
     const user = users[0];
-    const lockTime = Math.round(new Date().getTime() / 1000) + 6000000;
-    const amount = 5 ** 18;
+    const lockTime = Math.round(new Date().getTime() / 1000) + 60000000;
+    const amount = 1000000;
+    const lockedAmount = 100000;
+    const rewardAmount = 900000;
 
-    await expect(deployer.IQERC20.mint(user.address, amount)).to.be.not
-      .reverted;
-    expect(await deployer.IQERC20.balanceOf(user.address)).to.equal(5 ** 18);
+    await expect(deployer.HiIQRewards.initializeDefault()).to.be.not.reverted;
 
-    await expect(user.IQERC20.approve(HIIQ.address, 1000000000)).to.be.not
-      .reverted;
+    await expect(deployer.IQERC20.mint(user.address, amount)).to.be.not.reverted;
 
-    await expect(user.HIIQ.create_lock(1000000000, 1627406460)).to.be.not
-      .reverted;
+    await expect(user.IQERC20.approve(HIIQ.address, lockedAmount)).to.be.not.reverted;
 
-    await expect(user.HiIQRewards.eligibleCurrentHiIQ(user.address)).to.be.not
-      .reverted;
+    await expect(user.HIIQ.create_lock(lockedAmount, lockTime)).to.be.not.reverted;
 
-    console.log(
-      await (
-        await user.IQERC20.transfer(HiIQRewards.address, 1000000000)
-      ).wait()
-    );
+    await expect(user.IQERC20.transfer(HiIQRewards.address, rewardAmount)
+    ).to.be.not.reverted;
 
-    console.log(
+    await ethers.provider.send('evm_increaseTime', [60]);
+    await ethers.provider.send('evm_mine', []);
+
+    expect(await deployer.IQERC20.balanceOf(user.address)).to.equal(amount - lockedAmount - rewardAmount);
+    expect(
       await user.HiIQRewards['userIsInitialized(address)'](user.address)
-    );
-    // console.log(await user.HiIQRewards['getYield()']());
-    await ethers.provider.send('evm_setNextBlockTimestamp', [1629048060]);
-
-    console.log(await user.HiIQRewards.earned(user.address));
-    console.log(parseInt((await HiIQRewards.earned(user.address))._hex, 16));
+    ).to.be.false;
+    await expect(user.HiIQRewards['getYield()']()).to.be.not.reverted;
+    expect(
+      await user.HiIQRewards['userIsInitialized(address)'](user.address)
+    ).to.be.true;
+    expect(await deployer.IQERC20.balanceOf(user.address)).to.equal(99000); // TODO: fails, it should get some rewards
   });
 });
