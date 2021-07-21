@@ -61,7 +61,7 @@ describe('HiIQRewards', () => {
   });
 
   it('Mint and lock tokens', async () => {
-    const {users, deployer, HIIQ} = await setup();
+    const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
     const user = users[0];
     const lockTime = Math.round(new Date().getTime() / 1000) + 6000000;
@@ -69,27 +69,30 @@ describe('HiIQRewards', () => {
 
     await expect(deployer.IQERC20.mint(user.address, amount)).to.be.not
       .reverted;
-    // expect(await deployer.IQERC20.balanceOf(user.address)).to.equal(10000);
+    expect(await deployer.IQERC20.balanceOf(user.address)).to.equal(5 ** 18);
 
-    await expect(user.IQERC20.approve(HIIQ.address, amount)).to.be.not.reverted;
+    await expect(user.IQERC20.approve(HIIQ.address, 1000000000)).to.be.not
+      .reverted;
 
-    await expect(user.HIIQ.create_lock(amount, lockTime)).to.be.not.reverted;
+    await expect(user.HIIQ.create_lock(1000000000, 1627406460)).to.be.not
+      .reverted;
 
-    console.log(await deployer.HIIQ['balanceOf(address)'](user.address));
-    console.log(await deployer.HiIQRewards.eligibleCurrentHiIQ(user.address));
+    await expect(user.HiIQRewards.eligibleCurrentHiIQ(user.address)).to.be.not
+      .reverted;
 
-    // await expect(deployer.IQERC20.mint(user.address, amount)).to.be.not
-    //   .reverted;
-    // // expect(await deployer.IQERC20.balanceOf(user.address)).to.equal(10000);
+    console.log(
+      await (
+        await user.IQERC20.transfer(HiIQRewards.address, 1000000000)
+      ).wait()
+    );
 
-    // await expect(user.IQERC20.approve(HIIQ.address, amount)).to.be.not.reverted;
+    console.log(
+      await user.HiIQRewards['userIsInitialized(address)'](user.address)
+    );
+    // console.log(await user.HiIQRewards['getYield()']());
+    await ethers.provider.send('evm_setNextBlockTimestamp', [1629048060]);
 
-    // await expect(user.HIIQ.create_lock(amount, lockTime)).to.be.not.reverted;
-
-    // await expect(
-    //   deployer.HIIQ['increase_amount(uint256)'](
-    //     ethers.utils.parseEther(String(1))
-    //   )
-    // ).to.be.not.reverted;
+    console.log(await user.HiIQRewards.earned(user.address));
+    console.log(parseInt((await HiIQRewards.earned(user.address))._hex, 16));
   });
 });
