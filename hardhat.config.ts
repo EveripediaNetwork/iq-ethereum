@@ -53,6 +53,7 @@ const config: HardhatUserConfig = {
     hiIQRewards: {
       goerli: '0xEEE465152C74f7763dec52B1d4E6C90F7d6E1fd6',
       rinkeby: '0x2c0D8F23e254188d5019c3E9DD5CBB92Fc9D9aD7',
+      mainnet: '0x68a613409448E342Ce3AAd0fc390cA5cc0b45f75',
     },
   },
   networks: {
