@@ -96,22 +96,23 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
 
     // Only positions with locked hiIQ can accrue yield. Otherwise, expired-locked hiIQ
     // is de-facto rewards for IQ.
-    function eligibleCurrentHiIQ(address account) public view returns (uint256 eligible_hiiq_bal, uint256 current_ending_timestamp) {
+    function eligibleCurrentHiIQ(address account)
+        public
+        view
+        returns (uint256 eligible_hiiq_bal, uint256 current_ending_timestamp)
+    {
         uint256 curr_hiiq_bal = hiIQ.balanceOf(account);
         IhiIQ.LockedBalance memory curr_locked_bal_pack = hiIQ.locked(account);
 
         current_ending_timestamp = curr_locked_bal_pack.end;
         // Only unexpired hiIQ that is locked for min_lock_time_for_yield or longer should be eligible
-        if (userHiIQEndpointCheckpointed[account] != 0 && (block.timestamp >= userHiIQEndpointCheckpointed[account])){
+        if (userHiIQEndpointCheckpointed[account] != 0 && (block.timestamp >= userHiIQEndpointCheckpointed[account])) {
             eligible_hiiq_bal = 0;
-        }
-        else if (block.timestamp >= current_ending_timestamp){
+        } else if (block.timestamp >= current_ending_timestamp) {
             eligible_hiiq_bal = 0;
-        }
-        else if ((curr_locked_bal_pack.end).sub(block.timestamp) < min_lock_time_for_yield){
+        } else if ((curr_locked_bal_pack.end).sub(block.timestamp) < min_lock_time_for_yield) {
             eligible_hiiq_bal = 0;
-        }
-        else {
+        } else {
             eligible_hiiq_bal = curr_hiiq_bal;
         }
     }
@@ -147,10 +148,9 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         // If the amount of hiIQ increased, only pay off the old balance
         // Otherwise, take the midpoint
         uint256 hiiq_balance_to_use;
-        if (eligible_current_hiiq > old_hiiq_balance){
+        if (eligible_current_hiiq > old_hiiq_balance) {
             hiiq_balance_to_use = old_hiiq_balance;
-        }
-        else {
+        } else {
             hiiq_balance_to_use = ((eligible_current_hiiq).add(old_hiiq_balance)).div(2);
         }
 
