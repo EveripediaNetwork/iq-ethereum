@@ -73,21 +73,17 @@ describe('HiIQRewards', () => {
 
     await deployer.IQERC20.mint(user.address, amount);
 
+    // lock 1M IQ for 60 days
     await user.IQERC20.approve(HIIQ.address, lockedAmount);
     await user.HIIQ.create_lock(lockedAmount, lockTime);
 
     await deployer.HiIQRewards.initializeDefault();
-    await expect(deployer.HiIQRewards.setYieldRate(yieldPerSecond, true)).to.be.not
-      .reverted;
+    await deployer.HiIQRewards.setYieldRate(yieldPerSecond, false);
+    await user.IQERC20.transfer(HiIQRewards.address, rewardAmount);
 
-    expect(await user.HiIQRewards['userIsInitialized(address)'](user.address))
-      .to.be.false;
+    expect(await user.HiIQRewards.userIsInitialized(user.address)).to.be.false;
     await user.HiIQRewards.checkpoint();
-    expect(await user.HiIQRewards['userIsInitialized(address)'](user.address))
-      .to.be.true;
-
-    await expect(user.IQERC20.transfer(HiIQRewards.address, rewardAmount)).to.be
-      .not.reverted;
+    expect(await user.HiIQRewards.userIsInitialized(user.address)).to.be.true;
 
     await ethers.provider.send('evm_increaseTime', [secondsInADay*7]); // 7 days
     await ethers.provider.send('evm_mine', []);
