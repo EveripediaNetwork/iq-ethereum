@@ -28,7 +28,7 @@ const setup = deployments.createFixture(async () => {
 
 describe('HIIQ', function () {
   it('HIIQ can get IQ and vote', async function () {
-    const lockTime = Math.round(new Date().getTime() / 1000) + 6000000;
+    const lockTime = Math.round(new Date().getTime() / 1000) + 600000;
     const amount = 5 ** 18;
     const {users, HIIQ, deployer} = await setup();
 
@@ -46,5 +46,12 @@ describe('HIIQ', function () {
     expect(
       await (await users[0].HIIQ.locked__end(users[0].address)).toNumber()
     ).to.be.below(lockTime);
+
+    await expect(users[0].HIIQ.withdraw()).to.be.revertedWith("The lock didn't expire");
+
+    await ethers.provider.send('evm_increaseTime', [610000]);
+    await ethers.provider.send('evm_mine', []);
+
+    await expect(users[0].HIIQ.withdraw()).to.be.not.reverted;
   });
 });
