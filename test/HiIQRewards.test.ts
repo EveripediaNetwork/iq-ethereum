@@ -8,6 +8,7 @@ import {
 } from 'hardhat';
 import {setupUser, setupUsers} from './utils';
 import {BigNumber} from "ethers";
+import {formatEther, parseEther} from "ethers/lib/utils";
 
 const setup = deployments.createFixture(async () => {
   await deployments.fixture('HIIQ');
@@ -66,10 +67,10 @@ describe('HiIQRewards', () => {
     const secondsInADay = 24*60*60;
     const lockTime = Math.round(new Date().getTime() / 1000) + secondsInADay*60; // 60 days
 
-    const amount = BigNumber.from("60000000000000000000000000"); // 60M
-    const lockedAmount = BigNumber.from("1000000000000000000000000"); // 1M
-    const rewardAmount = BigNumber.from("30000000000000000000000000"); // 30M
-    const yieldPerSecond = BigNumber.from("365000000000000000000000000").div(365 * secondsInADay); // 1M per day
+    const amount = BigNumber.from(parseEther("60000000")); // 60M
+    const lockedAmount = BigNumber.from(parseEther("1000000")); // 1M
+    const rewardAmount = BigNumber.from(parseEther("30000000")); // 30M
+    const yieldPerSecond = BigNumber.from(parseEther("365000000")).div(365 * secondsInADay); // 1M per day
 
     await deployer.IQERC20.mint(user.address, amount);
 
@@ -94,7 +95,7 @@ describe('HiIQRewards', () => {
     );
 
     const earned = await user.HiIQRewards.earned(user.address);
-    console.log(earned.div("1000000000000000000").toString());
+    console.log(formatEther(earned.toString())); // 69428463.779862558570155926 :?
 
     await user.HiIQRewards.getYield();
 
