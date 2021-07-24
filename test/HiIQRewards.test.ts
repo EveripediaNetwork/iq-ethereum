@@ -7,8 +7,8 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 import {setupUser, setupUsers} from './utils';
-import {BigNumber} from "ethers";
-import {formatEther, parseEther} from "ethers/lib/utils";
+import {BigNumber} from 'ethers';
+import {parseEther} from 'ethers/lib/utils';
 
 const setup = deployments.createFixture(async () => {
   await deployments.fixture('HIIQ');
@@ -64,13 +64,16 @@ describe('HiIQRewards', () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
     const user = users[0];
-    const secondsInADay = 24*60*60;
-    const lockTime = Math.round(new Date().getTime() / 1000) + secondsInADay*60; // 60 days
+    const secondsInADay = 24 * 60 * 60;
+    const lockTime =
+      Math.round(new Date().getTime() / 1000) + secondsInADay * 60; // 60 days
 
-    const amount = BigNumber.from(parseEther("60000000")); // 60M
-    const lockedAmount = BigNumber.from(parseEther("1000000")); // 1M
-    const rewardAmount = BigNumber.from(parseEther("30000000")); // 30M
-    const yieldPerSecond = BigNumber.from(parseEther("1000000")).div(secondsInADay); // 1M per day
+    const amount = BigNumber.from(parseEther('60000000')); // 60M
+    const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
+    const rewardAmount = BigNumber.from(parseEther('30000000')); // 30M
+    const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(
+      secondsInADay
+    ); // 1M per day
 
     await deployer.IQERC20.mint(user.address, amount);
 
@@ -86,7 +89,7 @@ describe('HiIQRewards', () => {
     await user.HiIQRewards.checkpoint();
     expect(await user.HiIQRewards.userIsInitialized(user.address)).to.be.true;
 
-    await ethers.provider.send('evm_increaseTime', [secondsInADay*7]); // 7 days
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 7]); // 7 days
     await ethers.provider.send('evm_mine', []);
 
     const currentBalance = amount.sub(lockedAmount).sub(rewardAmount);
@@ -95,8 +98,8 @@ describe('HiIQRewards', () => {
     );
 
     const earned = await user.HiIQRewards.earned(user.address);
-    expect(earned.gt(BigNumber.from(parseEther("6000000")))).to.be.true;
-    expect(earned.lt(BigNumber.from(parseEther("7000000")))).to.be.true;
+    expect(earned.gt(BigNumber.from(parseEther('6000000')))).to.be.true;
+    expect(earned.lt(BigNumber.from(parseEther('7000000')))).to.be.true;
     await user.HiIQRewards.getYield();
 
     const earned2 = await user.HiIQRewards.earned(user.address);
