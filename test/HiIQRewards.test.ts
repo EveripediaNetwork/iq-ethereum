@@ -70,7 +70,7 @@ describe('HiIQRewards', () => {
     const amount = BigNumber.from(parseEther("60000000")); // 60M
     const lockedAmount = BigNumber.from(parseEther("1000000")); // 1M
     const rewardAmount = BigNumber.from(parseEther("30000000")); // 30M
-    const yieldPerSecond = BigNumber.from(parseEther("365000000")).div(365 * secondsInADay); // 1M per day
+    const yieldPerSecond = BigNumber.from(parseEther("1000000")).div(secondsInADay); // 1M per day
 
     await deployer.IQERC20.mint(user.address, amount);
 
@@ -79,7 +79,7 @@ describe('HiIQRewards', () => {
     await user.HIIQ.create_lock(lockedAmount, lockTime);
 
     await deployer.HiIQRewards.initializeDefault();
-    await deployer.HiIQRewards.setYieldRate(yieldPerSecond, false);
+    await deployer.HiIQRewards.setYieldRate(yieldPerSecond, true);
     await user.IQERC20.transfer(HiIQRewards.address, rewardAmount);
 
     expect(await user.HiIQRewards.userIsInitialized(user.address)).to.be.false;
@@ -95,8 +95,8 @@ describe('HiIQRewards', () => {
     );
 
     const earned = await user.HiIQRewards.earned(user.address);
-    console.log(formatEther(earned.toString())); // 69428463.779862558570155926 :?
-
+    expect(earned.gt(BigNumber.from(parseEther("6000000")))).to.be.true;
+    expect(earned.lt(BigNumber.from(parseEther("7000000")))).to.be.true;
     await user.HiIQRewards.getYield();
 
     const earned2 = await user.HiIQRewards.earned(user.address);
