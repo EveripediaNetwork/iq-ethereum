@@ -251,7 +251,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
 
     function sync() public {
         // Update the total hiIQ supply
-        totalHiIQSupplyStored = hiIQ.totalSupply().add(hiIQ.totalIQSupply());
+        totalHiIQSupplyStored = hiIQ.totalSupply();
 
         if (block.timestamp > periodFinish) {
             retroCatchUp();
@@ -283,7 +283,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     function initializeDefault() external onlyOwner {
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp.add(yieldDuration);
-        totalHiIQSupplyStored = hiIQ.totalSupply().add(hiIQ.totalIQSupply());
+        totalHiIQSupplyStored = hiIQ.totalSupply();
         emit DefaultInitialization();
     }
 

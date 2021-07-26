@@ -10,6 +10,8 @@ import {setupUser, setupUsers} from './utils';
 import {BigNumber} from 'ethers';
 import {formatEther, parseEther} from 'ethers/lib/utils';
 
+const secondsInADay = 24 * 60 * 60;
+
 const setup = deployments.createFixture(async () => {
   await deployments.fixture('HIIQ');
   const {deployer} = await getNamedAccounts();
@@ -64,7 +66,6 @@ describe('HiIQRewards', () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
     const user = users[0];
-    const secondsInADay = 24 * 60 * 60;
     const lockTime =
       Math.round(new Date().getTime() / 1000) + secondsInADay * 60; // 60 days
 
@@ -80,6 +81,7 @@ describe('HiIQRewards', () => {
     // lock 1M IQ for 60 days
     await user.IQERC20.approve(HIIQ.address, lockedAmount);
     await user.HIIQ.create_lock(lockedAmount, lockTime);
+    await user.HIIQ.checkpoint();
 
     await deployer.HiIQRewards.initializeDefault();
     await deployer.HiIQRewards.setYieldRate(yieldPerSecond, true);
@@ -114,7 +116,6 @@ describe('HiIQRewards', () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
     const user = users[0];
-    const secondsInADay = 24 * 60 * 60;
     const lockTime =
       Math.round(new Date().getTime() / 1000) + secondsInADay * 45; // 45 days
 
@@ -130,6 +131,7 @@ describe('HiIQRewards', () => {
     // lock 1M IQ for 45 days
     await user.IQERC20.approve(HIIQ.address, lockedAmount);
     await user.HIIQ.create_lock(lockedAmount, lockTime);
+    await user.HIIQ.checkpoint();
 
     await deployer.HiIQRewards.initializeDefault();
     await deployer.HiIQRewards.setYieldRate(yieldPerSecond, true);
@@ -140,14 +142,13 @@ describe('HiIQRewards', () => {
     await ethers.provider.send('evm_mine', []);
 
     const earned2 = await user.HiIQRewards.earned(user.address);
-    console.log(formatEther(earned2)); // 6.9M ? it should be 14M
 
     await user.HiIQRewards.checkpoint();
     const earned = await user.HiIQRewards.earned(user.address);
     expect(earned.gt(BigNumber.from(parseEther('14000000')))).to.be.true;
     expect(earned.lt(BigNumber.from(parseEther('15000000')))).to.be.true;
 
-    await ethers.provider.send('evm_increaseTime', [secondsInADay * 5]); // 5 days
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 2]); // 2 days reaches < 1 month
     await ethers.provider.send('evm_mine', []);
 
     // no rewards ?
@@ -159,7 +160,6 @@ describe('HiIQRewards', () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
     const user = users[0];
-    const secondsInADay = 24 * 60 * 60;
     const lockTime =
       Math.round(new Date().getTime() / 1000) + secondsInADay * 45; // 45 days
 
@@ -173,6 +173,7 @@ describe('HiIQRewards', () => {
     await deployer.IQERC20.mint(user.address, amount);
     await user.IQERC20.approve(HIIQ.address, lockedAmount);
     await user.HIIQ.create_lock(lockedAmount, lockTime);
+    await user.HIIQ.checkpoint();
 
     await deployer.HiIQRewards.initializeDefault();
     await deployer.HiIQRewards.setYieldRate(yieldPerSecond, true);
@@ -183,10 +184,6 @@ describe('HiIQRewards', () => {
     await ethers.provider.send('evm_mine', []);
 
     // greylist
-    await expect(
-      user.HiIQRewards.greylistAddress(user.address)
-    ).to.be.revertedWith('Ownable: caller is not the owner');
-
     await deployer.HiIQRewards.greylistAddress(user.address);
     await expect(user.HiIQRewards.getYield()).to.be.revertedWith(
       'Address has been greylisted'
@@ -194,10 +191,6 @@ describe('HiIQRewards', () => {
     await deployer.HiIQRewards.greylistAddress(user.address);
 
     // pause
-    await expect(user.HiIQRewards.setPauses(true)).to.be.revertedWith(
-      'Ownable: caller is not the owner'
-    );
-
     await deployer.HiIQRewards.setPauses(true);
     await expect(user.HiIQRewards.getYield()).to.be.revertedWith(
       'Yield collection is paused'
