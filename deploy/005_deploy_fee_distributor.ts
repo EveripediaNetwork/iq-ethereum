@@ -1,17 +1,18 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-const contractName = 'HiIQRewards';
+const contractName = 'FeeDistributor';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deployer, hiIQ} = await getNamedAccounts();
   const {deploy} = deployments;
   const iQ = await deployments.get('IQERC20');
+  const startTime = Math.round(new Date().getTime() / 1000);
 
   const result = await deploy(contractName, {
     from: deployer,
-    args: [iQ.address, hiIQ],
+    args: [hiIQ, iQ.address, startTime],
     log: true,
   });
 
@@ -21,5 +22,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['HiIQRewards'];
+func.tags = ['FeeDistributor'];
 func.dependencies = ['IQERC20'];

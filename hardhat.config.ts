@@ -11,13 +11,18 @@ import {utils} from 'ethers';
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.7.1',
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 1000,
-      },
-    },
+    compilers: [
+      {
+        version: '0.7.1',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
+      }
+    ]
+
   },
   vyper: {
     version: '0.2.8',
