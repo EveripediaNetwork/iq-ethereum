@@ -8,7 +8,7 @@ import {
 } from 'hardhat';
 import {setupUser, setupUsers} from './utils';
 import {BigNumber} from 'ethers';
-import {parseEther} from 'ethers/lib/utils';
+import {formatEther, parseEther} from 'ethers/lib/utils';
 
 const setup = deployments.createFixture(async () => {
   await deployments.fixture('HIIQ');
@@ -108,5 +108,102 @@ describe('HiIQRewards', () => {
     expect(await deployer.IQERC20.balanceOf(user.address)).to.not.equal(
       currentBalance
     );
+  });
+
+  it('Not rewards after 1 Month', async () => {
+    const {users, deployer, HIIQ, HiIQRewards} = await setup();
+
+    const user = users[0];
+    const secondsInADay = 24 * 60 * 60;
+    const lockTime =
+      Math.round(new Date().getTime() / 1000) + secondsInADay * 45; // 45 days
+
+    const amount = BigNumber.from(parseEther('61000000')); // 60M
+    const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
+    const rewardAmount = BigNumber.from(parseEther('60000000')); // 60M
+    const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(
+      secondsInADay
+    ); // 1M per day
+
+    await deployer.IQERC20.mint(user.address, amount);
+
+    // lock 1M IQ for 45 days
+    await user.IQERC20.approve(HIIQ.address, lockedAmount);
+    await user.HIIQ.create_lock(lockedAmount, lockTime);
+
+    await deployer.HiIQRewards.initializeDefault();
+    await deployer.HiIQRewards.setYieldRate(yieldPerSecond, true);
+    await user.IQERC20.transfer(HiIQRewards.address, rewardAmount);
+    await user.HiIQRewards.checkpoint();
+
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 14]); // 14 days
+    await ethers.provider.send('evm_mine', []);
+
+    const earned2 = await user.HiIQRewards.earned(user.address);
+    console.log(formatEther(earned2)); // 6.9M ? it should be 14M
+
+    await user.HiIQRewards.checkpoint();
+    const earned = await user.HiIQRewards.earned(user.address);
+    expect(earned.gt(BigNumber.from(parseEther('14000000')))).to.be.true;
+    expect(earned.lt(BigNumber.from(parseEther('15000000')))).to.be.true;
+
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 5]); // 5 days
+    await ethers.provider.send('evm_mine', []);
+
+    // no rewards ?
+    const earnedAfterAMonth = await user.HiIQRewards.earned(user.address);
+    expect(earnedAfterAMonth.eq('0')).to.be.true;
+  });
+
+  it('Greylist and pause', async () => {
+    const {users, deployer, HIIQ, HiIQRewards} = await setup();
+
+    const user = users[0];
+    const secondsInADay = 24 * 60 * 60;
+    const lockTime =
+      Math.round(new Date().getTime() / 1000) + secondsInADay * 45; // 45 days
+
+    const amount = BigNumber.from(parseEther('61000000')); // 60M
+    const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
+    const rewardAmount = BigNumber.from(parseEther('60000000')); // 60M
+    const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(
+      secondsInADay
+    ); // 1M per day
+
+    await deployer.IQERC20.mint(user.address, amount);
+    await user.IQERC20.approve(HIIQ.address, lockedAmount);
+    await user.HIIQ.create_lock(lockedAmount, lockTime);
+
+    await deployer.HiIQRewards.initializeDefault();
+    await deployer.HiIQRewards.setYieldRate(yieldPerSecond, true);
+    await user.IQERC20.transfer(HiIQRewards.address, rewardAmount);
+    await user.HiIQRewards.checkpoint();
+
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 14]);
+    await ethers.provider.send('evm_mine', []);
+
+    // greylist
+    await expect(
+      user.HiIQRewards.greylistAddress(user.address)
+    ).to.be.revertedWith('Ownable: caller is not the owner');
+
+    await deployer.HiIQRewards.greylistAddress(user.address);
+    await expect(user.HiIQRewards.getYield()).to.be.revertedWith(
+      'Address has been greylisted'
+    );
+    await deployer.HiIQRewards.greylistAddress(user.address);
+
+    // pause
+    await expect(user.HiIQRewards.setPauses(true)).to.be.revertedWith(
+      'Ownable: caller is not the owner'
+    );
+
+    await deployer.HiIQRewards.setPauses(true);
+    await expect(user.HiIQRewards.getYield()).to.be.revertedWith(
+      'Yield collection is paused'
+    );
+    await deployer.HiIQRewards.setPauses(false);
+
+    await user.HiIQRewards.getYield();
   });
 });

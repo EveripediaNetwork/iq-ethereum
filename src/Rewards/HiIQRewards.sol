@@ -113,7 +113,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         } else if ((curr_locked_bal_pack.end).sub(block.timestamp) < min_lock_time_for_yield) {
             eligible_hiiq_bal = 0;
         } else {
-            eligible_hiiq_bal = curr_hiiq_bal.sub(uint256(curr_locked_bal_pack.amount));
+            eligible_hiiq_bal = curr_hiiq_bal;
         }
     }
 
@@ -251,7 +251,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
 
     function sync() public {
         // Update the total hiIQ supply
-        totalHiIQSupplyStored = hiIQ.totalSupply();
+        totalHiIQSupplyStored = hiIQ.totalSupply().add(hiIQ.totalIQSupply());
 
         if (block.timestamp > periodFinish) {
             retroCatchUp();
@@ -283,7 +283,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     function initializeDefault() external onlyOwner {
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp.add(yieldDuration);
-        totalHiIQSupplyStored = hiIQ.totalSupply();
+        totalHiIQSupplyStored = hiIQ.totalSupply().add(hiIQ.totalIQSupply());
         emit DefaultInitialization();
     }
 
