@@ -17,6 +17,7 @@ interface Pointable {
         int128 slope;
         uint256 ts;
         uint256 blk;
+        uint256 iq_amt;
     }
 }
 
