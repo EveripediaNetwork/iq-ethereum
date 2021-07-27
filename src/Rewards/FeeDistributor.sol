@@ -59,12 +59,12 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
     mapping(address => uint256) public userEpochOf;
 
     uint256 public lastTokenTime;
-    uint256[] public tokensPerWeek;
+    uint256[1000000000000000] public tokensPerWeek;
 
     uint256 public totalReceived;
     uint256 public tokenLastBalance;
 
-    uint256[] public hiIQSupply;
+    uint256[1000000000000000] public hiIQSupply;
 
     bool public canCheckPointToken;
 
