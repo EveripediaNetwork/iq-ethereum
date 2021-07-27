@@ -20,9 +20,8 @@ const config: HardhatUserConfig = {
             runs: 1000,
           },
         },
-      }
-    ]
-
+      },
+    ],
   },
   vyper: {
     version: '0.2.8',

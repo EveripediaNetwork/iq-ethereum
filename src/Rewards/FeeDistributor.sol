@@ -2,27 +2,37 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/math/Math.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-interface IhiIQ {
+// TODO: use SafeMath everywhere
+// TODO: check ranges
+// TODO: pause / kill methods
+
+interface Pointable {
     struct Point {
         int128 bias;
         int128 slope;
         uint256 ts;
         uint256 blk;
     }
+}
+
+interface IhiIQ is Pointable {
     function user_point_epoch(address addr) external view returns (uint256);
+
     function epoch() external view returns (uint256);
-    function user_point_history(address addr, uint256 loc) external view returns (Point memory); // TODO: or calldata?
-    function point_history(uint256 loc) external view returns (Point memory); // TODO: or calldata?
+
+    function user_point_history(address addr, uint256 loc) external view returns (Point memory);
+
+    function point_history(uint256 loc) external view returns (Point memory);
+
     function checkpoint() external;
 }
 
-contract FeeDistributor is Ownable, ReentrancyGuard {
+contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
     using SafeMath for uint256;
 
     /* ========== EVENTS ========== */
@@ -58,17 +68,14 @@ contract FeeDistributor is Ownable, ReentrancyGuard {
 
     bool public canCheckPointToken;
 
-    struct Point {
-        int128 bias;
-        int128 slope;
-        uint256 ts;
-        uint256 blk;
-    }
-
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(address _hiIQAddress, address _token, uint256 _startTime) {
-        uint256 t = _startTime / WEEK * WEEK;
+    constructor(
+        address _hiIQAddress,
+        address _token,
+        uint256 _startTime
+    ) {
+        uint256 t = (_startTime / WEEK) * WEEK;
         startTime = t;
         lastTokenTime = t;
         timeCursor = t;
@@ -76,43 +83,64 @@ contract FeeDistributor is Ownable, ReentrancyGuard {
         hiIQ = IhiIQ(_hiIQAddress);
     }
 
+    /* ========== MATH ========== */
+
+    function max(int128 a, int128 b) internal pure returns (int128) {
+        return a >= b ? a : b;
+    }
+
+    function min(int128 a, int128 b) internal pure returns (int128) {
+        return a < b ? a : b;
+    }
+
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a < b ? a : b;
+    }
+
     /* ========== VIEWS ========== */
 
-    function max(uint a, uint b) private pure returns (uint) {
-        return a > b ? a : b;
+    function hiIQForAt(address _user, uint256 _timestamp) external view returns (uint256) {
+        uint256 maxUserEpoch = hiIQ.user_point_epoch(_user);
+        uint256 epoch = _findTimestampUserEpoch(_user, _timestamp, maxUserEpoch);
+        Point memory pt = hiIQ.user_point_history(_user, epoch);
+        return uint256(max(pt.bias - pt.slope * int128(_timestamp - pt.ts), 0));
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     function checkpointToken() external {
-        require(msg.sender == owner() || (canCheckPointToken && (block.timestamp > lastTokenTime + TOKEN_CHECKPOINT_DEADLINE)), "Can't checkpoint token!");
+        require(
+            msg.sender == owner() ||
+                (canCheckPointToken && (block.timestamp > lastTokenTime + TOKEN_CHECKPOINT_DEADLINE)),
+            "Can't checkpoint token!"
+        );
         _checkPointToken();
     }
 
     function _checkPointToken() internal {
         uint256 tokenBalance = token.balanceOf(address(this));
-        uint256 toDistribute = tokenBalance - tokenLastBalance;
+        uint256 toDistribute = tokenBalance.sub(tokenLastBalance);
         tokenLastBalance = tokenBalance;
         uint256 t = lastTokenTime;
-        uint256 sinceLast = block.timestamp - t;
+        uint256 sinceLast = block.timestamp.sub(t);
         lastTokenTime = block.timestamp;
-        uint256 thisWeek = t / WEEK * WEEK;
+        uint256 thisWeek = t.div(WEEK).mul(WEEK);
         uint256 nextWeek = 0;
 
-        for (uint i=0; i<20; i++) { // TODO: range(20) includes 20 ?
-            nextWeek = thisWeek + WEEK;
+        for (uint256 i = 0; i < 20; i++) {
+            nextWeek = thisWeek.add(WEEK);
             if (block.timestamp < nextWeek) {
                 if (sinceLast == 0 && block.timestamp == t) {
-                    tokensPerWeek[thisWeek] += toDistribute;
+                    tokensPerWeek[thisWeek].add(toDistribute);
                 } else {
-                    tokensPerWeek[thisWeek] += toDistribute * (block.timestamp - t) / sinceLast;
+                    tokensPerWeek[thisWeek].add(toDistribute.mul(block.timestamp.sub(t)).div(sinceLast));
                 }
                 break;
             } else {
                 if (sinceLast == 0 && nextWeek == t) {
-                    tokensPerWeek[thisWeek] += toDistribute;
+                    tokensPerWeek[thisWeek].add(toDistribute);
                 } else {
-                    tokensPerWeek[thisWeek] += toDistribute * (nextWeek - t) / sinceLast;
+                    tokensPerWeek[thisWeek].add(toDistribute.mul(nextWeek.sub(t)).div(sinceLast));
                 }
             }
             t = nextWeek;
@@ -124,7 +152,7 @@ contract FeeDistributor is Ownable, ReentrancyGuard {
     function _findTimestampEpoch(uint256 _timestamp) internal view returns (uint256) {
         uint256 _min = 0;
         uint256 _max = hiIQ.epoch();
-        for (uint i=0; i<128; i++) { // TODO: same than before
+        for (uint256 i = 0; i < 128; i++) {
             if (_min >= _max) {
                 break;
             }
@@ -139,10 +167,14 @@ contract FeeDistributor is Ownable, ReentrancyGuard {
         return _min;
     }
 
-    function _findTimestampUserEpoch(address _user, uint256 _timestamp, uint256 _maxUserEpoch) internal view returns (uint256) {
+    function _findTimestampUserEpoch(
+        address _user,
+        uint256 _timestamp,
+        uint256 _maxUserEpoch
+    ) internal view returns (uint256) {
         uint256 _min = 0;
         uint256 _max = _maxUserEpoch;
-        for (uint i=0; i<128; i++) { // TODO: same than before
+        for (uint256 i = 0; i < 128; i++) {
             if (_min >= _max) {
                 break;
             }
@@ -157,23 +189,16 @@ contract FeeDistributor is Ownable, ReentrancyGuard {
         return _min;
     }
 
-    function _hiIQForAt(address _user, uint256 _timestamp) external view returns (uint256) {
-        uint256 maxUserEpoch = hiIQ.user_point_epoch(_user);
-        uint256 epoch = _findTimestampUserEpoch(_user, _timestamp, maxUserEpoch);
-        Point memory pt = hiIQ.user_point_history(_user, epoch);
-        return uint256(max(pt.bias - pt.slope * uint128(_timestamp - pt.ts), 0));
-    }
-
     function checkpointTotalSupply() external {
         _checkPointTotalSupply();
     }
 
     function _checkPointTotalSupply() internal {
         uint256 t = timeCursor;
-        uint256 roundedTimestamp = block.timestamp / WEEK * WEEK;
+        uint256 roundedTimestamp = (block.timestamp / WEEK) * WEEK;
         hiIQ.checkpoint();
 
-        for (uint i=0; i<20; i++) {
+        for (uint256 i = 0; i < 20; i++) {
             if (t > roundedTimestamp) {
                 break;
             } else {
@@ -190,12 +215,148 @@ contract FeeDistributor is Ownable, ReentrancyGuard {
         timeCursor = t;
     }
 
-    // TODO claim
+    function claim(address _addr) external nonReentrant returns (uint256) {
+        if (block.timestamp >= timeCursor) {
+            _checkPointTotalSupply();
+        }
+
+        uint256 _lastTokenTime = lastTokenTime;
+
+        if (canCheckPointToken && (block.timestamp > _lastTokenTime + TOKEN_CHECKPOINT_DEADLINE)) {
+            _checkPointToken();
+            _lastTokenTime = block.timestamp;
+        }
+
+        _lastTokenTime = (_lastTokenTime / WEEK) * WEEK;
+
+        uint256 amount = _claim(_addr, _lastTokenTime);
+        if (amount != 0) {
+            tokenLastBalance -= amount;
+            token.transfer(_addr, amount);
+        }
+        return amount;
+    }
+
+    function claimMany(address[] memory _receivers) external nonReentrant returns (bool) {
+        if (block.timestamp >= timeCursor) {
+            _checkPointTotalSupply();
+        }
+
+        uint256 _lastTokenTime = lastTokenTime;
+
+        if (canCheckPointToken && (block.timestamp > _lastTokenTime + TOKEN_CHECKPOINT_DEADLINE)) {
+            _checkPointToken();
+            _lastTokenTime = block.timestamp;
+        }
+
+        _lastTokenTime = (_lastTokenTime / WEEK) * WEEK;
+        uint256 total = 0;
+
+        for (uint256 i; i < _receivers.length; i++) {
+            address _addr = _receivers[i];
+            if (_addr == address(0)) {
+                break;
+            }
+
+            uint256 amount = _claim(_addr, _lastTokenTime);
+            if (amount != 0) {
+                token.transfer(_addr, amount);
+                total += amount;
+            }
+        }
+
+        if (total != 0) {
+            tokenLastBalance -= total;
+        }
+
+        return true;
+    }
+
+    function _claim(address _addr, uint256 _lastTokenTime) internal returns (uint256) {
+        uint256 userEpoch = 0;
+        uint256 toDistribute = 0;
+        uint256 maxUserEpoch = hiIQ.user_point_epoch(_addr);
+        uint256 _startTime = startTime;
+
+        if (maxUserEpoch == 0) {
+            return 0;
+        }
+
+        uint256 weekCursor = timeCursorOf[_addr];
+        if (weekCursor == 0) {
+            userEpoch = _findTimestampUserEpoch(_addr, _startTime, maxUserEpoch);
+        } else {
+            userEpoch = userEpochOf[_addr];
+        }
+
+        if (userEpoch == 0) {
+            userEpoch = 1;
+        }
+
+        Point memory userPoint = hiIQ.user_point_history(_addr, userEpoch);
+
+        if (weekCursor == 0) {
+            weekCursor = ((userPoint.ts + WEEK - 1) / WEEK) * WEEK;
+        }
+
+        if (weekCursor >= _lastTokenTime) {
+            return 0;
+        }
+
+        if (weekCursor < _startTime) {
+            weekCursor = _startTime;
+        }
+
+        Point memory oldUserPoint;
+
+        for (uint256 i = 0; i < 50; i++) {
+            if (weekCursor >= _lastTokenTime) {
+                break;
+            }
+
+            if (weekCursor >= userPoint.ts && userEpoch <= maxUserEpoch) {
+                userEpoch += 1;
+                oldUserPoint = userPoint;
+                if (userEpoch > maxUserEpoch) {
+                    Point memory emptyPoint;
+                    userPoint = emptyPoint;
+                } else {
+                    userPoint = hiIQ.user_point_history(_addr, userEpoch);
+                }
+            } else {
+                int128 dt = int128(weekCursor - oldUserPoint.ts);
+                uint256 balanceOf = uint256(max(oldUserPoint.bias - dt * oldUserPoint.slope, 0));
+                if (balanceOf == 0 && userEpoch > maxUserEpoch) {
+                    break;
+                }
+
+                if (balanceOf > 0) {
+                    toDistribute += (balanceOf * tokensPerWeek[weekCursor]) / hiIQSupply[weekCursor];
+                }
+
+                weekCursor += WEEK;
+            }
+        }
+
+        userEpoch = min(maxUserEpoch, userEpoch - 1);
+        userEpochOf[_addr] = userEpoch;
+        timeCursorOf[_addr] = weekCursor;
+
+        emit Claimed(_addr, toDistribute, userEpoch, maxUserEpoch);
+
+        return toDistribute;
+    }
 
     /* ========== RESTRICTED FUNCTIONS ========== */
 
     function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyOwner {
-        token.transfer(owner(), tokenAmount);
+        IERC20(tokenAddress).transfer(owner(), tokenAmount);
         emit RecoveredERC20(tokenAddress, tokenAmount);
+    }
+
+    function toggleAllowCheckpointToken() external onlyOwner {
+        bool flag = !canCheckPointToken;
+        canCheckPointToken = flag;
+        emit ToggleAllowCheckpointToken(flag);
     }
 }
