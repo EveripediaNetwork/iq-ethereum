@@ -2,6 +2,7 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
+import "hardhat/console.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -196,7 +197,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
 
     function _checkPointTotalSupply() internal {
         uint256 t = timeCursor;
-        uint256 roundedTimestamp = (block.timestamp / WEEK) * WEEK;
+        uint256 roundedTimestamp = block.timestamp.div(WEEK).mul(WEEK);
         hiIQ.checkpoint();
 
         for (uint256 i = 0; i < 20; i++) {
@@ -231,6 +232,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
         _lastTokenTime = (_lastTokenTime / WEEK) * WEEK;
 
         uint256 amount = _claim(_addr, _lastTokenTime);
+        console.log(amount);
         if (amount != 0) {
             tokenLastBalance -= amount;
             token.transfer(_addr, amount);
