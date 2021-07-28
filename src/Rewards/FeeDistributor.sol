@@ -8,8 +8,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// TODO: pause / kill methods
-
 interface Pointable {
     struct Point {
         int128 bias;
@@ -38,6 +36,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
     /* ========== EVENTS ========== */
 
     event ToggleAllowCheckpointToken(bool toggleFlag);
+    event TogglePause(bool toggleFlag);
     event CheckpointToken(uint256 time, uint256 tokens);
     event RecoveredERC20(address token, uint256 amount);
     event Claimed(address indexed recipient, uint256 amount, uint256 claimEpoch, uint256 maxEpoch);
@@ -67,6 +66,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
     uint256[1000000000000000] public hiIQSupply;
 
     bool public canCheckPointToken;
+    bool public paused = false;
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -109,6 +109,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     function checkpointToken() external {
+        require(!paused, "Contract is paused");
         require(
             msg.sender == owner() ||
                 (canCheckPointToken && (block.timestamp > lastTokenTime + TOKEN_CHECKPOINT_DEADLINE)),
@@ -190,6 +191,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
     }
 
     function checkpointTotalSupply() external {
+        require(!paused, "Contract is paused");
         _checkPointTotalSupply();
     }
 
@@ -216,6 +218,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
     }
 
     function claim(address _addr) external nonReentrant returns (uint256) {
+        require(!paused, "Contract is paused");
         if (block.timestamp >= timeCursor) {
             _checkPointTotalSupply();
         }
@@ -238,6 +241,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
     }
 
     function claimMany(address[] memory _receivers) external nonReentrant returns (bool) {
+        require(!paused, "Contract is paused");
         if (block.timestamp >= timeCursor) {
             _checkPointTotalSupply();
         }
@@ -358,5 +362,11 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
         bool flag = !canCheckPointToken;
         canCheckPointToken = flag;
         emit ToggleAllowCheckpointToken(flag);
+    }
+
+    function togglePause() external onlyOwner {
+        bool flag = !paused;
+        paused = flag;
+        emit TogglePause(flag);
     }
 }
