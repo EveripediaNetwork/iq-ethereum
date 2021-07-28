@@ -8,8 +8,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// TODO: use SafeMath everywhere
-// TODO: check ranges
 // TODO: pause / kill methods
 
 interface Pointable {
@@ -133,16 +131,16 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
             nextWeek = thisWeek.add(WEEK);
             if (block.timestamp < nextWeek) {
                 if (sinceLast == 0 && block.timestamp == t) {
-                    tokensPerWeek[thisWeek].add(toDistribute);
+                    tokensPerWeek[thisWeek] += toDistribute;
                 } else {
-                    tokensPerWeek[thisWeek].add(toDistribute.mul(block.timestamp.sub(t)).div(sinceLast));
+                    tokensPerWeek[thisWeek] += toDistribute.mul(block.timestamp.sub(t)).div(sinceLast);
                 }
                 break;
             } else {
                 if (sinceLast == 0 && nextWeek == t) {
-                    tokensPerWeek[thisWeek].add(toDistribute);
+                    tokensPerWeek[thisWeek] += toDistribute;
                 } else {
-                    tokensPerWeek[thisWeek].add(toDistribute.mul(nextWeek.sub(t)).div(sinceLast));
+                    tokensPerWeek[thisWeek] += toDistribute.mul(nextWeek.sub(t)).div(sinceLast);
                 }
             }
             t = nextWeek;
@@ -229,10 +227,9 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
             _lastTokenTime = block.timestamp;
         }
 
-        _lastTokenTime = (_lastTokenTime / WEEK) * WEEK;
+        _lastTokenTime = _lastTokenTime.div(WEEK).mul(WEEK);
 
         uint256 amount = _claim(_addr, _lastTokenTime);
-        console.log(amount);
         if (amount != 0) {
             tokenLastBalance -= amount;
             token.transfer(_addr, amount);
@@ -252,7 +249,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
             _lastTokenTime = block.timestamp;
         }
 
-        _lastTokenTime = (_lastTokenTime / WEEK) * WEEK;
+        _lastTokenTime = _lastTokenTime.div(WEEK).mul(WEEK);
         uint256 total = 0;
 
         for (uint256 i; i < _receivers.length; i++) {
@@ -299,7 +296,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
         Point memory userPoint = hiIQ.user_point_history(_addr, userEpoch);
 
         if (weekCursor == 0) {
-            weekCursor = ((userPoint.ts + WEEK - 1) / WEEK) * WEEK;
+            weekCursor = (userPoint.ts + WEEK - 1).div(WEEK).mul(WEEK);
         }
 
         if (weekCursor >= _lastTokenTime) {
@@ -334,7 +331,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
                 }
 
                 if (balanceOf > 0) {
-                    toDistribute += (balanceOf * tokensPerWeek[weekCursor]) / hiIQSupply[weekCursor];
+                    toDistribute += balanceOf.mul(tokensPerWeek[weekCursor]).div(hiIQSupply[weekCursor]);
                 }
 
                 weekCursor += WEEK;
