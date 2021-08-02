@@ -54,9 +54,9 @@ const config: HardhatUserConfig = {
       goerli: '0xc03bcacc5377b7cc6634537650a7a1d14711c1a3',
       rinkeby: '0x279926cca1ccd061ee423c633f7376e2bdecc53a',
     },
-    hiIQRewards: {
-      goerli: '0xEEE465152C74f7763dec52B1d4E6C90F7d6E1fd6',
-      rinkeby: '0x2c0D8F23e254188d5019c3E9DD5CBB92Fc9D9aD7',
+    feeDistributor: {
+      goerli: '0x7dcb919ff25161698e56c18f953e6aab4d0ebef3',
+      rinkeby: '0xcf67e811e4cc07e27a992255bd5d27b60de7dd93',
       mainnet: '0x68a613409448E342Ce3AAd0fc390cA5cc0b45f75',
     },
   },
