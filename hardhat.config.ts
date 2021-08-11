@@ -57,7 +57,7 @@ const config: HardhatUserConfig = {
     feeDistributor: {
       goerli: '0x7dcb919ff25161698e56c18f953e6aab4d0ebef3',
       rinkeby: '0xcf67e811e4cc07e27a992255bd5d27b60de7dd93',
-      mainnet: '0x68a613409448E342Ce3AAd0fc390cA5cc0b45f75',
+      mainnet: '0x27714ADb7aC897D08ec6812E908e7c32BaD8Df0C',
     },
   },
   networks: {
@@ -77,7 +77,7 @@ const config: HardhatUserConfig = {
       accounts: accounts(),
     },
     mainnet: {
-      gasPrice: parseInt(utils.parseUnits('20', 'gwei').toString()),
+      gasPrice: parseInt(utils.parseUnits('60', 'gwei').toString()),
       url: node_url('mainnet'),
       accounts:
         keys('mainnet')[0] !== '' ? keys('mainnet') : accounts('mainnet'),
@@ -115,7 +115,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     currency: 'USD',
-    gasPrice: 20,
+    gasPrice: 60,
     enabled: process.env.REPORT_GAS ? true : false,
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     maxMethodDiff: 10,
