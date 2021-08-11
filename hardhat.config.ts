@@ -11,13 +11,17 @@ import {utils} from 'ethers';
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.7.1',
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 1000,
+    compilers: [
+      {
+        version: '0.7.1',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
       },
-    },
+    ],
   },
   vyper: {
     version: '0.2.8',
@@ -44,10 +48,16 @@ const config: HardhatUserConfig = {
       goerli: '0x0552D756a3E92Aa874EF60F61b7a29030373e869', // everipediaIQ
     },
     hiIQ: {
+      default: 2,
       mainnet: '0x1bf5457ecaa14ff63cc89efd560e251e814e16ba',
       matic: '0xfC0fA725E8fB4D87c38EcE56e8852258219C64Ee',
       goerli: '0xc03bcacc5377b7cc6634537650a7a1d14711c1a3',
       rinkeby: '0x279926cca1ccd061ee423c633f7376e2bdecc53a',
+    },
+    feeDistributor: {
+      goerli: '0x7dcb919ff25161698e56c18f953e6aab4d0ebef3',
+      rinkeby: '0xcf67e811e4cc07e27a992255bd5d27b60de7dd93',
+      mainnet: '0x27714ADb7aC897D08ec6812E908e7c32BaD8Df0C',
     },
   },
   networks: {
@@ -67,7 +77,7 @@ const config: HardhatUserConfig = {
       accounts: accounts(),
     },
     mainnet: {
-      gasPrice: parseInt(utils.parseUnits('32', 'gwei').toString()),
+      gasPrice: parseInt(utils.parseUnits('60', 'gwei').toString()),
       url: node_url('mainnet'),
       accounts:
         keys('mainnet')[0] !== '' ? keys('mainnet') : accounts('mainnet'),
@@ -105,7 +115,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     currency: 'USD',
-    gasPrice: 185,
+    gasPrice: 60,
     enabled: process.env.REPORT_GAS ? true : false,
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     maxMethodDiff: 10,
