@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.7.1;
 
-// import "../Math/Math.sol";
 import "./GaugeController.sol";
+import "../lib/Math/Math.sol";
 import "../lib/Owned.sol";
 import "../lib/ReentrancyGuard.sol";
 import "../lib/Math/SafeMath.sol";
 import "../lib/Uniswap/TransferHelper.sol";
+import "../lib/ERC20/ERC20.sol";
 import "../lib/ERC20/SafeERC20.sol";
 
 contract HiIQGaugeRewardsDistributor is Owned, ReentrancyGuard {
@@ -27,7 +28,7 @@ contract HiIQGaugeRewardsDistributor is Owned, ReentrancyGuard {
 
     // Gaugle controller related
     mapping(address => bool) public gaugeWhitelist;
-    mapping(address => bool) public lastTimeGaugePaid;
+    mapping(address => uint256) public lastTimeGaugePaid;
 
     // Booleans
     bool public distributionsOn;
@@ -50,6 +51,23 @@ contract HiIQGaugeRewardsDistributor is Owned, ReentrancyGuard {
     modifier isDistributing() {
         require(distributionsOn == true, "Distributions are off");
         _;
+    }
+
+    /* ========== CONSTRUCTOR ========== */
+
+    constructor(
+        address _owner,
+        address _timelockAddress,
+        address _curatorAddress,
+        address _rewardTokenAddress,
+        address _gaugeControllerAddress
+    ) Owned(_owner) {
+        curatorAddress = _curatorAddress;
+        timelockAddress = _timelockAddress;
+        rewardTokenAddress = _rewardTokenAddress;
+        gaugeController = GaugeController(_gaugeControllerAddress);
+
+        distributionsOn = true;
     }
 
     /* ========== VIEWS ========== */
@@ -76,7 +94,7 @@ contract HiIQGaugeRewardsDistributor is Owned, ReentrancyGuard {
         uint256 lastTimePaid = lastTimeGaugePaid[gaugeAddress];
 
         // Edge case for first reward for this gauge
-        if (lastTimePaid) {
+        if (lastTimePaid == 0) {
             weeksElapsed = 1;
         } else {
             // Truncation desired
@@ -126,7 +144,7 @@ contract HiIQGaugeRewardsDistributor is Owned, ReentrancyGuard {
 
     function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyByOwnGov {
         // Only the owner address can ever receive the recovery withdrawal
-        TransferHelper.safeTransfer(tokenAddress, tokenAmount);
+        TransferHelper.safeTransfer(tokenAddress, owner, tokenAmount);
         emit RecoveredERC20(tokenAddress, tokenAmount);
     }
 
@@ -139,7 +157,7 @@ contract HiIQGaugeRewardsDistributor is Owned, ReentrancyGuard {
         timelockAddress = newTimeLock;
     }
 
-    function setCurator(address newCuratorAddress) external onlybyOwnGov {
+    function setCurator(address newCuratorAddress) external onlyByOwnGov {
         curatorAddress = newCuratorAddress;
     }
 
