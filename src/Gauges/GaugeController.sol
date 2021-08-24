@@ -1,5 +1,8 @@
-// SPDX_License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.7.1;
+pragma experimental ABIEncoderV2
+
 
 interface GaugeController {
     struct Point {
