@@ -59,6 +59,7 @@ const config: HardhatUserConfig = {
       rinkeby: '0xcf67e811e4cc07e27a992255bd5d27b60de7dd93',
       mainnet: '0x27714ADb7aC897D08ec6812E908e7c32BaD8Df0C',
     },
+    hiIQGaugesRewardsDistributor: {},
   },
   networks: {
     hardhat: {
