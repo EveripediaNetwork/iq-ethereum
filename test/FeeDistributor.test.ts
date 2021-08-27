@@ -408,21 +408,22 @@ describe('FeeDistributor', () => {
     const user = users[0];
     const user2 = users[1];
     const lockTime = today + secondsInADay * 15; // 15 days
-    const lockTime2 = today + secondsInADay * 30; // 30 days
+    const lockTime2 = today + secondsInADay * 1460; // 4 years
 
     const amount = BigNumber.from(parseEther('100000000')); // 100M
     const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
+    const lockedAmount2 = BigNumber.from(parseEther('250000')); // 250K
     const rewardAmount = BigNumber.from(parseEther('7000000')); // 7M
 
     await deployer.IQERC20.mint(user.address, lockedAmount);
-    await deployer.IQERC20.mint(user2.address, lockedAmount);
+    await deployer.IQERC20.mint(user2.address, lockedAmount2);
     await deployer.IQERC20.mint(deployer.address, amount);
 
     // lock 1M IQ for 60 days
     await user.IQERC20.approve(HIIQ.address, lockedAmount);
     await user.HIIQ.create_lock(lockedAmount, lockTime);
-    await user2.IQERC20.approve(HIIQ.address, lockedAmount);
-    await user2.HIIQ.create_lock(lockedAmount, lockTime2); // second user gets 2x more time locked
+    await user2.IQERC20.approve(HIIQ.address, lockedAmount2);
+    await user2.HIIQ.create_lock(lockedAmount2, lockTime2); // second user gets 2x more time locked
     await deployer.IQERC20.transfer(FeeDistributor.address, rewardAmount);
     await deployer.IQERC20.transfer(FeeDistributorVyper.address, rewardAmount);
 
