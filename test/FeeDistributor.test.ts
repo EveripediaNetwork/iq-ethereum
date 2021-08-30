@@ -397,12 +397,7 @@ describe('FeeDistributor', () => {
   });
 
   it('Same HIIQ get rewards the same regardless locking time', async () => {
-    const {
-      users,
-      deployer,
-      HIIQ,
-      FeeDistributor,
-    } = await setup();
+    const {users, deployer, HIIQ, FeeDistributor} = await setup();
 
     const user = users[0];
     const lockTime = today + secondsInADay * 365; // 1 year
@@ -427,8 +422,12 @@ describe('FeeDistributor', () => {
     await user2.HIIQ.create_lock(lockedAmount2, lockTime2);
 
     // check balances
-    console.log(formatEther(await user.HIIQ["balanceOf(address)"](user.address))); // 3477631.27853881276188788
-    console.log(formatEther(await user2.HIIQ["balanceOf(address)"](user2.address))); // 3249089.61187214594109736
+    console.log(
+      formatEther(await user.HIIQ['balanceOf(address)'](user.address))
+    ); // 3477631.27853881276188788
+    console.log(
+      formatEther(await user2.HIIQ['balanceOf(address)'](user2.address))
+    ); // 3249089.61187214594109736
 
     await deployer.IQERC20.transfer(FeeDistributor.address, rewardAmount);
 
