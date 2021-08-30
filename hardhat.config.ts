@@ -54,10 +54,10 @@ const config: HardhatUserConfig = {
       goerli: '0xc03bcacc5377b7cc6634537650a7a1d14711c1a3',
       rinkeby: '0x279926cca1ccd061ee423c633f7376e2bdecc53a',
     },
-    feeDistributor: {
-      goerli: '0x7dcb919ff25161698e56c18f953e6aab4d0ebef3',
-      rinkeby: '0xcf67e811e4cc07e27a992255bd5d27b60de7dd93',
-      mainnet: '0x27714ADb7aC897D08ec6812E908e7c32BaD8Df0C',
+    hiIQRewards: {
+      goerli: '0xEBCa22f5035d7636104f5Cb4Ddbe11a9e5b05AD2',
+      rinkeby: '0x18EFe0d7932064E965bbc704F3025cd6eC459105',
+      mainnet: '0x18EFe0d7932064E965bbc704F3025cd6eC459105',
     },
   },
   networks: {

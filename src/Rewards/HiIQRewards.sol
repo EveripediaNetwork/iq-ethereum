@@ -141,7 +141,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         return Math.min(block.timestamp, periodFinish);
     }
 
-    function yieldPerVeFXS() public view returns (uint256) {
+    function yieldPerHiIQ() public view returns (uint256) {
         if (totalHiIQSupplyStored == 0) {
             return yieldPerHiIQStored;
         } else {
@@ -157,7 +157,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         // Uninitialized users should not earn anything yet
         if (!userIsInitialized[account]) return 0;
 
-        uint256 yield0 = yieldPerVeFXS();
+        uint256 yield0 = yieldPerHiIQ();
 
         // Get the old and the new hiIQ balances
         uint256 old_hiiq_balance = userHiIQCheckpointed[account];
@@ -263,7 +263,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
 
         periodFinish = periodFinish.add((num_periods_elapsed.add(1)).mul(yieldDuration));
 
-        uint256 yield0 = yieldPerVeFXS();
+        uint256 yield0 = yieldPerHiIQ();
         yieldPerHiIQStored = yield0;
         lastUpdateTime = lastTimeYieldApplicable();
 
@@ -277,7 +277,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         if (block.timestamp > periodFinish) {
             retroCatchUp();
         } else {
-            uint256 yield0 = yieldPerVeFXS();
+            uint256 yield0 = yieldPerHiIQ();
             yieldPerHiIQStored = yield0;
             lastUpdateTime = lastTimeYieldApplicable();
         }
