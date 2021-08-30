@@ -210,7 +210,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
                 if (t > pt.ts) {
                     dt = int128(t - pt.ts);
                 }
-                hiIQSupply[t] = uint256(max(pt.bias - pt.slope * dt, 0));
+                hiIQSupply[t] = pt.iq_amt.add(uint256(max(pt.bias - pt.slope * dt, 0)).mul(3));
             }
             t += WEEK;
         }
@@ -330,12 +330,15 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
             } else {
                 int128 dt = int128(weekCursor - oldUserPoint.ts);
                 uint256 balanceOf = uint256(max(oldUserPoint.bias - dt * oldUserPoint.slope, 0));
+                uint256 balanceOfWeighted = oldUserPoint.iq_amt.add(balanceOf.mul(3));
                 if (balanceOf == 0 && userEpoch > maxUserEpoch) {
                     break;
                 }
 
-                if (balanceOf > 0) {
-                    toDistribute += balanceOf.mul(tokensPerWeek[weekCursor]).div(hiIQSupply[weekCursor]);
+                if (balanceOfWeighted > 0) {
+                    console.log(balanceOfWeighted);
+                    console.log(hiIQSupply[weekCursor]);
+                    toDistribute += balanceOfWeighted.mul(tokensPerWeek[weekCursor]).div(hiIQSupply[weekCursor]);
                 }
 
                 weekCursor += WEEK;

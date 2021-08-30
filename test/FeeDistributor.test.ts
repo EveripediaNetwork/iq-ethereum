@@ -401,7 +401,7 @@ describe('FeeDistributor', () => {
       users,
       deployer,
       HIIQ,
-      FeeDistributorVyper,
+      FeeDistributor,
     } = await setup();
 
     const user = users[0];
@@ -430,36 +430,36 @@ describe('FeeDistributor', () => {
     console.log(formatEther(await user.HIIQ["balanceOf(address)"](user.address))); // 3477631.27853881276188788
     console.log(formatEther(await user2.HIIQ["balanceOf(address)"](user2.address))); // 3249089.61187214594109736
 
-    await deployer.IQERC20.transfer(FeeDistributorVyper.address, rewardAmount);
+    await deployer.IQERC20.transfer(FeeDistributor.address, rewardAmount);
 
-    await deployer.FeeDistributorVyper.checkpoint_token();
-    await deployer.FeeDistributorVyper.checkpoint_total_supply();
+    await deployer.FeeDistributor.checkpointToken();
+    await deployer.FeeDistributor.checkpointTotalSupply();
 
     // 1 week
     await ethers.provider.send('evm_increaseTime', [WEEK]);
     await ethers.provider.send('evm_mine', []);
 
-    await deployer.IQERC20.transfer(FeeDistributorVyper.address, rewardAmount);
-    await deployer.FeeDistributorVyper.checkpoint_token();
-    await deployer.FeeDistributorVyper.checkpoint_total_supply();
+    await deployer.IQERC20.transfer(FeeDistributor.address, rewardAmount);
+    await deployer.FeeDistributor.checkpointToken();
+    await deployer.FeeDistributor.checkpointTotalSupply();
 
     // 2 week
     await ethers.provider.send('evm_increaseTime', [WEEK]);
     await ethers.provider.send('evm_mine', []);
 
-    await deployer.IQERC20.transfer(FeeDistributorVyper.address, rewardAmount);
-    await deployer.FeeDistributorVyper.checkpoint_token();
-    await deployer.FeeDistributorVyper.checkpoint_total_supply();
+    await deployer.IQERC20.transfer(FeeDistributor.address, rewardAmount);
+    await deployer.FeeDistributor.checkpointToken();
+    await deployer.FeeDistributor.checkpointTotalSupply();
 
     const balance1 = await user.IQERC20.balanceOf(user.address);
     const balance2 = await user.IQERC20.balanceOf(user2.address);
     console.log(formatEther(balance1)); // 0.0
     console.log(formatEther(balance2)); // 0.0
 
-    await user.FeeDistributorVyper['claim(address)'](user.address);
+    await user.FeeDistributor['claim(address)'](user.address);
     const balance3 = await user.IQERC20.balanceOf(user.address);
 
-    await user2.FeeDistributorVyper['claim(address)'](user2.address);
+    await user2.FeeDistributor['claim(address)'](user2.address);
     const balance4 = await user.IQERC20.balanceOf(user2.address);
 
     console.log(formatEther(balance3)); // 2767426.461763341129355901
