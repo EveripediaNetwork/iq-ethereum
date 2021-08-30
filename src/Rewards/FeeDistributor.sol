@@ -2,7 +2,6 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -336,8 +335,6 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
                 }
 
                 if (balanceOfWeighted > 0) {
-                    console.log(balanceOfWeighted);
-                    console.log(hiIQSupply[weekCursor]);
                     toDistribute += balanceOfWeighted.mul(tokensPerWeek[weekCursor]).div(hiIQSupply[weekCursor]);
                 }
 
