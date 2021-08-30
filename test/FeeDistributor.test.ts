@@ -396,6 +396,76 @@ describe('FeeDistributor', () => {
     ); // aprox 1000 up or down
   });
 
+  it('Same HIIQ get rewards the same regardless locking time', async () => {
+    const {
+      users,
+      deployer,
+      HIIQ,
+      FeeDistributorVyper,
+    } = await setup();
+
+    const user = users[0];
+    const lockTime = today + secondsInADay * 365; // 1 year
+    const lockedAmount = BigNumber.from(parseEther('2000000')); // 2M
+
+    const user2 = users[1];
+    const lockTime2 = today + secondsInADay * 365 * 3; // 3 years
+    const lockedAmount2 = BigNumber.from(parseEther('1000000')); // 1M
+
+    const amount = BigNumber.from(parseEther('100000000')); // 100M
+    const rewardAmount = BigNumber.from(parseEther('7000000')); // 7M
+
+    await deployer.IQERC20.mint(user.address, lockedAmount);
+    await deployer.IQERC20.mint(user2.address, lockedAmount2);
+    await deployer.IQERC20.mint(deployer.address, amount);
+
+    // lock
+    await user.IQERC20.approve(HIIQ.address, lockedAmount);
+    await user.HIIQ.create_lock(lockedAmount, lockTime);
+
+    await user2.IQERC20.approve(HIIQ.address, lockedAmount2);
+    await user2.HIIQ.create_lock(lockedAmount2, lockTime2);
+
+    // check balances
+    console.log(formatEther(await user.HIIQ["balanceOf(address)"](user.address))); // 3477631.27853881276188788
+    console.log(formatEther(await user2.HIIQ["balanceOf(address)"](user2.address))); // 3249089.61187214594109736
+
+    await deployer.IQERC20.transfer(FeeDistributorVyper.address, rewardAmount);
+
+    await deployer.FeeDistributorVyper.checkpoint_token();
+    await deployer.FeeDistributorVyper.checkpoint_total_supply();
+
+    // 1 week
+    await ethers.provider.send('evm_increaseTime', [WEEK]);
+    await ethers.provider.send('evm_mine', []);
+
+    await deployer.IQERC20.transfer(FeeDistributorVyper.address, rewardAmount);
+    await deployer.FeeDistributorVyper.checkpoint_token();
+    await deployer.FeeDistributorVyper.checkpoint_total_supply();
+
+    // 2 week
+    await ethers.provider.send('evm_increaseTime', [WEEK]);
+    await ethers.provider.send('evm_mine', []);
+
+    await deployer.IQERC20.transfer(FeeDistributorVyper.address, rewardAmount);
+    await deployer.FeeDistributorVyper.checkpoint_token();
+    await deployer.FeeDistributorVyper.checkpoint_total_supply();
+
+    const balance1 = await user.IQERC20.balanceOf(user.address);
+    const balance2 = await user.IQERC20.balanceOf(user2.address);
+    console.log(formatEther(balance1)); // 0.0
+    console.log(formatEther(balance2)); // 0.0
+
+    await user.FeeDistributorVyper['claim(address)'](user.address);
+    const balance3 = await user.IQERC20.balanceOf(user.address);
+
+    await user2.FeeDistributorVyper['claim(address)'](user2.address);
+    const balance4 = await user.IQERC20.balanceOf(user2.address);
+
+    console.log(formatEther(balance3)); // 2767426.461763341129355901
+    console.log(formatEther(balance4)); // 4232534.588579227342648721
+  });
+
   it('Claims Many', async () => {
     const {
       users,
