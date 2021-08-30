@@ -102,7 +102,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
         uint256 maxUserEpoch = hiIQ.user_point_epoch(_user);
         uint256 epoch = _findTimestampUserEpoch(_user, _timestamp, maxUserEpoch);
         Point memory pt = hiIQ.user_point_history(_user, epoch);
-        return uint256(max(pt.bias - pt.slope * int128(_timestamp - pt.ts), 0));
+        return pt.iq_amt.add(uint256(max(pt.bias - pt.slope * int128(_timestamp - pt.ts), 0)).mul(3));
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
