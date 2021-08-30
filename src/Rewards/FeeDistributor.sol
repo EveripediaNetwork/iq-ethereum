@@ -49,6 +49,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
     // Constants
     uint256 private constant WEEK = 7 * 86400;
     uint256 private constant TOKEN_CHECKPOINT_DEADLINE = 86400;
+    uint256 private constant VOTE_WEIGHT_MULTIPLIER = 3;
 
     // Period related
     uint256 public startTime;
@@ -102,7 +103,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
         uint256 maxUserEpoch = hiIQ.user_point_epoch(_user);
         uint256 epoch = _findTimestampUserEpoch(_user, _timestamp, maxUserEpoch);
         Point memory pt = hiIQ.user_point_history(_user, epoch);
-        return pt.iq_amt.add(uint256(max(pt.bias - pt.slope * int128(_timestamp - pt.ts), 0)).mul(3));
+        return pt.iq_amt.add(uint256(max(pt.bias - pt.slope * int128(_timestamp - pt.ts), 0)).mul(VOTE_WEIGHT_MULTIPLIER));
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -209,7 +210,7 @@ contract FeeDistributor is Pointable, Ownable, ReentrancyGuard {
                 if (t > pt.ts) {
                     dt = int128(t - pt.ts);
                 }
-                hiIQSupply[t] = pt.iq_amt.add(uint256(max(pt.bias - pt.slope * dt, 0)).mul(3));
+                hiIQSupply[t] = pt.iq_amt.add(uint256(max(pt.bias - pt.slope * dt, 0)).mul(VOTE_WEIGHT_MULTIPLIER));
             }
             t += WEEK;
         }
