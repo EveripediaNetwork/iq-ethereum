@@ -57,7 +57,6 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     uint256 public lastUpdateTime;
     uint256 public yieldRate;
     uint256 public yieldDuration = 604800; // 7 * 86400  (7 days)
-    uint256 public min_lock_time_for_yield = 2592000; // 1 month
 
     // Yield tracking
     uint256 public yieldPerHiIQStored = 0;
@@ -70,6 +69,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     mapping(address => bool) public userIsInitialized;
     mapping(address => uint256) public userHiIQCheckpointed;
     mapping(address => uint256) public userHiIQEndpointCheckpointed;
+    mapping(address => uint256) private lastRewardClaimTime; // staker addr -> timestamp
 
     // Greylists
     mapping(address => bool) public greylist;
@@ -125,12 +125,10 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
 
         current_ending_timestamp = curr_locked_bal_pack.end;
 
-        // Only unexpired hiIQ that is locked for min_lock_time_for_yield or longer should be eligible
+        // Only unexpired hiIQ should be eligible
         if (userHiIQEndpointCheckpointed[account] != 0 && (block.timestamp >= userHiIQEndpointCheckpointed[account])) {
             eligible_hiiq_bal = 0;
         } else if (block.timestamp >= current_ending_timestamp) {
-            eligible_hiiq_bal = 0;
-        } else if ((curr_locked_bal_pack.end).sub(block.timestamp) < min_lock_time_for_yield) {
             eligible_hiiq_bal = 0;
         } else {
             eligible_hiiq_bal = curr_hiiq_bal;
@@ -157,26 +155,45 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         // Uninitialized users should not earn anything yet
         if (!userIsInitialized[account]) return 0;
 
-        uint256 yield0 = yieldPerHiIQ();
+        // Get eligible hiIQ balances
+        (uint256 eligible_current_hiiq, uint256 ending_timestamp) = eligibleCurrentHiIQ(account);
 
-        // Get the old and the new hiIQ balances
-        uint256 old_hiiq_balance = userHiIQCheckpointed[account];
-        (uint256 eligible_current_hiiq, ) = eligibleCurrentHiIQ(account);
-
-        // If your hiIQ is unlocked, you automatically get no rewards
-        // You need to make sure you claim in time.
-        if (eligible_current_hiiq == 0) return 0;
-
-        // If the amount of hiIQ increased, only pay off the old balance
-        // Otherwise, take the midpoint
-        uint256 hiiq_balance_to_use;
-        if (eligible_current_hiiq > old_hiiq_balance) {
-            hiiq_balance_to_use = old_hiiq_balance;
-        } else {
-            hiiq_balance_to_use = ((eligible_current_hiiq).add(old_hiiq_balance)).div(2);
+        // If your hiIQ is unlocked
+        uint256 eligible_time_fraction = PRICE_PRECISION;
+        if (eligible_current_hiiq == 0){
+            // And you already claimed after expiration
+            if (lastRewardClaimTime[account] >= ending_timestamp) {
+                // You get NOTHING. You LOSE. Good DAY ser!
+                return 0;
+            }
+            // You haven't claimed yet
+            else {
+                uint256 eligible_time = (ending_timestamp).sub(lastRewardClaimTime[account]);
+                uint256 total_time = (block.timestamp).sub(lastRewardClaimTime[account]);
+                eligible_time_fraction = PRICE_PRECISION.mul(eligible_time).div(total_time);
+            }
         }
 
-        return (hiiq_balance_to_use.mul(yield0.sub(userYieldPerTokenPaid[account])).div(1e18).add(yields[account]));
+        // If the amount of hiIQ increased, only pay off based on the old balance
+        // Otherwise, take the midpoint
+        uint256 hiiq_balance_to_use;
+        {
+            uint256 old_hiiq_balance = userHiIQCheckpointed[account];
+            if (eligible_current_hiiq > old_hiiq_balance){
+                hiiq_balance_to_use = old_hiiq_balance;
+            }
+            else {
+                hiiq_balance_to_use = ((eligible_current_hiiq).add(old_hiiq_balance)).div(2);
+            }
+        }
+
+        return (
+            hiiq_balance_to_use
+                .mul(yieldPerHiIQ().sub(userYieldPerTokenPaid[account]))
+                .mul(eligible_time_fraction)
+                .div(1e18 * PRICE_PRECISION)
+                .add(yields[account])
+        );
     }
 
     function getYieldForDuration() external view returns (uint256) {
@@ -212,7 +229,10 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         }
 
         // Mark the user as initialized
-        if (!userIsInitialized[account]) userIsInitialized[account] = true;
+        if (!userIsInitialized[account]) {
+            userIsInitialized[account] = true;
+            lastRewardClaimTime[account] = block.timestamp;
+        }
     }
 
     function _syncEarned(address account) internal {
@@ -221,6 +241,11 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
             yields[account] = earned0;
             userYieldPerTokenPaid[account] = yieldPerHiIQStored;
         }
+    }
+
+    // Anyone can checkpoint another user
+    function checkpointOtherUser(address user_addr) external {
+        _checkpointUser(user_addr);
     }
 
     // Checkpoints the user
@@ -243,6 +268,8 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
             TransferHelper.safeTransfer(emitted_token_address, msg.sender, yield0);
             emit YieldCollected(msg.sender, yield0, emitted_token_address);
         }
+
+        lastRewardClaimTime[msg.sender] = block.timestamp;
     }
 
     // If the period expired, renew it
@@ -310,10 +337,6 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
 
     function greylistAddress(address _address) external onlyOwner {
         greylist[_address] = !(greylist[_address]);
-    }
-
-    function setMinLockTimeForYield(uint256 _min_lock_time_for_yield) external onlyOwner {
-        min_lock_time_for_yield = _min_lock_time_for_yield;
     }
 
     function setPauses(bool _yieldCollectionPaused) external onlyOwner {
