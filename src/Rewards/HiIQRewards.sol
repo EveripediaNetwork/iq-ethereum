@@ -69,6 +69,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     mapping(address => bool) public userIsInitialized;
     mapping(address => uint256) public userHiIQCheckpointed;
     mapping(address => uint256) public userHiIQEndpointCheckpointed;
+    mapping(address => uint256) private userHiIQLastCheckpointed;
     mapping(address => uint256) private lastRewardClaimTime; // staker addr -> timestamp
 
     // Greylists
@@ -165,6 +166,8 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
             if (lastRewardClaimTime[account] >= ending_timestamp) {
                 // You get NOTHING. You LOSE. Good DAY ser!
                 return 0;
+            }else if(userHiIQLastCheckpointed[account] > ending_timestamp) {
+                eligible_time_fraction = 0;
             }
             // You haven't claimed yet
             else {
@@ -181,8 +184,10 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
             uint256 old_hiiq_balance = userHiIQCheckpointed[account];
             if (eligible_current_hiiq > old_hiiq_balance){
                 hiiq_balance_to_use = old_hiiq_balance;
-            }
-            else {
+            }else if(ending_timestamp < block.timestamp){
+                // it should not go to zero, use ending point hiIQ and prev checkpoint amount
+                hiiq_balance_to_use = ((hiIQ.balanceOf(account, ending_timestamp)).add(old_hiiq_balance)).div(2);
+            } else {
                 hiiq_balance_to_use = ((eligible_current_hiiq).add(old_hiiq_balance)).div(2);
             }
         }
@@ -218,6 +223,9 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
 
         // Update the user's stored ending timestamp
         userHiIQEndpointCheckpointed[account] = current_ending_timestamp;
+
+        // Update the user's stored checkpoint timestamp
+        userHiIQLastCheckpointed[account] = block.timestamp;
 
         // Update the total amount participating
         if (new_hiiq_balance >= old_hiiq_balance) {
