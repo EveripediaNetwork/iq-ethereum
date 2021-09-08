@@ -161,7 +161,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
 
         // If your hiIQ is unlocked
         uint256 eligible_time_fraction = PRICE_PRECISION;
-        if (eligible_current_hiiq == 0){
+        if (eligible_current_hiiq == 0) {
             // And you already claimed after expiration
             if (lastRewardClaimTime[account] >= ending_timestamp) {
                 // You get NOTHING. You LOSE. Good DAY ser!
