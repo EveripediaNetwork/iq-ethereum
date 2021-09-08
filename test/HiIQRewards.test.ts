@@ -8,7 +8,7 @@ import {
 } from 'hardhat';
 import {setupUser, setupUsers} from './utils';
 import {BigNumber} from 'ethers';
-import {parseEther} from 'ethers/lib/utils';
+import {parseEther, formatEther} from 'ethers/lib/utils';
 
 const secondsInADay = 24 * 60 * 60;
 
@@ -112,48 +112,78 @@ describe('HiIQRewards', () => {
     );
   });
 
-  it('Not rewards after 1 Month', async () => {
+  it('Rewards Test, Issue with Last Reward Period', async () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
     const user = users[0];
-    const lockTime =
-      Math.round(new Date().getTime() / 1000) + secondsInADay * 45; // 45 days
 
-    const amount = BigNumber.from(parseEther('61000000')); // 60M
+    const lockTime = Math.round(new Date().getTime() / 1000) + secondsInADay * 14; // 14 days
+    const amount = BigNumber.from(parseEther('60000000')); // 60M
     const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
-    const rewardAmount = BigNumber.from(parseEther('60000000')); // 60M
-    const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(
-      secondsInADay
-    ); // 1M per day
+    const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(secondsInADay); // 1M per day
 
     await deployer.IQERC20.mint(user.address, amount);
+    await deployer.IQERC20.mint(HiIQRewards.address, amount);
 
-    // lock 1M IQ for 45 days
     await user.IQERC20.approve(HIIQ.address, lockedAmount);
     await user.HIIQ.create_lock(lockedAmount, lockTime);
     await user.HIIQ.checkpoint();
 
     await deployer.HiIQRewards.initializeDefault();
     await deployer.HiIQRewards.setYieldRate(yieldPerSecond, true);
-    await user.IQERC20.transfer(HiIQRewards.address, rewardAmount);
     await user.HiIQRewards.checkpoint();
 
-    await ethers.provider.send('evm_increaseTime', [secondsInADay * 14]); // 14 days
-    await ethers.provider.send('evm_mine', []);
+    let blockNum = await ethers.provider.getBlockNumber();
+    let block = await ethers.provider.getBlock(blockNum)
 
-    const earned2 = await user.HiIQRewards.earned(user.address);
+    let prevBlock;
+    let firstBlock = block;
+    let expectedEarned1;
+    let expectedEarned2;
+    for (let weeksTest = 1; weeksTest < 4; weeksTest++) {
+      await ethers.provider.send('evm_increaseTime', [secondsInADay * 7]); // days to move forward
+      await ethers.provider.send('evm_mine', []);
 
-    await user.HiIQRewards.checkpoint();
-    const earned = await user.HiIQRewards.earned(user.address);
-    expect(earned.gt(BigNumber.from(parseEther('14000000')))).to.be.true;
-    expect(earned.lt(BigNumber.from(parseEther('15000000')))).to.be.true;
+      blockNum = await ethers.provider.getBlockNumber();
+      block = await ethers.provider.getBlock(blockNum)
+      let user1LockEnd = await user.HIIQ.locked__end(user.address);
+      if(user1LockEnd > BigNumber.from(block.timestamp)){
+        user1LockEnd = BigNumber.from(block.timestamp);
+      }
+      let user1IQBal = await user.IQERC20.balanceOf(user.address);
+      let user1HiIQBal = await user.HiIQRewards.balanceOfProxy(user.address, user1LockEnd);
+      let [user1HiIQRewardsBal, user1endLockTime] = await user.HiIQRewards.eligibleCurrentHiIQ(user.address)
+      let earned1 = await user.HiIQRewards.earned(user.address);
 
-    await ethers.provider.send('evm_increaseTime', [secondsInADay * 2]); // 2 days reaches < 1 month
-    await ethers.provider.send('evm_mine', []);
+      await user.HiIQRewards.checkpoint();
 
-    // no rewards ?
-    const earnedAfterAMonth = await user.HiIQRewards.earned(user.address);
-    expect(earnedAfterAMonth.eq('0')).to.be.true;
+      // expected amount tops after lockTime
+      if (lockTime >= block.timestamp) {
+        expectedEarned1 = 6500000 * weeksTest ;
+        expectedEarned2 = 7500000 * weeksTest ;
+      }
+
+      console.log('block.timestamp: ', block.timestamp)
+      console.log('weeks ellapsed: ', firstBlock ? (block.timestamp - firstBlock.timestamp) / (secondsInADay * 7) : '')
+      console.log('BlockNum: ', blockNum)
+      console.log('user1IQBal', formatEther(user1IQBal))
+      console.log('user1HiIQBal', formatEther(user1HiIQBal))
+      console.log('user1HiIQRewardsBal', formatEther(user1HiIQRewardsBal))
+      console.log('HIIQ.totalSupply', formatEther(await user.HIIQ.totalSupplyAt(blockNum)))
+      console.log('HiIQRewards.totalSupply', formatEther(await user.HiIQRewards.totalHiIQSupplyStored()))
+      console.log('HiIQRewards.userYieldPerTokenPaid', formatEther(await user.HiIQRewards.userYieldPerTokenPaid(user.address)))
+      console.log('HiIQRewards.yieldPerHiIQ', formatEther(await user.HiIQRewards.yieldPerHiIQ()))
+      console.log('earned1', formatEther(earned1))
+      console.log('expectedEarned1', expectedEarned1)
+      console.log('expectedEarned2', expectedEarned2)
+      console.log('')
+
+      prevBlock = block;
+
+      expect(earned1.gt(BigNumber.from(parseEther(`${expectedEarned1}`)))).to.be.true;
+      expect(earned1.lt(BigNumber.from(parseEther(`${expectedEarned2}`)))).to.be.true;
+
+    }
   });
 
   it('Greylist and pause', async () => {
