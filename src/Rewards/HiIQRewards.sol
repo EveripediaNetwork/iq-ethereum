@@ -166,7 +166,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
             if (lastRewardClaimTime[account] >= ending_timestamp) {
                 // You get NOTHING. You LOSE. Good DAY ser!
                 return 0;
-            }else if(userHiIQLastCheckpointed[account] > ending_timestamp) {
+            } else if (userHiIQLastCheckpointed[account] > ending_timestamp) {
                 eligible_time_fraction = 0;
             } else {
                 // You haven't claimed yet
@@ -181,9 +181,9 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         uint256 hiiq_balance_to_use;
         {
             uint256 old_hiiq_balance = userHiIQCheckpointed[account];
-            if (eligible_current_hiiq > old_hiiq_balance){
+            if (eligible_current_hiiq > old_hiiq_balance) {
                 hiiq_balance_to_use = old_hiiq_balance;
-            }else if(ending_timestamp < block.timestamp){
+            } else if (ending_timestamp < block.timestamp) {
                 // it should not go to zero, use ending point hiIQ and prev checkpoint amount
                 hiiq_balance_to_use = ((hiIQ.balanceOf(account, ending_timestamp)).add(old_hiiq_balance)).div(2);
             } else {
