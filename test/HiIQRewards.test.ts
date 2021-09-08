@@ -137,7 +137,7 @@ describe('HiIQRewards', () => {
     let block = await ethers.provider.getBlock(blockNum)
 
     let prevBlock;
-    let firstBlock = block;
+    const firstBlock = block;
     let expectedEarned1;
     let expectedEarned2;
     for (let weeksTest = 1; weeksTest < 4; weeksTest++) {
@@ -150,10 +150,9 @@ describe('HiIQRewards', () => {
       if(user1LockEnd > BigNumber.from(block.timestamp)){
         user1LockEnd = BigNumber.from(block.timestamp);
       }
-      let user1IQBal = await user.IQERC20.balanceOf(user.address);
-      let user1HiIQBal = await user.HiIQRewards.balanceOfProxy(user.address, user1LockEnd);
-      let [user1HiIQRewardsBal, user1endLockTime] = await user.HiIQRewards.eligibleCurrentHiIQ(user.address)
-      let earned1 = await user.HiIQRewards.earned(user.address);
+      const user1IQBal = await user.IQERC20.balanceOf(user.address);
+      const [user1HiIQRewardsBal, user1endLockTime] = await user.HiIQRewards.eligibleCurrentHiIQ(user.address)
+      const earned1 = await user.HiIQRewards.earned(user.address);
 
       await user.HiIQRewards.checkpoint();
 
@@ -167,7 +166,6 @@ describe('HiIQRewards', () => {
       console.log('weeks ellapsed: ', firstBlock ? (block.timestamp - firstBlock.timestamp) / (secondsInADay * 7) : '')
       console.log('BlockNum: ', blockNum)
       console.log('user1IQBal', formatEther(user1IQBal))
-      console.log('user1HiIQBal', formatEther(user1HiIQBal))
       console.log('user1HiIQRewardsBal', formatEther(user1HiIQRewardsBal))
       console.log('HIIQ.totalSupply', formatEther(await user.HIIQ.totalSupplyAt(blockNum)))
       console.log('HiIQRewards.totalSupply', formatEther(await user.HiIQRewards.totalHiIQSupplyStored()))
