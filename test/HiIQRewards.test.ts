@@ -151,7 +151,6 @@ describe('HiIQRewards', () => {
         user1LockEnd = BigNumber.from(block.timestamp);
       }
       const user1IQBal = await user.IQERC20.balanceOf(user.address);
-      const user1HiIQBal = await user.HiIQRewards.balanceOfProxy(user.address, user1LockEnd);
       const [user1HiIQRewardsBal, user1endLockTime] = await user.HiIQRewards.eligibleCurrentHiIQ(user.address)
       const earned1 = await user.HiIQRewards.earned(user.address);
 
@@ -167,7 +166,6 @@ describe('HiIQRewards', () => {
       console.log('weeks ellapsed: ', firstBlock ? (block.timestamp - firstBlock.timestamp) / (secondsInADay * 7) : '')
       console.log('BlockNum: ', blockNum)
       console.log('user1IQBal', formatEther(user1IQBal))
-      console.log('user1HiIQBal', formatEther(user1HiIQBal))
       console.log('user1HiIQRewardsBal', formatEther(user1HiIQRewardsBal))
       console.log('HIIQ.totalSupply', formatEther(await user.HIIQ.totalSupplyAt(blockNum)))
       console.log('HiIQRewards.totalSupply', formatEther(await user.HiIQRewards.totalHiIQSupplyStored()))
