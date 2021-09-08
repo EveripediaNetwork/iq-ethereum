@@ -66,7 +66,7 @@ describe('HIIQ', function () {
     await expect(users[0].HIIQ.withdraw()).to.be.not.reverted;
     await users[0].HIIQ.checkpoint(); // without checkpoint data is not accurate
 
-    const ZERO = ethers.BigNumber.from("0");
+    const ZERO = ethers.BigNumber.from('0');
     const totalSupply2 = await users[0].HIIQ['totalSupply()']();
 
     expect(ZERO.eq(totalSupply2)).to.be.true;

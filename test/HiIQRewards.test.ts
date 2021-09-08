@@ -117,10 +117,13 @@ describe('HiIQRewards', () => {
 
     const user = users[0];
 
-    const lockTime = Math.round(new Date().getTime() / 1000) + secondsInADay * 14; // 14 days
+    const lockTime =
+      Math.round(new Date().getTime() / 1000) + secondsInADay * 14; // 14 days
     const amount = BigNumber.from(parseEther('60000000')); // 60M
     const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
-    const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(secondsInADay); // 1M per day
+    const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(
+      secondsInADay
+    ); // 1M per day
 
     await deployer.IQERC20.mint(user.address, amount);
     await deployer.IQERC20.mint(HiIQRewards.address, amount);
@@ -134,7 +137,7 @@ describe('HiIQRewards', () => {
     await user.HiIQRewards.checkpoint();
 
     let blockNum = await ethers.provider.getBlockNumber();
-    let block = await ethers.provider.getBlock(blockNum)
+    let block = await ethers.provider.getBlock(blockNum);
 
     let prevBlock;
     const firstBlock = block;
@@ -145,42 +148,63 @@ describe('HiIQRewards', () => {
       await ethers.provider.send('evm_mine', []);
 
       blockNum = await ethers.provider.getBlockNumber();
-      block = await ethers.provider.getBlock(blockNum)
+      block = await ethers.provider.getBlock(blockNum);
       let user1LockEnd = await user.HIIQ.locked__end(user.address);
-      if(user1LockEnd > BigNumber.from(block.timestamp)){
+      if (user1LockEnd > BigNumber.from(block.timestamp)) {
         user1LockEnd = BigNumber.from(block.timestamp);
       }
       const user1IQBal = await user.IQERC20.balanceOf(user.address);
-      const [user1HiIQRewardsBal, user1endLockTime] = await user.HiIQRewards.eligibleCurrentHiIQ(user.address)
+      const [
+        user1HiIQRewardsBal,
+        user1endLockTime,
+      ] = await user.HiIQRewards.eligibleCurrentHiIQ(user.address);
       const earned1 = await user.HiIQRewards.earned(user.address);
 
       await user.HiIQRewards.checkpoint();
 
       // expected amount tops after lockTime
       if (lockTime >= block.timestamp) {
-        expectedEarned1 = 6500000 * weeksTest ;
-        expectedEarned2 = 7500000 * weeksTest ;
+        expectedEarned1 = 6500000 * weeksTest;
+        expectedEarned2 = 7500000 * weeksTest;
       }
 
-      console.log('block.timestamp: ', block.timestamp)
-      console.log('weeks ellapsed: ', firstBlock ? (block.timestamp - firstBlock.timestamp) / (secondsInADay * 7) : '')
-      console.log('BlockNum: ', blockNum)
-      console.log('user1IQBal', formatEther(user1IQBal))
-      console.log('user1HiIQRewardsBal', formatEther(user1HiIQRewardsBal))
-      console.log('HIIQ.totalSupply', formatEther(await user.HIIQ.totalSupplyAt(blockNum)))
-      console.log('HiIQRewards.totalSupply', formatEther(await user.HiIQRewards.totalHiIQSupplyStored()))
-      console.log('HiIQRewards.userYieldPerTokenPaid', formatEther(await user.HiIQRewards.userYieldPerTokenPaid(user.address)))
-      console.log('HiIQRewards.yieldPerHiIQ', formatEther(await user.HiIQRewards.yieldPerHiIQ()))
-      console.log('earned1', formatEther(earned1))
-      console.log('expectedEarned1', expectedEarned1)
-      console.log('expectedEarned2', expectedEarned2)
-      console.log('')
+      console.log('block.timestamp: ', block.timestamp);
+      console.log(
+        'weeks ellapsed: ',
+        firstBlock
+          ? (block.timestamp - firstBlock.timestamp) / (secondsInADay * 7)
+          : ''
+      );
+      console.log('BlockNum: ', blockNum);
+      console.log('user1IQBal', formatEther(user1IQBal));
+      console.log('user1HiIQRewardsBal', formatEther(user1HiIQRewardsBal));
+      console.log(
+        'HIIQ.totalSupply',
+        formatEther(await user.HIIQ.totalSupplyAt(blockNum))
+      );
+      console.log(
+        'HiIQRewards.totalSupply',
+        formatEther(await user.HiIQRewards.totalHiIQSupplyStored())
+      );
+      console.log(
+        'HiIQRewards.userYieldPerTokenPaid',
+        formatEther(await user.HiIQRewards.userYieldPerTokenPaid(user.address))
+      );
+      console.log(
+        'HiIQRewards.yieldPerHiIQ',
+        formatEther(await user.HiIQRewards.yieldPerHiIQ())
+      );
+      console.log('earned1', formatEther(earned1));
+      console.log('expectedEarned1', expectedEarned1);
+      console.log('expectedEarned2', expectedEarned2);
+      console.log('');
 
       prevBlock = block;
 
-      expect(earned1.gt(BigNumber.from(parseEther(`${expectedEarned1}`)))).to.be.true;
-      expect(earned1.lt(BigNumber.from(parseEther(`${expectedEarned2}`)))).to.be.true;
-
+      expect(earned1.gt(BigNumber.from(parseEther(`${expectedEarned1}`)))).to.be
+        .true;
+      expect(earned1.lt(BigNumber.from(parseEther(`${expectedEarned2}`)))).to.be
+        .true;
     }
   });
 
