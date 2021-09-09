@@ -170,8 +170,8 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
                 eligible_time_fraction = 0;
             } else {
                 // You haven't claimed yet
-                uint256 eligible_time = (ending_timestamp); //.sub(userHiIQLastCheckpointed[account]);
-                uint256 total_time = (block.timestamp); //.sub(userHiIQLastCheckpointed[account]);
+                uint256 eligible_time = (ending_timestamp).sub(userHiIQLastCheckpointed[account]);
+                uint256 total_time = (block.timestamp).sub(userHiIQLastCheckpointed[account]);
                 eligible_time_fraction = PRICE_PRECISION.mul(eligible_time).div(total_time);
             }
         }
