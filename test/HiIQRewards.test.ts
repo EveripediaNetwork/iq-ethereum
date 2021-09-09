@@ -222,6 +222,58 @@ describe('HiIQRewards', () => {
     console.log('earned1', formatEther(earned1)); // 135M !
   });
 
+  it('Re stake with multiple users', async () => {
+    const {users, deployer, HIIQ, HiIQRewards} = await setup();
+    const WEEKS_TO_STAKE = 2;
+    const AMOUNT_USERS = 7;
+
+    const lockTime =
+      Math.round(new Date().getTime() / 1000) + secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
+    const amount = BigNumber.from(parseEther('60000000')); // 60M
+    const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
+    const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(
+      secondsInADay
+    ); // 1M per day
+
+    await deployer.IQERC20.mint(HiIQRewards.address, amount);
+
+    for(let i=0; i <= AMOUNT_USERS; i++) {
+      await deployer.IQERC20.mint(users[i].address, amount);
+      await users[i].IQERC20.approve(HIIQ.address, lockedAmount);
+      await users[i].HIIQ.create_lock(lockedAmount, lockTime);
+      await users[i].HIIQ.checkpoint();
+    }
+
+    await deployer.HiIQRewards.initializeDefault();
+    await deployer.HiIQRewards.setYieldRate(yieldPerSecond, true);
+
+    for(let i=0; i <= AMOUNT_USERS; i++) {
+      await users[i].HiIQRewards.checkpoint();
+    }
+
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 30]); // days to move forward
+    await ethers.provider.send('evm_mine', []);
+
+    const blockNum = await ethers.provider.getBlockNumber();
+    const block = await ethers.provider.getBlock(blockNum);
+
+    const earned1 = await users[0].HiIQRewards.earned(users[0].address);
+    console.log('earned1', formatEther(earned1)); // 378,296 but it should be 14M/7 = 2M
+
+    // let's re stake
+    const newLockTime = block.timestamp + secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
+    await users[0].HIIQ.withdraw();
+    await users[0].IQERC20.approve(HIIQ.address, lockedAmount);
+    await users[0].HIIQ.create_lock(lockedAmount, newLockTime);
+    await users[0].HiIQRewards.checkpoint();
+
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 14]); // days to move forward
+    await ethers.provider.send('evm_mine', []);
+
+    const earned2 = await users[0].HiIQRewards.earned(users[0].address);
+    console.log('earned2', formatEther(earned2)); // it should be 2M + 14M (one per day since nobody else is staking)
+  });
+
   it('2 users, 1 checkpointer. 14 day lock for both users. 21 day simulation 1 day step', async () => {
     // return
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
