@@ -257,6 +257,7 @@ describe('HiIQRewards', () => {
     const blockNum = await ethers.provider.getBlockNumber();
     const block = await ethers.provider.getBlock(blockNum);
 
+    // await users[0].HiIQRewards.checkpoint(); // w checkpoint earned1 == 1,663,481 & earned2 == 1,946,490
     const earned1 = await users[0].HiIQRewards.earned(users[0].address);
     console.log('earned1', formatEther(earned1)); // 378,296 but it should be 14M/7 = 2M
 
@@ -271,7 +272,7 @@ describe('HiIQRewards', () => {
     await ethers.provider.send('evm_mine', []);
 
     const earned2 = await users[0].HiIQRewards.earned(users[0].address);
-    console.log('earned2', formatEther(earned2)); // it should be 2M + 14M (one per day since nobody else is staking)
+    console.log('earned2', formatEther(earned2)); // 3,290,265 but it should be 2M + 14M (one per day since nobody else is staking)
   });
 
   it('2 users, 1 checkpointer. 14 day lock for both users. 21 day simulation 1 day step', async () => {
