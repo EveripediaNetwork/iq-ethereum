@@ -207,6 +207,19 @@ describe('HiIQRewards', () => {
       expect(earned1.lt(BigNumber.from(parseEther(`${expectedEarned2}`)))).to.be
         .true;
     }
+
+    // let's re stake
+    const newLockTime = block.timestamp + secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
+    await user.HIIQ.withdraw();
+    await user.IQERC20.approve(HIIQ.address, lockedAmount);
+    await user.HIIQ.create_lock(lockedAmount, newLockTime);
+    await user.HiIQRewards.checkpoint();
+
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 14]); // days to move forward
+    await ethers.provider.send('evm_mine', []);
+
+    const earned1 = await user.HiIQRewards.earned(user.address);
+    console.log('earned1', formatEther(earned1)); // 135M !
   });
 
   it('2 users, 1 checkpointer. 14 day lock for both users. 21 day simulation 1 day step', async () => {
