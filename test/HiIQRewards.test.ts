@@ -314,7 +314,6 @@ describe(contractName, () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
     const user = users[0];
-    const user2 = users[1];
     const WEEKS_TO_STAKE = 2;
 
     const lockTime =
@@ -327,7 +326,6 @@ describe(contractName, () => {
     ); // 1M per day
 
     await deployer.IQERC20.mint(user.address, amount);
-    await deployer.IQERC20.mint(user2.address, amount);
     await deployer.IQERC20.mint(HiIQRewards.address, BigNumber.from(parseEther('10000000000'))); // 10,000M
 
     await user.IQERC20.approve(HIIQ.address, lockedAmount);
