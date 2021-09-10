@@ -110,28 +110,6 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
 
     /* ========== VIEWS ========== */
 
-    // Only positions with locked hiIQ can accrue yield. Otherwise, expired-locked hiIQ
-    // is de-facto rewards for IQ.
-    function eligibleCurrentHiIQ(address account)
-        public
-        view
-        returns (uint256 eligible_hiiq_bal, uint256 current_ending_timestamp)
-    {
-        uint256 curr_hiiq_bal = hiIQ.balanceOf(account);
-        IhiIQ.LockedBalance memory curr_locked_bal_pack = hiIQ.locked(account);
-
-        current_ending_timestamp = curr_locked_bal_pack.end;
-
-        // Only unexpired hiIQ should be eligible
-        if (userHiIQEndpointCheckpointed[account] != 0 && (block.timestamp >= userHiIQEndpointCheckpointed[account])) {
-            eligible_hiiq_bal = 0;
-        } else if (block.timestamp >= current_ending_timestamp) {
-            eligible_hiiq_bal = 0;
-        } else {
-            eligible_hiiq_bal = curr_hiiq_bal;
-        }
-    }
-
     function lastTimeYieldApplicable() public view returns (uint256) {
         return Math.min(block.timestamp, periodFinish);
     }
@@ -140,13 +118,6 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         if (totalHiIQSupplyStored == 0) {
             return yieldPerHiIQStored;
         } else {
-//            console.log("----");
-//            console.log("yieldPerHiIQStored: %s", yieldPerHiIQStored);
-//            console.log("lastTimeYieldApplicable(): %s", lastTimeYieldApplicable());
-//            console.log("lastUpdateTime: %s", lastUpdateTime);
-//            console.log("yieldRate: %s", yieldRate);
-//            console.log("totalHiIQSupplyStored: %s", totalHiIQSupplyStored);
-//            console.log("----");
             return (
                 yieldPerHiIQStored.add(
                     lastTimeYieldApplicable().sub(lastUpdateTime).mul(yieldRate).mul(1e18).div(totalHiIQSupplyStored)
@@ -159,9 +130,16 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         // Uninitialized users should not earn anything yet
         if (!userIsInitialized[account]) return 0;
 
-        // Get eligible hiIQ balances
-        (uint256 eligible_current_hiiq, uint256 current_ending_timestamp) = eligibleCurrentHiIQ(account);
         uint256 user_locking_ending_time = userHiIQEndpointCheckpointed[account];
+
+        // Get eligible hiIQ balances
+        uint256 eligible_current_hiiq;
+        if (block.timestamp >= user_locking_ending_time) {
+            eligible_current_hiiq = 0;
+        } else {
+            eligible_current_hiiq = hiIQ.balanceOf(account);
+        }
+
 
         // If your hiIQ is unlocked
         uint256 eligible_time_fraction = PRICE_PRECISION;
@@ -224,15 +202,12 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         // Calculate the earnings first
         _syncEarned(account);
 
-        // Get the old and the new hiIQ balances
-        uint256 old_hiiq_balance = userHiIQCheckpointed[account];
-        (uint256 new_hiiq_balance, uint256 current_ending_timestamp) = eligibleCurrentHiIQ(account);
-
+        IhiIQ.LockedBalance memory curr_locked_bal_pack = hiIQ.locked(account);
         // Update the user's stored hiIQ balance
-        userHiIQCheckpointed[account] = new_hiiq_balance;
+        userHiIQCheckpointed[account] = hiIQ.balanceOf(account);
 
         // Update the user's stored ending timestamp
-        userHiIQEndpointCheckpointed[account] = current_ending_timestamp;
+        userHiIQEndpointCheckpointed[account] = curr_locked_bal_pack.end;
 
         // Update the user's stored checkpoint timestamp
         userHiIQLastCheckpointed[account] = block.timestamp;
