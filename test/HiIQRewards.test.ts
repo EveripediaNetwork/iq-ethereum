@@ -12,7 +12,7 @@ import {parseEther, formatEther} from 'ethers/lib/utils';
 
 const secondsInADay = 24 * 60 * 60;
 
-const contractName = 'HiIQRewardsv3'; // HiIQRewards HiIQRewardsv4 HiIQRewardsv3
+const contractName = 'HiIQRewards'; // HiIQRewards HiIQRewardsv4 HiIQRewardsv3
 const setup = deployments.createFixture(async () => {
   await deployments.fixture('HIIQ');
   const {deployer} = await getNamedAccounts();
@@ -209,19 +209,6 @@ describe(contractName, () => {
       expect(earned1.lt(BigNumber.from(parseEther(`${expectedEarned2}`)))).to.be
         .true;
     }
-
-    // let's re stake
-    const newLockTime = block.timestamp + secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
-    await user.HIIQ.withdraw();
-    await user.IQERC20.approve(HIIQ.address, lockedAmount);
-    await user.HIIQ.create_lock(lockedAmount, newLockTime);
-    await user.HiIQRewards.checkpoint();
-
-    await ethers.provider.send('evm_increaseTime', [secondsInADay * 14]); // days to move forward
-    await ethers.provider.send('evm_mine', []);
-
-    const earned1 = await user.HiIQRewards.earned(user.address);
-    console.log('earned1', formatEther(earned1)); // 135M !
   });
 
   it('Re stake with multiple users', async () => {

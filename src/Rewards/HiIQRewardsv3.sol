@@ -124,7 +124,7 @@ contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
 
     // Only positions with locked veFXS can accrue yield. Otherwise, expired-locked veFXS
     // is de-facto rewards for FXS.
-    function eligibleCurrentVeFXS(address account) public view returns (uint256) {
+    function eligibleCurrentHiIQ(address account) public view returns (uint256) {
         uint256 curr_vefxs_bal = veFXS.balanceOf(account);
         IhiIQ.LockedBalance memory curr_locked_bal_pack = veFXS.locked(account);
 
@@ -165,7 +165,7 @@ contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
 
         // Get the old and the new veFXS balances
         uint256 old_vefxs_balance = userVeFXSCheckpointed[account];
-        uint256 new_vefxs_balance = eligibleCurrentVeFXS(account);
+        uint256 new_vefxs_balance = eligibleCurrentHiIQ(account);
 
         // Analogous to midpoint Riemann sum
         uint256 midpoint_vefxs_balance = ((new_vefxs_balance).add(old_vefxs_balance)).div(2);
@@ -193,7 +193,7 @@ contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
 
         // Get the old and the new veFXS balances
         uint256 old_vefxs_balance = userVeFXSCheckpointed[account];
-        uint256 new_vefxs_balance = eligibleCurrentVeFXS(account);
+        uint256 new_vefxs_balance = eligibleCurrentHiIQ(account);
 
         // Update the user's stored veFXS balance
         userVeFXSCheckpointed[account] = new_vefxs_balance;

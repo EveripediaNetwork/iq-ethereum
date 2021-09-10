@@ -165,20 +165,21 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         if (!userIsInitialized[account]) return 0;
 
         // Get eligible hiIQ balances
-        (uint256 eligible_current_hiiq, uint256 ending_timestamp) = eligibleCurrentHiIQ(account);
+        (uint256 eligible_current_hiiq, uint256 current_ending_timestamp) = eligibleCurrentHiIQ(account);
+        uint256 user_locking_ending_time = userHiIQEndpointCheckpointed[account];
 
         // If your hiIQ is unlocked
         uint256 eligible_time_fraction = PRICE_PRECISION;
         if (eligible_current_hiiq == 0) {
             // And you already claimed after expiration
-            if (lastRewardClaimTime[account] >= userHiIQEndpointCheckpointed[account]) {
+            if (lastRewardClaimTime[account] >= user_locking_ending_time) {
                 // You get NOTHING. You LOSE. Good DAY ser!
                 return 0;
-            } else if (userHiIQLastCheckpointed[account] > userHiIQEndpointCheckpointed[account]) {
+            } else if (userHiIQLastCheckpointed[account] > user_locking_ending_time) {
                 eligible_time_fraction = 0;
             } else {
                 // You haven't claimed yet
-                uint256 eligible_time = (userHiIQEndpointCheckpointed[account]).sub(userHiIQLastCheckpointed[account]);
+                uint256 eligible_time = user_locking_ending_time.sub(userHiIQLastCheckpointed[account]);
                 uint256 total_time = (block.timestamp).sub(userHiIQLastCheckpointed[account]);
                 eligible_time_fraction = Math.min(PRICE_PRECISION, PRICE_PRECISION.mul(eligible_time).div(total_time));
             }
@@ -191,29 +192,28 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
             uint256 old_hiiq_balance = userHiIQCheckpointed[account];
             if (eligible_current_hiiq > old_hiiq_balance) {
                 hiiq_balance_to_use = old_hiiq_balance;
-            } else if (ending_timestamp < block.timestamp) {
+            } else if (user_locking_ending_time < block.timestamp) {
                 // it should not go to zero, use ending point hiIQ and prev checkpoint amount
-                hiiq_balance_to_use = ((hiIQ.balanceOf(account, ending_timestamp)).add(old_hiiq_balance)).div(2);
+                uint256 balanceOf = 0;
+                try hiIQ.balanceOf(account, user_locking_ending_time) returns (uint256 balance) {
+                   balanceOf = balance;
+                } catch(bytes memory _err) {
+                }
+                hiiq_balance_to_use = ((balanceOf).add(old_hiiq_balance)).div(2);
             } else {
                 hiiq_balance_to_use = ((eligible_current_hiiq).add(old_hiiq_balance)).div(2);
             }
         }
 
-//        console.log("--------");
-//        console.log("hiiq_balance_to_use: %s", hiiq_balance_to_use);
-//        console.log("eligible_time_fraction: %s", eligible_time_fraction);
-//        console.log("eligible_current_hiiq: %s", eligible_current_hiiq);
-//        console.log("yieldPerHiIQ(): %s", yieldPerHiIQ());
-//        console.log("userYieldPerTokenPaid[account]: %s", userYieldPerTokenPaid[account]);
-//        console.log("--------");
+        return calculateEarn(account, hiiq_balance_to_use, eligible_time_fraction);
+    }
 
-        return (
-            hiiq_balance_to_use
-                .mul(yieldPerHiIQ().sub(userYieldPerTokenPaid[account]))
-                .mul(eligible_time_fraction)
-                .div(1e18 * PRICE_PRECISION)
-                .add(yields[account])
-        );
+    function calculateEarn(address account, uint256 hiiq_balance_to_use, uint256 eligible_time_fraction) internal view returns (uint256) {
+        return hiiq_balance_to_use
+        .mul(yieldPerHiIQ().sub(userYieldPerTokenPaid[account]))
+        .mul(eligible_time_fraction)
+        .div(1e18 * PRICE_PRECISION)
+        .add(yields[account]);
     }
 
     function getYieldForDuration() external view returns (uint256) {
