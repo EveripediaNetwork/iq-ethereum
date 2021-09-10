@@ -116,9 +116,9 @@ contract HiIQRewardsv4 is Ownable, ReentrancyGuard {
     // Only positions with locked hiIQ can accrue yield. Otherwise, expired-locked hiIQ
     // is de-facto rewards for IQ.
     function eligibleCurrentHiIQ(address account)
-    public
-    view
-    returns (uint256 eligible_hiiq_bal, uint256 current_ending_timestamp)
+        public
+        view
+        returns (uint256 eligible_hiiq_bal, uint256 current_ending_timestamp)
     {
         uint256 curr_hiiq_bal = hiIQ.balanceOf(account);
         IhiIQ.LockedBalance memory curr_locked_bal_pack = hiIQ.locked(account);
@@ -144,9 +144,9 @@ contract HiIQRewardsv4 is Ownable, ReentrancyGuard {
             return yieldPerHiIQStored;
         } else {
             return (
-            yieldPerHiIQStored.add(
-                lastTimeYieldApplicable().sub(lastUpdateTime).mul(yieldRate).mul(1e18).div(totalHiIQSupplyStored)
-            )
+                yieldPerHiIQStored.add(
+                    lastTimeYieldApplicable().sub(lastUpdateTime).mul(yieldRate).mul(1e18).div(totalHiIQSupplyStored)
+                )
             );
         }
     }
@@ -165,9 +165,7 @@ contract HiIQRewardsv4 is Ownable, ReentrancyGuard {
             if (lastRewardClaimTime[account] >= ending_timestamp) {
                 // You get NOTHING. You LOSE. Good DAY ser!
                 return 0;
-            }
-            // You haven't claimed yet
-            else {
+            } else {
                 uint256 eligible_time = (ending_timestamp).sub(lastRewardClaimTime[account]);
                 uint256 total_time = (block.timestamp).sub(lastRewardClaimTime[account]);
                 eligible_time_fraction = PRICE_PRECISION.mul(eligible_time).div(total_time);
@@ -181,18 +179,17 @@ contract HiIQRewardsv4 is Ownable, ReentrancyGuard {
             uint256 old_hiiq_balance = userHiIQCheckpointed[account];
             if (eligible_current_hiiq > old_hiiq_balance) {
                 hiiq_balance_to_use = old_hiiq_balance;
-            }
-            else {
+            } else {
                 hiiq_balance_to_use = ((eligible_current_hiiq).add(old_hiiq_balance)).div(2);
             }
         }
 
         return (
-        hiiq_balance_to_use
-        .mul(yieldPerHiIQ().sub(userYieldPerTokenPaid[account]))
-        .mul(eligible_time_fraction)
-        .div(1e18 * PRICE_PRECISION)
-        .add(yields[account])
+            hiiq_balance_to_use
+                .mul(yieldPerHiIQ().sub(userYieldPerTokenPaid[account]))
+                .mul(eligible_time_fraction)
+                .div(1e18 * PRICE_PRECISION)
+                .add(yields[account])
         );
     }
 
@@ -254,11 +251,11 @@ contract HiIQRewardsv4 is Ownable, ReentrancyGuard {
     }
 
     function getYield()
-    external
-    nonReentrant
-    notYieldCollectionPaused
-    checkpointUser(msg.sender)
-    returns (uint256 yield0)
+        external
+        nonReentrant
+        notYieldCollectionPaused
+        checkpointUser(msg.sender)
+        returns (uint256 yield0)
     {
         require(greylist[msg.sender] == false, "Address has been greylisted");
 

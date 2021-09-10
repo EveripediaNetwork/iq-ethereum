@@ -27,6 +27,7 @@ pragma experimental ABIEncoderV2;
 // Originally inspired by Synthetix.io, but heavily modified by the Frax team (hiIQ portion)
 // https://raw.githubusercontent.com/Synthetixio/synthetix/develop/contracts/StakingYield.sol
 
+import "hardhat/console.sol";
 import "./TransferHelper.sol";
 import "../Lock/IhiIQ.sol";
 import "@openzeppelin/contracts/math/Math.sol";
@@ -163,16 +164,16 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         uint256 eligible_time_fraction = PRICE_PRECISION;
         if (eligible_current_hiiq == 0) {
             // And you already claimed after expiration
-            if (lastRewardClaimTime[account] >= ending_timestamp) {
+            if (lastRewardClaimTime[account] >= userHiIQEndpointCheckpointed[account]) {
                 // You get NOTHING. You LOSE. Good DAY ser!
                 return 0;
-            } else if (userHiIQLastCheckpointed[account] > ending_timestamp) {
+            } else if (userHiIQLastCheckpointed[account] > userHiIQEndpointCheckpointed[account]) {
                 eligible_time_fraction = 0;
             } else {
                 // You haven't claimed yet
-                uint256 eligible_time = (ending_timestamp).sub(userHiIQLastCheckpointed[account]);
+                uint256 eligible_time = (userHiIQEndpointCheckpointed[account]).sub(userHiIQLastCheckpointed[account]);
                 uint256 total_time = (block.timestamp).sub(userHiIQLastCheckpointed[account]);
-                eligible_time_fraction = PRICE_PRECISION.mul(eligible_time).div(total_time);
+                eligible_time_fraction = Math.min(PRICE_PRECISION, PRICE_PRECISION.mul(eligible_time).div(total_time));
             }
         }
 
@@ -288,7 +289,8 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         // This keeps the yield rate in the right range, preventing overflows due to
         // very high values of yieldRate in the earned and yieldPerToken functions;
         // Yield + leftover must be less than 2^256 / 10^18 to avoid overflow.
-        uint256 num_periods_elapsed = uint256(block.timestamp.sub(periodFinish)) / yieldDuration; // Floor division to the nearest period
+        uint256 num_periods_elapsed = uint256(block.timestamp.sub(periodFinish)) / yieldDuration;
+        // Floor division to the nearest period
         uint256 balance0 = emittedToken.balanceOf(address(this));
         require(
             yieldRate.mul(yieldDuration).mul(num_periods_elapsed + 1) <= balance0,

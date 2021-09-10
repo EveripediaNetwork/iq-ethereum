@@ -12,7 +12,7 @@ import {parseEther, formatEther} from 'ethers/lib/utils';
 
 const secondsInADay = 24 * 60 * 60;
 
-const contractName = 'HiIQRewards'; // HiIQRewardsv4 veFXSYieldDistributorV2
+const contractName = 'HiIQRewards'; // HiIQRewards HiIQRewardsv4 HiIQRewardsv2
 const setup = deployments.createFixture(async () => {
   await deployments.fixture('HIIQ');
   const {deployer} = await getNamedAccounts();
@@ -38,7 +38,7 @@ const setup = deployments.createFixture(async () => {
   };
 });
 
-describe('HiIQRewards', () => {
+describe(contractName, () => {
   it('Only owner can call restrictive functions', async () => {
     const {users, deployer} = await setup();
     const temp = users[0];
@@ -120,7 +120,8 @@ describe('HiIQRewards', () => {
     const WEEKS_TO_STAKE = 2;
 
     const lockTime =
-      Math.round(new Date().getTime() / 1000) + secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
+      Math.round(new Date().getTime() / 1000) +
+      secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
     const amount = BigNumber.from(parseEther('60000000')); // 60M
     const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
     const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(
@@ -166,8 +167,8 @@ describe('HiIQRewards', () => {
 
       // expected amount tops after lockTime
       if (weeksTest <= WEEKS_TO_STAKE) {
-        expectedEarned1 = 6500000 * weeksTest;
-        expectedEarned2 = 7500000 * weeksTest;
+        expectedEarned1 = 6000000 * weeksTest;
+        expectedEarned2 = 7000000 * weeksTest;
       }
 
       console.log('block.timestamp: ', block.timestamp);
@@ -229,7 +230,8 @@ describe('HiIQRewards', () => {
     const AMOUNT_USERS = 7;
 
     const lockTime =
-      Math.round(new Date().getTime() / 1000) + secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
+      Math.round(new Date().getTime() / 1000) +
+      secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
     const amount = BigNumber.from(parseEther('60000000')); // 60M
     const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
     const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(
@@ -238,7 +240,7 @@ describe('HiIQRewards', () => {
 
     await deployer.IQERC20.mint(HiIQRewards.address, amount);
 
-    for(let i=0; i <= AMOUNT_USERS; i++) {
+    for (let i = 0; i <= AMOUNT_USERS; i++) {
       await deployer.IQERC20.mint(users[i].address, amount);
       await users[i].IQERC20.approve(HIIQ.address, lockedAmount);
       await users[i].HIIQ.create_lock(lockedAmount, lockTime);
@@ -248,7 +250,7 @@ describe('HiIQRewards', () => {
     await deployer.HiIQRewards.initializeDefault();
     await deployer.HiIQRewards.setYieldRate(yieldPerSecond, true);
 
-    for(let i=0; i <= AMOUNT_USERS; i++) {
+    for (let i = 0; i <= AMOUNT_USERS; i++) {
       await users[i].HiIQRewards.checkpoint();
     }
 
@@ -276,15 +278,15 @@ describe('HiIQRewards', () => {
     console.log('earned2', formatEther(earned2)); // 3,290,265 but it should be 2M + 14M (one per day since nobody else is staking)
   });
 
-
   it('Re stake with multiple users 2', async () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
-    const WEEKS_TO_STAKE = 4;
+    const WEEKS_TO_STAKE = 52;
     const AMOUNT_USERS = 7;
 
     const lockTime =
-      Math.round(new Date().getTime() / 1000) + secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
-    const amount = BigNumber.from(parseEther('360000000')); // 360M
+      Math.round(new Date().getTime() / 1000) +
+      secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
+    const amount = BigNumber.from(parseEther('365000000'));
     const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
     const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(
       secondsInADay
@@ -294,10 +296,13 @@ describe('HiIQRewards', () => {
 
     await deployer.IQERC20.mint(users[0].address, amount);
     await users[0].IQERC20.approve(HIIQ.address, lockedAmount);
-    await users[0].HIIQ.create_lock(lockedAmount, Math.round(new Date().getTime() / 1000) + secondsInADay * 7 * 2);
+    await users[0].HIIQ.create_lock(
+      lockedAmount,
+      Math.round(new Date().getTime() / 1000) + secondsInADay * 7
+    );
     await users[0].HIIQ.checkpoint();
 
-    for(let i=1; i <= AMOUNT_USERS; i++) {
+    for (let i = 1; i <= AMOUNT_USERS; i++) {
       await deployer.IQERC20.mint(users[i].address, amount);
       await users[i].IQERC20.approve(HIIQ.address, lockedAmount);
       await users[i].HIIQ.create_lock(lockedAmount, lockTime);
@@ -307,7 +312,7 @@ describe('HiIQRewards', () => {
     await deployer.HiIQRewards.initializeDefault();
     await deployer.HiIQRewards.setYieldRate(yieldPerSecond, true);
 
-    for(let i=1; i <= AMOUNT_USERS; i++) {
+    for (let i = 1; i <= AMOUNT_USERS; i++) {
       await users[i].HiIQRewards.checkpoint();
     }
     await users[0].HiIQRewards.checkpoint();
@@ -319,14 +324,14 @@ describe('HiIQRewards', () => {
     const earned1 = await users[0].HiIQRewards.earned(users[0].address);
     console.log('earned1', formatEther(earned1)); // 780,000 but it should be 14M/7 = 2M
 
-    await ethers.provider.send('evm_increaseTime', [secondsInADay * 13]); // days to move forward
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 300]); // days to move forward
     await ethers.provider.send('evm_mine', []);
 
     const blockNum = await ethers.provider.getBlockNumber();
     const block = await ethers.provider.getBlock(blockNum);
 
     // let's re stake
-    const newLockTime = block.timestamp + secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
+    const newLockTime = block.timestamp + secondsInADay * 7;
     await users[0].HIIQ.withdraw();
     await users[0].IQERC20.approve(HIIQ.address, lockedAmount);
     await users[0].HIIQ.create_lock(lockedAmount, newLockTime);
