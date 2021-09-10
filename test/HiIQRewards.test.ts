@@ -12,19 +12,20 @@ import {parseEther, formatEther} from 'ethers/lib/utils';
 
 const secondsInADay = 24 * 60 * 60;
 
+const contractName = 'HiIQRewards'; // HiIQRewardsv4 veFXSYieldDistributorV2
 const setup = deployments.createFixture(async () => {
   await deployments.fixture('HIIQ');
   const {deployer} = await getNamedAccounts();
   const HIIQ = <HIIQ>await ethers.getContract('HIIQ');
   const IQERC20 = <IQERC20>await ethers.getContract('IQERC20');
-  await deployments.deploy('HiIQRewards', {
+  await deployments.deploy(contractName, {
     from: deployer,
     args: [IQERC20.address, HIIQ.address],
     log: true,
   });
 
   const contracts = {
-    HiIQRewards: <HiIQRewards>await ethers.getContract('HiIQRewards'),
+    HiIQRewards: <HiIQRewards>await ethers.getContract(contractName),
     HIIQ,
     IQERC20,
   };
