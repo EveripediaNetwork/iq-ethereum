@@ -145,6 +145,13 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         if (totalHiIQSupplyStored == 0) {
             return yieldPerHiIQStored;
         } else {
+//            console.log("----");
+//            console.log("yieldPerHiIQStored: %s", yieldPerHiIQStored);
+//            console.log("lastTimeYieldApplicable(): %s", lastTimeYieldApplicable());
+//            console.log("lastUpdateTime: %s", lastUpdateTime);
+//            console.log("yieldRate: %s", yieldRate);
+//            console.log("totalHiIQSupplyStored: %s", totalHiIQSupplyStored);
+//            console.log("----");
             return (
                 yieldPerHiIQStored.add(
                     lastTimeYieldApplicable().sub(lastUpdateTime).mul(yieldRate).mul(1e18).div(totalHiIQSupplyStored)
@@ -191,6 +198,14 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
                 hiiq_balance_to_use = ((eligible_current_hiiq).add(old_hiiq_balance)).div(2);
             }
         }
+
+//        console.log("--------");
+//        console.log("hiiq_balance_to_use: %s", hiiq_balance_to_use);
+//        console.log("eligible_time_fraction: %s", eligible_time_fraction);
+//        console.log("eligible_current_hiiq: %s", eligible_current_hiiq);
+//        console.log("yieldPerHiIQ(): %s", yieldPerHiIQ());
+//        console.log("userYieldPerTokenPaid[account]: %s", userYieldPerTokenPaid[account]);
+//        console.log("--------");
 
         return (
             hiiq_balance_to_use
@@ -246,6 +261,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     function _syncEarned(address account) internal {
         if (account != address(0)) {
             uint256 earned0 = earned(account);
+            // console.log("earned0: %s", earned0);
             yields[account] = earned0;
             userYieldPerTokenPaid[account] = yieldPerHiIQStored;
         }

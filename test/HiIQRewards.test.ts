@@ -12,7 +12,7 @@ import {parseEther, formatEther} from 'ethers/lib/utils';
 
 const secondsInADay = 24 * 60 * 60;
 
-const contractName = 'HiIQRewards'; // HiIQRewards HiIQRewardsv4 HiIQRewardsv2
+const contractName = 'HiIQRewardsv3'; // HiIQRewards HiIQRewardsv4 HiIQRewardsv3
 const setup = deployments.createFixture(async () => {
   await deployments.fixture('HIIQ');
   const {deployer} = await getNamedAccounts();
@@ -259,10 +259,12 @@ describe(contractName, () => {
 
     const blockNum = await ethers.provider.getBlockNumber();
     const block = await ethers.provider.getBlock(blockNum);
-
-    // await users[0].HiIQRewards.checkpoint(); // w checkpoint earned1 == 1,663,481 & earned2 == 1,946,490
+    console.log('checkpointing...');
+    await users[1].HiIQRewards.checkpoint(); // w checkpoint earned1 == 1,663,481 & earned2 == 1,946,490
+    console.log('end checkpointing...');
     const earned1 = await users[0].HiIQRewards.earned(users[0].address);
     console.log('earned1', formatEther(earned1)); // 378,296 but it should be 14M/7 = 2M
+    await users[0].HiIQRewards.getYield();
 
     // let's re stake
     const newLockTime = block.timestamp + secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
@@ -274,11 +276,12 @@ describe(contractName, () => {
     await ethers.provider.send('evm_increaseTime', [secondsInADay * 14]); // days to move forward
     await ethers.provider.send('evm_mine', []);
 
+    await users[0].HiIQRewards.checkpoint();
     const earned2 = await users[0].HiIQRewards.earned(users[0].address);
     console.log('earned2', formatEther(earned2)); // 3,290,265 but it should be 2M + 14M (one per day since nobody else is staking)
   });
 
-  it('Re stake with multiple users 2', async () => {
+  it('Re stake with staked multiple users', async () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
     const WEEKS_TO_STAKE = 52;
     const AMOUNT_USERS = 7;
@@ -324,6 +327,8 @@ describe(contractName, () => {
     const earned1 = await users[0].HiIQRewards.earned(users[0].address);
     console.log('earned1', formatEther(earned1)); // 780,000 but it should be 14M/7 = 2M
 
+    await users[0].HIIQ.withdraw();
+
     await ethers.provider.send('evm_increaseTime', [secondsInADay * 300]); // days to move forward
     await ethers.provider.send('evm_mine', []);
 
@@ -332,7 +337,6 @@ describe(contractName, () => {
 
     // let's re stake
     const newLockTime = block.timestamp + secondsInADay * 7;
-    await users[0].HIIQ.withdraw();
     await users[0].IQERC20.approve(HIIQ.address, lockedAmount);
     await users[0].HIIQ.create_lock(lockedAmount, newLockTime);
     await users[0].HiIQRewards.checkpoint();

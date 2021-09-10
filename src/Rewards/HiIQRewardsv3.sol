@@ -36,7 +36,7 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract HiIQRewardsv2 is Ownable, ReentrancyGuard {
+contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
@@ -47,7 +47,7 @@ contract HiIQRewardsv2 is Ownable, ReentrancyGuard {
     ERC20 public emittedToken;
 
     // Addresses
-    address emitted_token_address;
+    address public emitted_token_address;
 
     // Admin addresses
     address public timelock_address;
@@ -67,8 +67,9 @@ contract HiIQRewardsv2 is Ownable, ReentrancyGuard {
     mapping(address => uint256) public yields;
 
     // veFXS tracking
-    // uint256 public totalVeFXSParticipating = 0;
+    uint256 public totalVeFXSParticipating = 0;
     uint256 public totalVeFXSSupplyStored = 0;
+    mapping(address => bool) public userIsInitialized;
     mapping(address => uint256) public userVeFXSCheckpointed;
 
     // Greylists
@@ -77,10 +78,15 @@ contract HiIQRewardsv2 is Ownable, ReentrancyGuard {
     // Admin booleans for emergencies
     bool public yieldCollectionPaused = false; // For emergencies
 
+    struct LockedBalance {
+        int128 amount;
+        uint256 end;
+    }
+
     /* ========== MODIFIERS ========== */
 
     modifier onlyByOwnGov() {
-        require(msg.sender == owner() || msg.sender == timelock_address, "Not owner or timelock");
+        require( msg.sender == owner() || msg.sender == timelock_address, "Not owner or timelock");
         _;
     }
 
@@ -96,7 +102,10 @@ contract HiIQRewardsv2 is Ownable, ReentrancyGuard {
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(address _emittedToken, address _veFXS_address) {
+    constructor (
+        address _emittedToken,
+        address _veFXS_address
+    ) {
         emitted_token_address = _emittedToken;
         emittedToken = ERC20(_emittedToken);
 
@@ -105,6 +114,27 @@ contract HiIQRewardsv2 is Ownable, ReentrancyGuard {
 
         // 1 FXS a day at initialization
         yieldRate = (uint256(365e18)).div(365 * 86400);
+    }
+
+    /* ========== VIEWS ========== */
+
+    function fractionParticipating() external view returns (uint256) {
+        return totalVeFXSParticipating.mul(PRICE_PRECISION).div(totalVeFXSSupplyStored);
+    }
+
+    // Only positions with locked veFXS can accrue yield. Otherwise, expired-locked veFXS
+    // is de-facto rewards for FXS.
+    function eligibleCurrentVeFXS(address account) public view returns (uint256) {
+        uint256 curr_vefxs_bal = veFXS.balanceOf(account);
+        IhiIQ.LockedBalance memory curr_locked_bal_pack = veFXS.locked(account);
+
+        // Only unexpired veFXS should be eligible
+        if (int256(curr_locked_bal_pack.amount) == int256(curr_vefxs_bal)) {
+            return 0;
+        }
+        else {
+            return curr_vefxs_bal;
+        }
     }
 
     function lastTimeYieldApplicable() public view returns (uint256) {
@@ -116,24 +146,36 @@ contract HiIQRewardsv2 is Ownable, ReentrancyGuard {
             return yieldPerVeFXSStored;
         } else {
             return (
-                yieldPerVeFXSStored.add(
-                    lastTimeYieldApplicable().sub(lastUpdateTime).mul(yieldRate).mul(1e18).div(totalVeFXSSupplyStored)
-                )
+            yieldPerVeFXSStored.add(
+                lastTimeYieldApplicable()
+                .sub(lastUpdateTime)
+                .mul(yieldRate)
+                .mul(1e18)
+                .div(totalVeFXSSupplyStored)
+            )
             );
         }
     }
 
     function earned(address account) public view returns (uint256) {
+        // Uninitialized users should not earn anything yet
+        if (!userIsInitialized[account]) return 0;
+
         uint256 yield0 = yieldPerVeFXS();
 
         // Get the old and the new veFXS balances
         uint256 old_vefxs_balance = userVeFXSCheckpointed[account];
-        uint256 new_vefxs_balance = veFXS.balanceOf(account);
+        uint256 new_vefxs_balance = eligibleCurrentVeFXS(account);
 
         // Analogous to midpoint Riemann sum
         uint256 midpoint_vefxs_balance = ((new_vefxs_balance).add(old_vefxs_balance)).div(2);
 
-        return (midpoint_vefxs_balance.mul(yield0.sub(userYieldPerTokenPaid[account])).div(1e18).add(yields[account]));
+        return (
+        midpoint_vefxs_balance
+        .mul(yield0.sub(userYieldPerTokenPaid[account]))
+        .div(1e18)
+        .add(yields[account])
+        );
     }
 
     function getYieldForDuration() external view returns (uint256) {
@@ -149,8 +191,24 @@ contract HiIQRewardsv2 is Ownable, ReentrancyGuard {
         // Calculate the earnings first
         _syncEarned(account);
 
+        // Get the old and the new veFXS balances
+        uint256 old_vefxs_balance = userVeFXSCheckpointed[account];
+        uint256 new_vefxs_balance = eligibleCurrentVeFXS(account);
+
         // Update the user's stored veFXS balance
-        userVeFXSCheckpointed[account] = veFXS.balanceOf(account);
+        userVeFXSCheckpointed[account] = new_vefxs_balance;
+
+        // Update the total amount participating
+        if (new_vefxs_balance >= old_vefxs_balance) {
+            uint256 weight_diff = new_vefxs_balance.sub(old_vefxs_balance);
+            totalVeFXSParticipating = totalVeFXSParticipating.add(weight_diff);
+        } else {
+            uint256 weight_diff = old_vefxs_balance.sub(new_vefxs_balance);
+            totalVeFXSParticipating = totalVeFXSParticipating.sub(weight_diff);
+        }
+
+        // Mark the user as initialized
+        if (!userIsInitialized[account]) userIsInitialized[account] = true;
     }
 
     function _syncEarned(address account) internal {
@@ -166,19 +224,17 @@ contract HiIQRewardsv2 is Ownable, ReentrancyGuard {
         _checkpointUser(msg.sender);
     }
 
-    function getYield()
-        external
-        nonReentrant
-        notYieldCollectionPaused
-        checkpointUser(msg.sender)
-        returns (uint256 yield0)
-    {
+    function getYield() external nonReentrant notYieldCollectionPaused checkpointUser(msg.sender) returns (uint256 yield0) {
         require(greylist[msg.sender] == false, "Address has been greylisted");
 
         yield0 = yields[msg.sender];
         if (yield0 > 0) {
             yields[msg.sender] = 0;
-            TransferHelper.safeTransfer(emitted_token_address, msg.sender, yield0);
+            TransferHelper.safeTransfer(
+                emitted_token_address,
+                msg.sender,
+                yield0
+            );
             emit YieldCollected(msg.sender, yield0, emitted_token_address);
         }
     }
@@ -195,11 +251,14 @@ contract HiIQRewardsv2 is Ownable, ReentrancyGuard {
         uint256 num_periods_elapsed = uint256(block.timestamp.sub(periodFinish)) / yieldDuration; // Floor division to the nearest period
         uint256 balance0 = emittedToken.balanceOf(address(this));
         require(
-            yieldRate.mul(yieldDuration).mul(num_periods_elapsed + 1) <= balance0,
+            yieldRate.mul(yieldDuration).mul(num_periods_elapsed + 1) <=
+            balance0,
             "Not enough emittedToken available for yield distribution!"
         );
 
-        periodFinish = periodFinish.add((num_periods_elapsed.add(1)).mul(yieldDuration));
+        periodFinish = periodFinish.add(
+            (num_periods_elapsed.add(1)).mul(yieldDuration)
+        );
 
         uint256 yield0 = yieldPerVeFXS();
         yieldPerVeFXSStored = yield0;
@@ -231,10 +290,7 @@ contract HiIQRewardsv2 is Ownable, ReentrancyGuard {
     }
 
     function setYieldDuration(uint256 _yieldDuration) external onlyByOwnGov {
-        require(
-            periodFinish == 0 || block.timestamp > periodFinish,
-            "Previous yield period must be complete before changing the duration for the new period"
-        );
+        require( periodFinish == 0 || block.timestamp > periodFinish, "Previous yield period must be complete before changing the duration for the new period");
         yieldDuration = _yieldDuration;
         emit YieldDurationUpdated(yieldDuration);
     }
