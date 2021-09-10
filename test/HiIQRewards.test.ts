@@ -157,10 +157,6 @@ describe(contractName, () => {
         user1LockEnd = BigNumber.from(block.timestamp);
       }
       const user1IQBal = await user.IQERC20.balanceOf(user.address);
-      const [
-        user1HiIQRewardsBal,
-        user1endLockTime,
-      ] = await user.HiIQRewards.eligibleCurrentHiIQ(user.address);
       const earned1 = await user.HiIQRewards.earned(user.address);
 
       await user.HiIQRewards.checkpoint();
@@ -180,7 +176,6 @@ describe(contractName, () => {
       );
       console.log('BlockNum: ', blockNum);
       console.log('user1IQBal', formatEther(user1IQBal));
-      console.log('user1HiIQRewardsBal', formatEther(user1HiIQRewardsBal));
       console.log(
         'HIIQ.totalSupply',
         formatEther(await user.HIIQ.totalSupplyAt(blockNum))
@@ -382,10 +377,6 @@ describe(contractName, () => {
         user1LockEnd = BigNumber.from(block.timestamp);
       }
       const user1IQBal = await user.IQERC20.balanceOf(user.address);
-      const [
-        user1HiIQRewardsBal,
-        user1endLockTime,
-      ] = await user.HiIQRewards.eligibleCurrentHiIQ(user.address);
       const earned1 = await user.HiIQRewards.earned(user.address);
 
       // don't checkpoint user1 but have user2 updating global states
@@ -413,7 +404,6 @@ describe(contractName, () => {
       );
       console.log('BlockNum: ', blockNum);
       console.log('user1IQBal', formatEther(user1IQBal));
-      console.log('user1HiIQRewardsBal', formatEther(user1HiIQRewardsBal));
       console.log(
         'HIIQ.totalSupply',
         formatEther(await user.HIIQ.totalSupplyAt(blockNum))
