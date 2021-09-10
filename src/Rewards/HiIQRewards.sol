@@ -65,7 +65,6 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     mapping(address => uint256) public yields;
 
     // hiIQ tracking
-    uint256 public totalHiIQParticipating = 0;
     uint256 public totalHiIQSupplyStored = 0;
     mapping(address => bool) public userIsInitialized;
     mapping(address => uint256) public userHiIQCheckpointed;
@@ -110,10 +109,6 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     }
 
     /* ========== VIEWS ========== */
-
-    function fractionParticipating() external view returns (uint256) {
-        return totalHiIQParticipating.mul(PRICE_PRECISION).div(totalHiIQSupplyStored);
-    }
 
     // Only positions with locked hiIQ can accrue yield. Otherwise, expired-locked hiIQ
     // is de-facto rewards for IQ.
@@ -241,15 +236,6 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
 
         // Update the user's stored checkpoint timestamp
         userHiIQLastCheckpointed[account] = block.timestamp;
-
-        // Update the total amount participating
-        if (new_hiiq_balance >= old_hiiq_balance) {
-            uint256 weight_diff = new_hiiq_balance.sub(old_hiiq_balance);
-            totalHiIQParticipating = totalHiIQParticipating.add(weight_diff);
-        } else {
-            uint256 weight_diff = old_hiiq_balance.sub(new_hiiq_balance);
-            totalHiIQParticipating = totalHiIQParticipating.sub(weight_diff);
-        }
 
         // Mark the user as initialized
         if (!userIsInitialized[account]) {
