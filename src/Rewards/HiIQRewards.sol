@@ -130,6 +130,8 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         // Uninitialized users should not earn anything yet
         if (!userIsInitialized[account]) return 0;
 
+        uint256 yieldPerHiIQToUse = yieldPerHiIQ().sub(userYieldPerTokenPaid[account]);
+
         uint256 user_locking_ending_time = userHiIQEndpointCheckpointed[account];
 
         // Get eligible hiIQ balances
@@ -157,6 +159,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
                 eligible_time_fraction = Math.min(PRICE_PRECISION, PRICE_PRECISION.mul(eligible_time).div(total_time));
             }
         }
+        yieldPerHiIQToUse = yieldPerHiIQToUse.mul(eligible_time_fraction);
 
         // If the amount of hiIQ increased, only pay off based on the old balance
         // Otherwise, take the midpoint
@@ -178,13 +181,12 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
             }
         }
 
-        return calculateEarn(account, hiiq_balance_to_use, eligible_time_fraction);
+        return calculateEarn(account, hiiq_balance_to_use, yieldPerHiIQToUse);
     }
 
-    function calculateEarn(address account, uint256 hiiq_balance_to_use, uint256 eligible_time_fraction) internal view returns (uint256) {
+    function calculateEarn(address account, uint256 hiiq_balance_to_use, uint256 yieldPerHiIQToUse) internal view returns (uint256) {
         return hiiq_balance_to_use
-        .mul(yieldPerHiIQ().sub(userYieldPerTokenPaid[account]))
-        .mul(eligible_time_fraction)
+        .mul(yieldPerHiIQToUse)
         .div(1e18 * PRICE_PRECISION)
         .add(yields[account]);
     }
