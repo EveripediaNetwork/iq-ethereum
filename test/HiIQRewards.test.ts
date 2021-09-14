@@ -553,6 +553,60 @@ describe(contractName, () => {
     }
   });
 
+  it('17 users, increase amount, increase time', async () => {
+    const {users, deployer, HIIQ, HiIQRewards} = await setup();
+    const WEEKS_TO_STAKE = 52;
+    const AMOUNT_USERS = 16;
+
+    const lockTime =
+      Math.round(new Date().getTime() / 1000) +
+      secondsInADay * 2 * WEEKS_TO_STAKE; // 2 years
+    const amount = BigNumber.from(parseEther('365000000'));
+    const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
+    const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(
+      secondsInADay
+    ); // 1M per day
+
+    await deployer.IQERC20.mint(HiIQRewards.address, amount);
+
+    for (let i = 1; i <= AMOUNT_USERS; i++) {
+      await deployer.IQERC20.mint(users[i].address, amount);
+      await users[i].IQERC20.approve(HIIQ.address, lockedAmount);
+      await users[i].HIIQ.create_lock(lockedAmount, lockTime);
+    }
+
+    await deployer.IQERC20.mint(users[0].address, amount);
+    await users[0].IQERC20.approve(HIIQ.address, lockedAmount);
+    await users[0].HIIQ.create_lock(
+      lockedAmount,
+      Math.round(new Date().getTime() / 1000) + secondsInADay * 30
+    );
+    await users[0].HIIQ.checkpoint();
+
+    await deployer.HiIQRewards.initializeDefault();
+    await deployer.HiIQRewards.setYieldRate(yieldPerSecond, true);
+
+    for (let i = 0; i <= AMOUNT_USERS; i++) {
+      await users[i].HiIQRewards.checkpoint();
+    }
+
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 14]); // days to move forward
+    await ethers.provider.send('evm_mine', []);
+
+    await users[3].HiIQRewards.checkpoint();
+    const earned1 = await users[0].HiIQRewards.earned(users[0].address);
+    console.log('earned1', formatEther(earned1));
+
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 300]); // days to move forward
+    await ethers.provider.send('evm_mine', []);
+
+//    const random = Math.floor(Math.random()*(15-1+1)+1);
+//    await users[random].HiIQRewards.checkpoint();
+
+    const earned2 = await users[0].HiIQRewards.earned(users[0].address);
+    console.log('earned2', formatEther(earned2));
+  });
+
   it('Greylist and pause', async () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
