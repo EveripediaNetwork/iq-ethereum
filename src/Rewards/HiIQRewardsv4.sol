@@ -118,17 +118,17 @@ contract HiIQRewardsv4 is Ownable, ReentrancyGuard {
     function eligibleCurrentHiIQ(address account)
         public
         view
-        returns (uint256 eligible_hiiq_bal, uint256 current_ending_timestamp)
+        returns (uint256 eligible_hiiq_bal, uint256 stored_ending_timestamp)
     {
         uint256 curr_hiiq_bal = hiIQ.balanceOf(account);
-        IhiIQ.LockedBalance memory curr_locked_bal_pack = hiIQ.locked(account);
 
-        current_ending_timestamp = curr_locked_bal_pack.end;
+        // Stored is used to prevent abuse
+        stored_ending_timestamp = userHiIQEndpointCheckpointed[account];
 
         // Only unexpired hiIQ should be eligible
-        if (userHiIQEndpointCheckpointed[account] != 0 && (block.timestamp >= userHiIQEndpointCheckpointed[account])) {
+        if (stored_ending_timestamp != 0 && (block.timestamp >= stored_ending_timestamp)) {
             eligible_hiiq_bal = 0;
-        } else if (block.timestamp >= current_ending_timestamp) {
+        } else if (block.timestamp >= stored_ending_timestamp) {
             eligible_hiiq_bal = 0;
         } else {
             eligible_hiiq_bal = curr_hiiq_bal;
@@ -208,13 +208,14 @@ contract HiIQRewardsv4 is Ownable, ReentrancyGuard {
 
         // Get the old and the new hiIQ balances
         uint256 old_hiiq_balance = userHiIQCheckpointed[account];
-        (uint256 new_hiiq_balance, uint256 current_ending_timestamp) = eligibleCurrentHiIQ(account);
+        uint256 new_hiiq_balance = hiIQ.balanceOf(account);
 
         // Update the user's stored hiIQ balance
         userHiIQCheckpointed[account] = new_hiiq_balance;
 
         // Update the user's stored ending timestamp
-        userHiIQEndpointCheckpointed[account] = current_ending_timestamp;
+        IhiIQ.LockedBalance memory curr_locked_bal_pack = hiIQ.locked(account);
+        userHiIQEndpointCheckpointed[account] = curr_locked_bal_pack.end;
 
         // Update the total amount participating
         if (new_hiiq_balance >= old_hiiq_balance) {
