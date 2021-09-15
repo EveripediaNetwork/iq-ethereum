@@ -111,7 +111,14 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     /* ========== VIEWS ========== */
 
     function lastTimeYieldApplicable() public view returns (uint256) {
-        return Math.min(block.timestamp, periodFinish);
+        uint256 currentPeriod = periodFinish;
+        // this is the retroCatchUp calculation. applying it here in case earned is called and many periods have passed without checkpoint
+        if (block.timestamp > periodFinish) {
+            uint256 num_periods_elapsed = uint256(block.timestamp.sub(periodFinish)) / yieldDuration;
+            currentPeriod = periodFinish.add((num_periods_elapsed.add(1)).mul(yieldDuration));
+        }
+
+        return Math.min(block.timestamp, currentPeriod);
     }
 
     function yieldPerHiIQ() public view returns (uint256) {
@@ -154,11 +161,16 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
                 eligible_time_fraction = 0;
             } else {
                 // You haven't claimed yet
-                uint256 eligible_time = user_locking_ending_time.sub(userHiIQLastCheckpointed[account]);
-                uint256 total_time = (block.timestamp).sub(userHiIQLastCheckpointed[account]);
+                // user can checkpoint multiple times and it shouldnt affect this
+                uint256 eligible_time = user_locking_ending_time.sub(lastRewardClaimTime[account]);
+                uint256 total_time = block.timestamp.sub(lastRewardClaimTime[account]);
+                //console.log("eligible_time", user_locking_ending_time);
+                //console.log("total_time", total_time);
                 eligible_time_fraction = Math.min(PRICE_PRECISION, PRICE_PRECISION.mul(eligible_time).div(total_time));
             }
         }
+        //console.log("PRICE_PRECISION", PRICE_PRECISION);
+        //console.log("eligible_time_fraction", eligible_time_fraction);
         yieldPerHiIQToUse = yieldPerHiIQToUse.mul(eligible_time_fraction);
 
         // If the amount of hiIQ increased, only pay off based on the old balance
@@ -175,6 +187,7 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
                    balanceOf = balance;
                 } catch(bytes memory _err) {
                 }
+                //console.log("balanceOf", balanceOf);
                 hiiq_balance_to_use = ((balanceOf).add(old_hiiq_balance)).div(2);
             } else {
                 hiiq_balance_to_use = ((eligible_current_hiiq).add(old_hiiq_balance)).div(2);
@@ -185,6 +198,9 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     }
 
     function calculateEarn(address account, uint256 hiiq_balance_to_use, uint256 yieldPerHiIQToUse) internal view returns (uint256) {
+        //console.log("yields[account]", yields[account]);
+        //console.log("hiiq_balance_to_use", hiiq_balance_to_use);
+        //console.log("yieldPerHiIQToUse", yieldPerHiIQToUse);
         return hiiq_balance_to_use
         .mul(yieldPerHiIQToUse)
         .div(1e18 * PRICE_PRECISION)
@@ -224,8 +240,8 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     function _syncEarned(address account) internal {
         if (account != address(0)) {
             uint256 earned0 = earned(account);
-            // console.log("earned0: %s", earned0);
             yields[account] = earned0;
+            //console.log("yields[account]", yields[account]);
             userYieldPerTokenPaid[account] = yieldPerHiIQStored;
         }
     }

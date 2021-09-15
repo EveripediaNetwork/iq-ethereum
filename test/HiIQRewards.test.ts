@@ -156,15 +156,16 @@ describe(contractName, () => {
       if (user1LockEnd > BigNumber.from(block.timestamp)) {
         user1LockEnd = BigNumber.from(block.timestamp);
       }
+      console.log('checkpointing...');
+      await user.HiIQRewards.checkpoint();
+      console.log('checkpointing end...');
       const user1IQBal = await user.IQERC20.balanceOf(user.address);
       const earned1 = await user.HiIQRewards.earned(user.address);
-
-      await user.HiIQRewards.checkpoint();
 
       // expected amount tops after lockTime
       if (weeksTest <= WEEKS_TO_STAKE) {
         expectedEarned1 = 6000000 * weeksTest;
-        expectedEarned2 = 7000000 * weeksTest;
+        expectedEarned2 = 7100000 * weeksTest;
       }
 
       console.log('block.timestamp: ', block.timestamp);
@@ -368,6 +369,10 @@ describe(contractName, () => {
       }
 
       if (weeksTest == weeksTestEnd) {
+        console.log('earned1', formatEther(earned1));
+        console.log('weeksTest', weeksTest);
+        console.log('expectedEarned1', expectedEarned1);
+        console.log('expectedEarned2', expectedEarned2);
         expect(earned1.gt(BigNumber.from(parseEther(`${expectedEarned1}`)))).to.be.true;
         expect(earned1.lt(BigNumber.from(parseEther(`${expectedEarned2}`)))).to.be.true;
       }
@@ -577,10 +582,9 @@ describe(contractName, () => {
 
     await deployer.IQERC20.mint(users[0].address, amount);
     await users[0].IQERC20.approve(HIIQ.address, lockedAmount);
-    await users[0].HIIQ.create_lock(
-      lockedAmount,
-      Math.round(new Date().getTime() / 1000) + secondsInADay * 30
-    );
+    const userLockTime = Math.round(new Date().getTime() / 1000) + secondsInADay * 30;
+    const userLockTime2 = Math.round(new Date().getTime() / 1000) + secondsInADay * 60;
+    await users[0].HIIQ.create_lock(lockedAmount, userLockTime);
     await users[0].HIIQ.checkpoint();
 
     await deployer.HiIQRewards.initializeDefault();
@@ -594,17 +598,24 @@ describe(contractName, () => {
     await ethers.provider.send('evm_mine', []);
 
     await users[3].HiIQRewards.checkpoint();
-    const earned1 = await users[0].HiIQRewards.earned(users[0].address);
-    console.log('earned1', formatEther(earned1));
+    for (let i = 0; i <= AMOUNT_USERS; i++) {
+      const earned1 = await users[i].HiIQRewards.earned(users[i].address);
+      console.log(`earned1 . user: ${i}`, formatEther(earned1));
+    }
+    await users[0].HIIQ.increase_unlock_time(userLockTime2);
+    await users[0].HiIQRewards.checkpoint();
 
-    await ethers.provider.send('evm_increaseTime', [secondsInADay * 300]); // days to move forward
+    await ethers.provider.send('evm_increaseTime', [secondsInADay * 90]); // days to move forward
     await ethers.provider.send('evm_mine', []);
 
-//    const random = Math.floor(Math.random()*(15-1+1)+1);
-//    await users[random].HiIQRewards.checkpoint();
+    //const random = Math.floor(Math.random()*(15-1+1)+1);
+    //await users[random].HiIQRewards.checkpoint();
 
-    const earned2 = await users[0].HiIQRewards.earned(users[0].address);
-    console.log('earned2', formatEther(earned2));
+    for (let i = 0; i <= AMOUNT_USERS; i++) {
+      const earned2 = await users[i].HiIQRewards.earned(users[i].address);
+      console.log(`earned2 . user: ${i}`, formatEther(earned2));
+    }
+
   });
 
   it('Greylist and pause', async () => {
