@@ -294,11 +294,9 @@ describe(contractName, () => {
 
     await users[0].HiIQRewards.checkpoint();
     const earned1 = await users[0].HiIQRewards.earned(users[0].address);
-    // console.log('earned1', formatEther(earned1)); // 21741.81980534932460782
-    expect(earned1.gt(BigNumber.from(parseEther(`19000`)))).to.be
-      .true;
-    expect(earned1.lt(BigNumber.from(parseEther(`22000`)))).to.be
-      .true;
+    // console.log('earned1', formatEther(earned1));
+    expect(earned1).gt(BigNumber.from(parseEther(`18000`)));
+    expect(earned1).lt(BigNumber.from(parseEther(`22000`)));
 
     await users[0].HIIQ.withdraw();
 
