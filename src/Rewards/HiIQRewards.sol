@@ -193,9 +193,6 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
     }
 
     function calculateEarn(address account, uint256 hiiq_balance_to_use, uint256 yieldPerHiIQToUse) internal view returns (uint256) {
-        //console.log("yields[account]", yields[account]);
-        //console.log("hiiq_balance_to_use", hiiq_balance_to_use);
-        //console.log("yieldPerHiIQToUse", yieldPerHiIQToUse);
         return hiiq_balance_to_use
         .mul(yieldPerHiIQToUse)
         .div(1e18 * PRICE_PRECISION)
@@ -236,7 +233,6 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         if (account != address(0)) {
             uint256 earned0 = earned(account);
             yields[account] = earned0;
-            //console.log("yields[account]", yields[account]);
             userYieldPerTokenPaid[account] = yieldPerHiIQStored;
         }
     }
