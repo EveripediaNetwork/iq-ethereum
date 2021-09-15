@@ -27,7 +27,6 @@ pragma experimental ABIEncoderV2;
 // Originally inspired by Synthetix.io, but heavily modified by the Frax team (hiIQ portion)
 // https://raw.githubusercontent.com/Synthetixio/synthetix/develop/contracts/StakingYield.sol
 
-import "hardhat/console.sol";
 import "./TransferHelper.sol";
 import "../Lock/IhiIQ.sol";
 import "@openzeppelin/contracts/math/Math.sol";
