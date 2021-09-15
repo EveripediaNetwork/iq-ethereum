@@ -117,7 +117,7 @@ describe(contractName, () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
     const user = users[0];
-    const WEEKS_TO_STAKE = 2;
+    const WEEKS_TO_STAKE = 5;
 
     const lockTime =
       Math.round(new Date().getTime() / 1000) +
@@ -146,7 +146,7 @@ describe(contractName, () => {
     const firstBlock = block;
     let expectedEarned1;
     let expectedEarned2;
-    for (let weeksTest = 1; weeksTest < 6; weeksTest++) {
+    for (let weeksTest = 1; weeksTest < 10; weeksTest++) {
       await ethers.provider.send('evm_increaseTime', [secondsInADay * 7]); // days to move forward
       await ethers.provider.send('evm_mine', []);
 
@@ -311,15 +311,15 @@ describe(contractName, () => {
     console.log('earned2', formatEther(earned2)); // 3,290,265 but it should be same than earn1 (2M)
   });
 
-  it('1 user, 2 week lock, 2 year simulation, no checkpoints until last week of sim', async () => {
+  it('1 user, 4 week lock, 2 year simulation, no checkpoints until last week of sim', async () => {
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
     const user = users[0];
-    const WEEKS_TO_STAKE = 2;
+    const WEEKS_TO_STAKE = 4;
 
     const lockTime =
       Math.round(new Date().getTime() / 1000) +
-      secondsInADay * 7 * WEEKS_TO_STAKE; // 14 days
+      secondsInADay * 7 * WEEKS_TO_STAKE;
     const amount = BigNumber.from(parseEther('60000000')); // 60M
     const lockedAmount = BigNumber.from(parseEther('1000000')); // 1M
     const yieldPerSecond = BigNumber.from(parseEther('1000000')).div(

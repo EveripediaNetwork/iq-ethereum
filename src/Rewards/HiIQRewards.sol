@@ -164,13 +164,9 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
                 // user can checkpoint multiple times and it shouldnt affect this
                 uint256 eligible_time = user_locking_ending_time.sub(lastRewardClaimTime[account]);
                 uint256 total_time = block.timestamp.sub(lastRewardClaimTime[account]);
-                //console.log("eligible_time", user_locking_ending_time);
-                //console.log("total_time", total_time);
                 eligible_time_fraction = Math.min(PRICE_PRECISION, PRICE_PRECISION.mul(eligible_time).div(total_time));
             }
         }
-        //console.log("PRICE_PRECISION", PRICE_PRECISION);
-        //console.log("eligible_time_fraction", eligible_time_fraction);
         yieldPerHiIQToUse = yieldPerHiIQToUse.mul(eligible_time_fraction);
 
         // If the amount of hiIQ increased, only pay off based on the old balance
@@ -187,7 +183,6 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
                    balanceOf = balance;
                 } catch(bytes memory _err) {
                 }
-                //console.log("balanceOf", balanceOf);
                 hiiq_balance_to_use = ((balanceOf).add(old_hiiq_balance)).div(2);
             } else {
                 hiiq_balance_to_use = ((eligible_current_hiiq).add(old_hiiq_balance)).div(2);
