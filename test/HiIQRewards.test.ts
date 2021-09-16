@@ -225,10 +225,8 @@ describe(contractName, () => {
     const block = await ethers.provider.getBlock(blockNum);
     const earned1 = await users[0].HiIQRewards.earned(users[0].address);
     // console.log('earned1', formatEther(earned1));
-    expect(earned1.gt(BigNumber.from(parseEther(`850000`)))).to.be
-      .true;
-    expect(earned1.lt(BigNumber.from(parseEther(`1000000`)))).to.be
-      .true;
+    expect(earned1).gt(BigNumber.from(parseEther(`1500000`)));
+    expect(earned1).lt(BigNumber.from(parseEther(`2000000`)));
     await users[0].HiIQRewards.getYield();
 
     // let's re stake
@@ -245,10 +243,8 @@ describe(contractName, () => {
     await users[0].HiIQRewards.checkpoint();
     const earned2 = await users[0].HiIQRewards.earned(users[0].address);
     // console.log('earned2', formatEther(earned2));
-    expect(earned2.gt(BigNumber.from(parseEther(`1500000`)))).to.be
-      .true;
-    expect(earned2.lt(BigNumber.from(parseEther(`1700000`)))).to.be
-      .true;
+    expect(earned2).gt(BigNumber.from(parseEther(`1400000`)));
+    expect(earned2).lt(BigNumber.from(parseEther(`2000000`)));
   });
 
   it('Re stake with staked multiple users', async () => {
@@ -295,8 +291,8 @@ describe(contractName, () => {
     await users[0].HiIQRewards.checkpoint();
     const earned1 = await users[0].HiIQRewards.earned(users[0].address);
     // console.log('earned1', formatEther(earned1));
-    expect(earned1).gt(BigNumber.from(parseEther(`18000`)));
-    expect(earned1).lt(BigNumber.from(parseEther(`22000`)));
+    expect(earned1).gt(BigNumber.from(parseEther(`400000`)));
+    expect(earned1).lt(BigNumber.from(parseEther(`600000`)));
 
     await users[0].HIIQ.withdraw();
 
@@ -313,7 +309,7 @@ describe(contractName, () => {
     await users[0].HiIQRewards.checkpoint();
 
     const earned2 = await users[0].HiIQRewards.earned(users[0].address);
-    // console.log('earned2', formatEther(earned2)); // 21741.81980534932460782
+    // console.log('earned2', formatEther(earned2));
     expect(earned1.eq(earned2)).to.be.true;
   });
 
@@ -369,8 +365,8 @@ describe(contractName, () => {
 
       // update expectedEarned every week until end of lockTime
       if (weeksTest <= WEEKS_TO_STAKE) {
-        expectedEarned1 = 5000000 * weeksTest;
-        expectedEarned2 = 6000000 * weeksTest; // slash last week
+        expectedEarned1 = 6500000 * weeksTest;
+        expectedEarned2 = 7500000 * weeksTest;
       }
 
       if (weeksTest == weeksTestEnd) {
@@ -378,8 +374,8 @@ describe(contractName, () => {
         console.log('weeksTest', weeksTest);
         console.log('expectedEarned1', expectedEarned1);
         console.log('expectedEarned2', expectedEarned2);
-        expect(earned1.gt(BigNumber.from(parseEther(`${expectedEarned1}`)))).to.be.true;
-        expect(earned1.lt(BigNumber.from(parseEther(`${expectedEarned2}`)))).to.be.true;
+        expect(earned1).gt(BigNumber.from(parseEther(`${expectedEarned1}`)));
+        expect(earned1).lt(BigNumber.from(parseEther(`${expectedEarned2}`)));
       }
     }
   });
@@ -519,7 +515,7 @@ describe(contractName, () => {
         await user2.HIIQ.withdraw();
 
         // checkpoint to update the totalSupply for user1
-        await user2.HIIQ.checkpoint();
+        // await user2.HIIQ.checkpoint(); // TODO: if checkpoint result is wrong bcs of total supply changes
 
         // user2 properly checkpoints Reward contract
         await user2.HiIQRewards.checkpoint();
@@ -552,8 +548,8 @@ describe(contractName, () => {
       console.log('');
 
       if (weeksTest == weeksTestEnd) {
-        expect(earned1.gt(BigNumber.from(parseEther(`${expectedEarned1}`)))).to.be.true;
-        expect(earned1.lt(BigNumber.from(parseEther(`${expectedEarned2}`)))).to.be.true;
+        expect(earned1).gt(BigNumber.from(parseEther(`${expectedEarned1}`)));
+        expect(earned1).lt(BigNumber.from(parseEther(`${expectedEarned2}`)));
       }
     }
   });
