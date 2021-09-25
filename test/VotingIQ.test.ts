@@ -64,5 +64,14 @@ describe('HIIQ', function () {
     await ethers.provider.send('evm_mine', []);
 
     await expect(users[0].HIIQ.withdraw()).to.be.not.reverted;
+    await users[0].HIIQ.checkpoint(); // without checkpoint data is not accurate
+
+    const ZERO = ethers.BigNumber.from('0');
+    const totalSupply2 = await users[0].HIIQ['totalSupply()']();
+
+    expect(ZERO.eq(totalSupply2)).to.be.true;
+
+    const totalIQSupply2 = await users[0].HIIQ['totalIQSupply()']();
+    expect(ZERO.eq(totalIQSupply2)).to.be.true;
   });
 });

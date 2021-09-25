@@ -54,10 +54,10 @@ const config: HardhatUserConfig = {
       goerli: '0xc03bcacc5377b7cc6634537650a7a1d14711c1a3',
       rinkeby: '0x279926cca1ccd061ee423c633f7376e2bdecc53a',
     },
-    feeDistributor: {
-      goerli: '0x7dcb919ff25161698e56c18f953e6aab4d0ebef3',
-      rinkeby: '0xcf67e811e4cc07e27a992255bd5d27b60de7dd93',
-      mainnet: '0x27714ADb7aC897D08ec6812E908e7c32BaD8Df0C',
+    hiIQRewards: {
+      goerli: '0x36Cae8d96CBB53e139628e63E47ebe2B47a53f1f',
+      rinkeby: '0xBe0B7Dedad660BdEE5CDE49b95a2811Dd6F03E9B',
+      mainnet: '0xb55Dcc69d909103b4De773412A22AB8B86e8c602',
     },
   },
   networks: {
@@ -77,7 +77,7 @@ const config: HardhatUserConfig = {
       accounts: accounts(),
     },
     mainnet: {
-      gasPrice: parseInt(utils.parseUnits('60', 'gwei').toString()),
+      gasPrice: parseInt(utils.parseUnits('80', 'gwei').toString()),
       url: node_url('mainnet'),
       accounts:
         keys('mainnet')[0] !== '' ? keys('mainnet') : accounts('mainnet'),
@@ -115,7 +115,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     currency: 'USD',
-    gasPrice: 60,
+    gasPrice: 80,
     enabled: process.env.REPORT_GAS ? true : false,
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     maxMethodDiff: 10,
