@@ -60,17 +60,30 @@ const config: HardhatUserConfig = {
       mainnet: '0xb55Dcc69d909103b4De773412A22AB8B86e8c602',
     },
   },
+  defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      accounts: accounts(process.env.HARDHAT_FORK),
-      forking: process.env.HARDHAT_FORK
-        ? {
-            url: node_url(process.env.HARDHAT_FORK),
-            blockNumber: process.env.HARDHAT_FORK_NUMBER
-              ? parseInt(process.env.HARDHAT_FORK_NUMBER)
-              : undefined,
-          }
-        : undefined,
+      hardfork: "london",
+      gasPrice: "auto",
+      forking: {
+        url: "https://eth-mainnet.alchemyapi.io/v2/Tk-YAWxiKBzTeYyi5vF9IEv4QhFkcMl_",
+        blockNumber: 13411630
+      },
+      // chainId: 31337
+
+      // accounts: accounts(process.env.HARDHAT_FORK),
+      // forking: process.env.HARDHAT_FORK
+      //   ? {
+      //       url: node_url(process.env.HARDHAT_FORK),
+      //       blockNumber: process.env.HARDHAT_FORK_NUMBER
+      //         ? parseInt(process.env.HARDHAT_FORK_NUMBER)
+      //         : undefined,
+      //     }
+      //   : undefined,
+    },
+    gaugenet: {
+      url: "http://localhost:8545",
+      // accounts: [`${PRIVATE_KEY_RINKEBY}`]
     },
     localhost: {
       url: node_url('localhost'),
@@ -129,10 +142,10 @@ const config: HardhatUserConfig = {
   },
   external: process.env.HARDHAT_FORK
     ? {
-        deployments: {
-          hardhat: ['deployments/' + process.env.HARDHAT_FORK],
-        },
-      }
+      deployments: {
+        hardhat: ['deployments/' + process.env.HARDHAT_FORK],
+      },
+    }
     : undefined,
 };
 
