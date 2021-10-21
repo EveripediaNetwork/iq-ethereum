@@ -22,7 +22,11 @@ const IQERC20ABI = require('../artifacts/src/ERC20/IQERC20.sol/IQERC20').abi;
 const hiIQRewardsMainnetAddress = '0xb55Dcc69d909103b4De773412A22AB8B86e8c602';
 const hiIQRewardsABI = require('../artifacts/src/Rewards/HiIQRewardsv4.sol/HiIQRewardsv4').abi;
 
+const lpTokenAddress = "0xd6c783b257e662ca949b441a4fcb08a53fc49914";
+
 const hiIQGaugeController = 'HIIQGaugeController';
+const stakingRewardsMultiGauge = 'StakingRewardsMultiGauge';
+const fraxGaugeFXSRewardsDistributor = 'FraxGaugeFXSRewardsDistributor';
 
 async function runwithImpersonation(userAddress: any, func: any) {
 
@@ -47,7 +51,7 @@ const setup = deployments.createFixture(async () => {
   const IQERC20 = new ethers.Contract(IQERC20MainnetAddress, IQERC20ABI); // await ethers.getContract('IQERC20');
   const HiIQRewards = new ethers.Contract(hiIQRewardsMainnetAddress, hiIQRewardsABI);
 
-  console.log('1')
+  console.log('deploying hiIQGaugeController')
   console.log(new Date())
 
   // await deployments.deploy(hiIQContract, {
@@ -65,8 +69,55 @@ const setup = deployments.createFixture(async () => {
     log: true,
   });
 
-  console.log('3')
+  const HiIQGaugeController = await ethers.getContract(hiIQGaugeController);
+
+  console.log('deploying timelock')
+  const timelock =  await deployments.deploy('Timelock', {
+    from: deployer,
+    args: [
+      deployer,
+      172800
+    ],
+    log: true,
+  });
+
+  console.log('deploying gauge rewards distributor')
   console.log(new Date())
+
+  const fraxGaugeFXSRewardsDist = await deployments.deploy(fraxGaugeFXSRewardsDistributor, {
+    from: deployer,
+    args: [
+      timelock.address,
+      deployer,
+      IQERC20.address,
+      HiIQGaugeController.address
+    ],
+    log: true,
+  });
+
+  console.log('deploying gauge')
+  console.log(new Date())
+
+  const uniGauge = await deployments.deploy(stakingRewardsMultiGauge, {
+    from: deployer,
+    args: [
+      lpTokenAddress,
+      fraxGaugeFXSRewardsDist.address,
+      ['IQ'],
+      [IQERC20.address],
+      [deployer],
+      [11574074074074,11574074074074],
+      [ '0x0000000000000000000000000000000000000000']
+    ],
+    log: true,
+  });
+
+
+  console.log('add gauge')
+
+  await HiIQGaugeController.add_gauge(uniGauge.address, 0, 100);
+
+  console.log('22')
 
   const contracts = {
     HiIQRewards,//: <HiIQRewards> await ethers.getContract(hiIQContract),
@@ -75,8 +126,10 @@ const setup = deployments.createFixture(async () => {
     HiIQGaugeController: await ethers.getContract(hiIQGaugeController),
   };
 
-  console.log('4')
+  console.log('14')
   console.log(new Date())
+
+
 
   const users = await setupUsers(await getUnnamedAccounts(), contracts);
 
