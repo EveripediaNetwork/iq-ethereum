@@ -11,8 +11,8 @@ async function main0001() {
   const gaugeABI = require('../../artifacts/src/Curve/HIIQGaugeController.vy/HIIQGaugeController').abi;
 
   // hardhat fork addresses
-  const GAUGE_CONTROLLER_ADDR = "0x9786f6d29e1c9129808bbd3d1abc475e8324285d"
-  const REWARDS_DIST_ADDR = "0xc1259131422c55fd7f4d403592d8abf5d132d32e"
+  const GAUGE_CONTROLLER_ADDR = "0xc2cd962e53afcdf574b409599a24724efbadb3d4"
+  const REWARDS_DIST_ADDR = "0x839055d0fbee415e665dc500dd2af292c0692305"
 
   // impersonate owner for hardhat fork
   const provider = new hre.ethers.providers.JsonRpcProvider(
@@ -29,15 +29,16 @@ async function main0001() {
   const StakingRewardsMultiGauge = await hre.ethers.getContractFactory("StakingRewardsMultiGauge", signer);
   console.log('StakingRewardsMultiGauge.signer', StakingRewardsMultiGauge.signer.address)//, signer)
 
-  const lpTokenAddress = "0xd6c783b257e662ca949b441a4fcb08a53fc49914";
+  const IqFraxlpTokenAddress = "0xd6c783b257e662ca949b441a4fcb08a53fc49914";
+  const IqEthLpTokenAddress = "0xef9f994a74cb6ef21c38b13553caa2e3e15f69d0";
   const stakingRewardsMultiGauge = await StakingRewardsMultiGauge.deploy(
-    lpTokenAddress,
+    IqEthLpTokenAddress,
     REWARDS_DIST_ADDR,
     ['IQ'],
     [iqAddress],
     [OWNER_ADDR],
-    [11574074074074,11574074074074],
-    [ '0x0000000000000000000000000000000000000000']
+    [11574074074074, 11574074074074],
+    ['0x0000000000000000000000000000000000000000']
   );
   await stakingRewardsMultiGauge.deployed();
   console.log("stakingRewardsMultiGauge deployed to:", stakingRewardsMultiGauge.address)

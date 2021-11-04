@@ -27,29 +27,28 @@ async function getHiIQTokens() {
   // impersonate owner for hardhat fork
   const provider = new hre.ethers.providers.JsonRpcProvider("http://localhost:8545");
 
-  // await runwithImpersonation(IQOwner, provider, hre, async (signer: any) => {
-  //   return;
-  //   const iqContract = new hre.ethers.Contract(IQERC20MainnetAddress, IQERC20ABI, signer);
-  //
-  //   console.log('from IQ balance: ', hre.ethers.utils.formatUnits(
-  //     await iqContract.balanceOf(IQOwner),
-  //     18
-  //   ))
-  //
-  //   const howManyTokens = hre.ethers.BigNumber.from(hre.ethers.utils.parseEther('1000000'));
-  //
-  //   const tx = await iqContract.transfer(
-  //     toAddress,
-  //     howManyTokens
-  //   );
-  //
-  //   await tx.wait()
-  //
-  //   console.log('toAddress IQ balance: ', hre.ethers.utils.formatUnits(
-  //     await iqContract.balanceOf(toAddress),
-  //     18
-  //   ))
-  // });
+  await runwithImpersonation(IQOwner, provider, hre, async (signer: any) => {
+    const iqContract = new hre.ethers.Contract(IQERC20MainnetAddress, IQERC20ABI, signer);
+
+    console.log('from IQ balance: ', hre.ethers.utils.formatUnits(
+      await iqContract.balanceOf(IQOwner),
+      18
+    ))
+
+    const howManyTokens = hre.ethers.BigNumber.from(hre.ethers.utils.parseEther('1000000'));
+
+    const tx = await iqContract.transfer(
+      toAddress,
+      howManyTokens
+    );
+
+    await tx.wait()
+
+    console.log('toAddress IQ balance: ', hre.ethers.utils.formatUnits(
+      await iqContract.balanceOf(toAddress),
+      18
+    ))
+  });
 
   await runwithImpersonation(toAddress, provider, hre, async (signer: any) => {
 
@@ -74,18 +73,18 @@ async function getHiIQTokens() {
 
     txFunding.wait()
 
-    // console.log('approve transfer for IQ')
-    // const gasCost1 = await iqContract.estimateGas.approve(hiiqAddress, lockedAmount);
-    // console.log('gasCost1', hre.ethers.utils.formatEther(gasCost1))
-    // await (await iqContract.approve(hiiqAddress, lockedAmount, {gasLimit: gasCost1})).wait();
-    //
-    // console.log('create lock, get hiIQ')
-    // const gasCost2 = await hiiqContract.estimateGas.create_lock(lockedAmount, lockTime);
-    // await (await hiiqContract.create_lock(lockedAmount, lockTime, {gasLimit: gasCost2})).wait();
+    console.log('approve transfer for IQ')
+    const gasCost1 = await iqContract.estimateGas.approve(hiiqAddress, lockedAmount);
+    console.log('gasCost1', hre.ethers.utils.formatEther(gasCost1))
+    await (await iqContract.approve(hiiqAddress, lockedAmount, {gasLimit: gasCost1})).wait();
 
-    // console.log('checkpoint the hiiqContract to init')
-    // const estGas3 = await hiiqContract.estimateGas.checkpoint();
-    // await (await hiiqContract.checkpoint({gasLimit: estGas3})).wait();
+    console.log('create lock, get hiIQ')
+    const gasCost2 = await hiiqContract.estimateGas.create_lock(lockedAmount, lockTime);
+    await (await hiiqContract.create_lock(lockedAmount, lockTime, {gasLimit: gasCost2})).wait();
+
+    console.log('checkpoint the hiiqContract to init')
+    const estGas3 = await hiiqContract.estimateGas.checkpoint();
+    await (await hiiqContract.checkpoint({gasLimit: estGas3})).wait();
 
     console.log('toAddress HiIQ balance: ', hre.ethers.utils.formatUnits(
       await hiiqContract['balanceOf(address)'](toAddress),

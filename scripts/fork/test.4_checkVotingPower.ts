@@ -1,4 +1,4 @@
-async function main0002() {
+async function checkVotingPower() {
 
   const hre = require("hardhat");
 
@@ -14,30 +14,29 @@ async function main0002() {
   const gaugeABI = require('../../artifacts/src/Curve/HIIQGaugeController.vy/HIIQGaugeController').abi;
 
   // hardhat fork addresses
-  const GAUGE_CONTROLLER_ADDR = "0x9786f6d29e1c9129808bbd3d1abc475e8324285d"
-  const REWARDS_DIST_ADDR = "0xc1259131422c55fd7f4d403592d8abf5d132d32e"
-  const UNI_GAUGE_ADDR = "0x3d7126d1ce1f71cb0111cf6ff683f55ba8474464"
+  const GAUGE_CONTROLLER_ADDR = "0xc2cd962e53afcdf574b409599a24724efbadb3d4"
+  const REWARDS_DIST_ADDR = "0x839055d0fbee415e665dc500dd2af292c0692305"
+  const UNI_GAUGE_ADDR = "0x65237882dd5fbb85d865eff3be26ac4e67da87aa"
 
   // impersonate owner for hardhat fork
   const provider = new hre.ethers.providers.JsonRpcProvider(
     "http://localhost:8545"
   );
-  await provider.send("hardhat_impersonateAccount", [testUser]);
-  const signer = await hre.ethers.getSigner(testUser);
+  await provider.send("hardhat_impersonateAccount", [OWNER_ADDR]);
+  const signer = await hre.ethers.getSigner(OWNER_ADDR);
 
   console.log('signer.address', signer.address)
 
   const gaugeController = new hre.ethers.Contract(GAUGE_CONTROLLER_ADDR, gaugeABI, signer);
+  console.log('votingPower: ',
+    hre.ethers.utils.formatUnits(await gaugeController.vote_user_power(testUser), 2)
+  );
 
-  const voteWeightBps = 1000;
-  const estGas = await gaugeController.estimateGas.vote_for_gauge_weights(UNI_GAUGE_ADDR, voteWeightBps) // 10%
-  await gaugeController.vote_for_gauge_weights(UNI_GAUGE_ADDR, voteWeightBps, {gasLimit: estGas}) // 10%
-
-  await provider.send("hardhat_stopImpersonatingAccount", [testUser]);
+  await provider.send("hardhat_stopImpersonatingAccount", [OWNER_ADDR]);
 
 }
 
-main0002()
+checkVotingPower()
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

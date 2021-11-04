@@ -9,7 +9,7 @@ async function main01() {
   const OWNER_ADDR = "0xaca39b187352d9805deced6e73a3d72abf86e7a0";
 
   // hardhat fork addresses
-  const GAUGE_CONTROLLER_ADDR = "0x9786f6d29e1c9129808bbd3d1abc475e8324285d"
+  const GAUGE_CONTROLLER_ADDR = "0xc2cd962e53afcdf574b409599a24724efbadb3d4"
 
   // impersonate owner for hardhat fork
   const provider = new hre.ethers.providers.JsonRpcProvider(

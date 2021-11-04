@@ -1,4 +1,4 @@
-async function main0002() {
+async function voteOnGauges() {
 
   const hre = require("hardhat");
 
@@ -22,23 +22,22 @@ async function main0002() {
   const provider = new hre.ethers.providers.JsonRpcProvider(
     "http://localhost:8545"
   );
-  await provider.send("hardhat_impersonateAccount", [OWNER_ADDR]);
-  const signer = await hre.ethers.getSigner(OWNER_ADDR);
+  await provider.send("hardhat_impersonateAccount", [testUser]);
+  const signer = await hre.ethers.getSigner(testUser);
 
   console.log('signer.address', signer.address)
 
   const gaugeController = new hre.ethers.Contract(GAUGE_CONTROLLER_ADDR, gaugeABI, signer);
-  console.log('votingPower: ',
-    hre.ethers.utils.formatUnits(
-      await gaugeController.vote_user_power(testUser), 2
-    )
-  );
 
-  await provider.send("hardhat_stopImpersonatingAccount", [OWNER_ADDR]);
+  const voteWeightBps = 1000; // 10%
+  const estGas = await gaugeController.estimateGas.vote_for_gauge_weights(UNI_GAUGE_ADDR, voteWeightBps);
+  await gaugeController.vote_for_gauge_weights(UNI_GAUGE_ADDR, voteWeightBps, {gasLimit: estGas});
+
+  await provider.send("hardhat_stopImpersonatingAccount", [testUser]);
 
 }
 
-main0002()
+voteOnGauges()
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);
