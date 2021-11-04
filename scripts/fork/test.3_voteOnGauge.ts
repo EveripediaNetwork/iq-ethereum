@@ -15,7 +15,8 @@ async function voteOnGauges() {
 
   // hardhat fork addresses
   const GAUGE_CONTROLLER_ADDR = "0xc2cd962e53afcdf574b409599a24724efbadb3d4"
-  const UNI_GAUGE_ADDR = "0x65237882dd5fbb85d865eff3be26ac4e67da87aa"
+  const UNI_GAUGE_FRAX_IQ_ADDR = "0x65237882dd5fbb85d865eff3be26ac4e67da87aa"
+  const UNI_GAUGE_ETH_IQ_ADDR = "0x2c477a64d2cb9f340e1f72ff76399432559e2199"
 
   // impersonate owner for hardhat fork
   const provider = new hre.ethers.providers.JsonRpcProvider(
@@ -29,8 +30,8 @@ async function voteOnGauges() {
   const gaugeController = new hre.ethers.Contract(GAUGE_CONTROLLER_ADDR, gaugeABI, signer);
 
   const voteWeightBps = 1000; // 10%
-  const estGas = await gaugeController.estimateGas.vote_for_gauge_weights(UNI_GAUGE_ADDR, voteWeightBps);
-  await gaugeController.vote_for_gauge_weights(UNI_GAUGE_ADDR, voteWeightBps, {gasLimit: estGas});
+  const estGas = await gaugeController.estimateGas.vote_for_gauge_weights(UNI_GAUGE_ETH_IQ_ADDR, voteWeightBps);
+  await gaugeController.vote_for_gauge_weights(UNI_GAUGE_ETH_IQ_ADDR, voteWeightBps, {gasLimit: estGas});
 
   await provider.send("hardhat_stopImpersonatingAccount", [testUser]);
 

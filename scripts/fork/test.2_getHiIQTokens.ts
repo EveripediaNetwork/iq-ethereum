@@ -1,13 +1,4 @@
-async function runwithImpersonation(userAddress: any, provider: any, hre: any, func: any) {
-
-  try {
-    await provider.send("hardhat_impersonateAccount", [userAddress]);
-    const signer = await hre.ethers.getSigner(userAddress);
-    await func(signer);
-  } finally {
-    await provider.send("hardhat_stopImpersonatingAccount", [userAddress]);
-  }
-}
+import {runwithImpersonation} from "./util_functions";
 
 async function getHiIQTokens() {
   const hre = require("hardhat");
@@ -19,7 +10,7 @@ async function getHiIQTokens() {
   const IQERC20MainnetAddress = '0x579cea1889991f68acc35ff5c3dd0621ff29b0c9';
   const IQERC20ABI = require('../../artifacts/src/ERC20/IQERC20.sol/IQERC20').abi;
 
-  const toAddress = "0xAe65930180ef4d86dbD1844275433E9e1d6311ED";
+  const toAddress = "0xfed53eB388c6FF138aA97D1F9d24F8fd4efC9C73" // "0x208a110dDc5732f406B17E89bD92E06Db21c8CA1" // "0xAe65930180ef4d86dbD1844275433E9e1d6311ED";
 
   const secondsInADay = 24 * 60 * 60;
   const lockTime = Math.round(new Date().getTime() / 1000) + secondsInADay * 60;

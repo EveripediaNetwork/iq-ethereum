@@ -1,4 +1,4 @@
-async function main01() {
+async function deployRewardsDistributor() {
 
   const hre = require("hardhat");
   const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
@@ -37,7 +37,7 @@ async function main01() {
 
 }
 
-main01()
+deployRewardsDistributor()
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

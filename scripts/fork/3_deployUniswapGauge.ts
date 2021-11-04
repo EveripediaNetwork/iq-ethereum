@@ -1,10 +1,13 @@
-async function main0001() {
+async function deployUniswapGauge() {
 
   const hre = require("hardhat");
   const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
 
   const iqAddress = "0x579cea1889991f68acc35ff5c3dd0621ff29b0c9";
   const hiiqAddress = "0x1bf5457ecaa14ff63cc89efd560e251e814e16ba";
+
+  const IqFraxlpTokenAddress = "0xd6c783b257e662ca949b441a4fcb08a53fc49914";
+  const IqEthLpTokenAddress = "0xef9f994a74cb6ef21c38b13553caa2e3e15f69d0";
 
   const OWNER_ADDR = "0xaca39b187352d9805deced6e73a3d72abf86e7a0";
 
@@ -29,8 +32,6 @@ async function main0001() {
   const StakingRewardsMultiGauge = await hre.ethers.getContractFactory("StakingRewardsMultiGauge", signer);
   console.log('StakingRewardsMultiGauge.signer', StakingRewardsMultiGauge.signer.address)//, signer)
 
-  const IqFraxlpTokenAddress = "0xd6c783b257e662ca949b441a4fcb08a53fc49914";
-  const IqEthLpTokenAddress = "0xef9f994a74cb6ef21c38b13553caa2e3e15f69d0";
   const stakingRewardsMultiGauge = await StakingRewardsMultiGauge.deploy(
     IqEthLpTokenAddress,
     REWARDS_DIST_ADDR,
@@ -43,15 +44,11 @@ async function main0001() {
   await stakingRewardsMultiGauge.deployed();
   console.log("stakingRewardsMultiGauge deployed to:", stakingRewardsMultiGauge.address)
 
-  // console.log('add gauge')
-  // await gauge.add_gauge(stakingRewardsMultiGauge.address, 0, 100);
-  // console.log('added gauge')
-
   await provider.send("hardhat_stopImpersonatingAccount", [OWNER_ADDR]);
 
 }
 
-main0001()
+deployUniswapGauge()
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

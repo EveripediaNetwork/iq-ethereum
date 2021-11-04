@@ -1,17 +1,11 @@
-async function stakeLPTokenInGauge() {
+async function voteOnGauges() {
 
   const hre = require("hardhat");
-
-  const uniswapGaugeABI = require('../../artifacts/src/Curve/StakingRewardsMultiGauge.sol/StakingRewardsMultiGauge').abi;
-  const uniswapV2PairABI = require('../../artifacts/src/Interfaces/IUniswapV2Pair.sol/IUniswapV2Pair').abi;
 
   const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
   const hiiqAddress = "0x1bf5457ecaa14ff63cc89efd560e251e814e16ba";
 
   const iqAddress = "0x579cea1889991f68acc35ff5c3dd0621ff29b0c9";
-
-  const IqFraxlpTokenAddress = "0xd6c783b257e662ca949b441a4fcb08a53fc49914";
-  const IqEthLpTokenAddress = "0xef9f994a74cb6ef21c38b13553caa2e3e15f69d0";
 
   const OWNER_ADDR = "0xaca39b187352d9805deced6e73a3d72abf86e7a0";
 
@@ -24,11 +18,6 @@ async function stakeLPTokenInGauge() {
   const UNI_GAUGE_FRAX_IQ_ADDR = "0x65237882dd5fbb85d865eff3be26ac4e67da87aa"
   const UNI_GAUGE_ETH_IQ_ADDR = "0x2c477a64d2cb9f340e1f72ff76399432559e2199"
 
-  const gauge_lpToken_map = {
-    UNI_GAUGE_FRAX_IQ_ADDR: IqFraxlpTokenAddress,
-    UNI_GAUGE_ETH_IQ_ADDR: IqEthLpTokenAddress,
-  }
-
   // impersonate owner for hardhat fork
   const provider = new hre.ethers.providers.JsonRpcProvider(
     "http://localhost:8545"
@@ -38,23 +27,27 @@ async function stakeLPTokenInGauge() {
 
   console.log('signer.address', signer.address)
 
-  const howManyLPTokens = hre.ethers.BigNumber.from(hre.ethers.utils.parseEther('10'));
+  const gaugeController = new hre.ethers.Contract(GAUGE_CONTROLLER_ADDR, gaugeABI, signer);
 
-  const GaugeToUse = UNI_GAUGE_FRAX_IQ_ADDR;
+  const iq_frax_gauge_weight = await gaugeController.get_gauge_weight(UNI_GAUGE_FRAX_IQ_ADDR, {gasLimit: 400000});
+  const iq_eth_gauge_weight = await gaugeController.get_gauge_weight(UNI_GAUGE_ETH_IQ_ADDR, {gasLimit: 400000});
+  const total_gauge_weight = await gaugeController.get_total_weight({gasLimit: 400000});
 
-  const uniswapLPToken = new hre.ethers.Contract(gauge_lpToken_map[GaugeToUse], uniswapV2PairABI, signer);
-  await (await uniswapLPToken.approve(GaugeToUse, howManyLPTokens)).wait(); // aprove the movement of lp tokens for safeTransfer in gauge
-
-  const uniswapGauge = new hre.ethers.Contract(GaugeToUse, uniswapGaugeABI, signer);
-  await uniswapGauge.stakeLocked(howManyLPTokens, 94608000);
+  console.log('weight iq frax',
+    hre.ethers.utils.formatUnits(iq_frax_gauge_weight, 2))
+  console.log('weight iq eth',
+    hre.ethers.utils.formatUnits(iq_eth_gauge_weight, 2))
+  console.log('total weight',
+    hre.ethers.utils.formatUnits(total_gauge_weight, 2))
 
   await provider.send("hardhat_stopImpersonatingAccount", [testUser]);
 
 }
 
-stakeLPTokenInGauge()
+voteOnGauges()
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);
     process.exit(1);
   });
+

@@ -1,4 +1,4 @@
-async function main0() {
+async function deployGaugeControllerContract() {
 
   const hre = require("hardhat");
   const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
@@ -47,7 +47,7 @@ async function main0() {
   await provider.send("hardhat_stopImpersonatingAccount", [OWNER_ADDR]);
 }
 
-main0()
+deployGaugeControllerContract()
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);
