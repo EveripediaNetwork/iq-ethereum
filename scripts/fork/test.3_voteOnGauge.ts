@@ -14,9 +14,8 @@ async function voteOnGauges() {
   const gaugeABI = require('../../artifacts/src/Curve/HIIQGaugeController.vy/HIIQGaugeController').abi;
 
   // hardhat fork addresses
-  const GAUGE_CONTROLLER_ADDR = "0x9786f6d29e1c9129808bbd3d1abc475e8324285d"
-  const REWARDS_DIST_ADDR = "0xc1259131422c55fd7f4d403592d8abf5d132d32e"
-  const UNI_GAUGE_ADDR = "0x3d7126d1ce1f71cb0111cf6ff683f55ba8474464"
+  const GAUGE_CONTROLLER_ADDR = "0xc2cd962e53afcdf574b409599a24724efbadb3d4"
+  const UNI_GAUGE_ADDR = "0x65237882dd5fbb85d865eff3be26ac4e67da87aa"
 
   // impersonate owner for hardhat fork
   const provider = new hre.ethers.providers.JsonRpcProvider(

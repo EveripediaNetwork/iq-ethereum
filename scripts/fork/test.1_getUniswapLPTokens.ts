@@ -51,11 +51,7 @@ async function getUniswapLPTokens() {
     18
   ))
 
-
-  await provider.request({
-    method: "hardhat_stopImpersonatingAccount",
-    params: [userAddress]
-  });
+  await provider.send("hardhat_stopImpersonatingAccount", [fromAddress]);
 
 //   const UniswapFraxIqPool = new ethers.Contract(uniswapFraxIqAddress, uniswapFraxIqABI, signer);
 //
