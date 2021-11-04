@@ -1,10 +1,11 @@
 async function main0002() {
 
   const hre = require("hardhat");
+  
   const hiiqABI = require('../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
+  const hiiqAddress = "0x1bf5457ecaa14ff63cc89efd560e251e814e16ba";
 
   const iqAddress = "0x579cea1889991f68acc35ff5c3dd0621ff29b0c9";
-  const hiiqAddress = "0x1bf5457ecaa14ff63cc89efd560e251e814e16ba";
 
   const OWNER_ADDR = "0xaca39b187352d9805deced6e73a3d72abf86e7a0";
 
