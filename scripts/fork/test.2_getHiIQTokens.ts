@@ -12,12 +12,12 @@ async function runwithImpersonation(userAddress: any, provider: any, hre: any, f
 async function getHiIQTokens() {
   const hre = require("hardhat");
 
-  const hiiqABI = require('../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
+  const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
   const hiiqAddress = "0x1bf5457ecaa14ff63cc89efd560e251e814e16ba";
 
   const IQOwner = '0xaca39b187352d9805deced6e73a3d72abf86e7a0';
   const IQERC20MainnetAddress = '0x579cea1889991f68acc35ff5c3dd0621ff29b0c9';
-  const IQERC20ABI = require('../artifacts/src/ERC20/IQERC20.sol/IQERC20').abi;
+  const IQERC20ABI = require('../../artifacts/src/ERC20/IQERC20.sol/IQERC20').abi;
 
   const toAddress = "0xAe65930180ef4d86dbD1844275433E9e1d6311ED";
 

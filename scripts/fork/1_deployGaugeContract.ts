@@ -1,7 +1,7 @@
 async function main0() {
 
   const hre = require("hardhat");
-  const hiiqABI = require('../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
+  const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
 
   const iqAddress = "0x579cea1889991f68acc35ff5c3dd0621ff29b0c9";
   const hiiqAddress = "0x1bf5457ecaa14ff63cc89efd560e251e814e16ba";
@@ -25,7 +25,7 @@ async function main0() {
   );
   await provider.send("hardhat_impersonateAccount", [OWNER_ADDR]);
   const signer = await hre.ethers.getSigner(OWNER_ADDR);
-  
+
   // const signer = (await hre.ethers.getSigners())[0];
 
   console.log('signer.address', signer.address)

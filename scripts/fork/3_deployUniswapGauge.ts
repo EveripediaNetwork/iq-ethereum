@@ -1,14 +1,14 @@
 async function main0001() {
 
   const hre = require("hardhat");
-  const hiiqABI = require('../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
+  const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
 
   const iqAddress = "0x579cea1889991f68acc35ff5c3dd0621ff29b0c9";
   const hiiqAddress = "0x1bf5457ecaa14ff63cc89efd560e251e814e16ba";
 
   const OWNER_ADDR = "0xaca39b187352d9805deced6e73a3d72abf86e7a0";
 
-  const gaugeABI = require('../artifacts/src/Curve/HIIQGaugeController.vy/HIIQGaugeController').abi;
+  const gaugeABI = require('../../artifacts/src/Curve/HIIQGaugeController.vy/HIIQGaugeController').abi;
 
   // hardhat fork addresses
   const GAUGE_CONTROLLER_ADDR = "0x9786f6d29e1c9129808bbd3d1abc475e8324285d"

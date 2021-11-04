@@ -2,7 +2,7 @@ async function main0002() {
 
   const hre = require("hardhat");
 
-  const hiiqABI = require('../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
+  const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
   const hiiqAddress = "0x1bf5457ecaa14ff63cc89efd560e251e814e16ba";
 
   const iqAddress = "0x579cea1889991f68acc35ff5c3dd0621ff29b0c9";
@@ -11,7 +11,7 @@ async function main0002() {
 
   const testUser = "0xAe65930180ef4d86dbD1844275433E9e1d6311ED";
 
-  const gaugeABI = require('../artifacts/src/Curve/HIIQGaugeController.vy/HIIQGaugeController').abi;
+  const gaugeABI = require('../../artifacts/src/Curve/HIIQGaugeController.vy/HIIQGaugeController').abi;
 
   // hardhat fork addresses
   const GAUGE_CONTROLLER_ADDR = "0x9786f6d29e1c9129808bbd3d1abc475e8324285d"
@@ -29,8 +29,8 @@ async function main0002() {
 
   const gaugeController = new hre.ethers.Contract(GAUGE_CONTROLLER_ADDR, gaugeABI, signer);
   console.log('votingPower: ',
-    hre.ethers.utils.formatEther(
-      await gaugeController.vote_user_power(testUser)
+    hre.ethers.utils.formatUnits(
+      await gaugeController.vote_user_power(testUser), 2
     )
   );
 
