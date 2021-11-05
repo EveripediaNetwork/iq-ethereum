@@ -1,22 +1,22 @@
-import {runwithImpersonation} from "./util_functions";
+import {runwithImpersonation, contractAddress, forkEthFaucet} from "./util_functions";
 
 async function getHiIQTokens() {
   const hre = require("hardhat");
 
-  const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
-  const hiiqAddress = "0x1bf5457ecaa14ff63cc89efd560e251e814e16ba";
-
-  const IQOwner = '0xaca39b187352d9805deced6e73a3d72abf86e7a0';
-  const IQERC20MainnetAddress = '0x579cea1889991f68acc35ff5c3dd0621ff29b0c9';
   const IQERC20ABI = require('../../artifacts/src/ERC20/IQERC20.sol/IQERC20').abi;
+  const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
 
-  const toAddress = "0xfed53eB388c6FF138aA97D1F9d24F8fd4efC9C73" // "0x208a110dDc5732f406B17E89bD92E06Db21c8CA1" // "0xAe65930180ef4d86dbD1844275433E9e1d6311ED";
+  const hiiqAddress = contractAddress("HIIQ");
+  const IQOwner = contractAddress("OWNER");
+  const IQERC20MainnetAddress = contractAddress("IQ");
+
+  const toAddress = "0xAe65930180ef4d86dbD1844275433E9e1d6311ED"; // "0xfed53eB388c6FF138aA97D1F9d24F8fd4efC9C73" // "0x208a110dDc5732f406B17E89bD92E06Db21c8CA1"
 
   const secondsInADay = 24 * 60 * 60;
   const lockTime = Math.round(new Date().getTime() / 1000) + secondsInADay * 60;
 
   // impersonate owner for hardhat fork
-  const provider = new hre.ethers.providers.JsonRpcProvider("http://localhost:8545");
+  const provider = new hre.ethers.providers.JsonRpcProvider(hre.network.config.url);
 
   await runwithImpersonation(IQOwner, provider, hre, async (signer: any) => {
     const iqContract = new hre.ethers.Contract(IQERC20MainnetAddress, IQERC20ABI, signer);
@@ -56,13 +56,7 @@ async function getHiIQTokens() {
     const lockedAmount = hre.ethers.BigNumber.from(hre.ethers.utils.parseEther('100000')); // 100K
 
     // fund the account
-    let hhSigner0 = (await hre.ethers.getSigners())[0]
-    const txFunding = await hhSigner0.sendTransaction({
-      to: toAddress,
-      value: hre.ethers.utils.parseEther("20.0"), // Sends exactly 1.0 ether
-    });
-
-    txFunding.wait()
+    await forkEthFaucet(hre, toAddress, "20.0");
 
     console.log('approve transfer for IQ')
     const gasCost1 = await iqContract.estimateGas.approve(hiiqAddress, lockedAmount);
