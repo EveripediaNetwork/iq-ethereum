@@ -68,7 +68,10 @@ contract GaugeRewardsDistributor is Ownable {
     }
 
     modifier onlyByOwnerOrCuratorOrGovernance() {
-        require(msg.sender == owner() || msg.sender == curator_address || msg.sender == timelock_address, "Not owner, curator, or timelock");
+        require(
+            msg.sender == owner() || msg.sender == curator_address || msg.sender == timelock_address,
+            "Not owner, curator, or timelock"
+        );
         _;
     }
 
@@ -92,7 +95,6 @@ contract GaugeRewardsDistributor is Ownable {
         gauge_controller = IGaugeController(_gauge_controller_address);
 
         distributionsOn = true;
-
     }
 
     /* ========== VIEWS ========== */
@@ -107,17 +109,20 @@ contract GaugeRewardsDistributor is Ownable {
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     // Callable by anyone
-    function distributeReward(address gauge_address) public isDistributing returns (uint256 weeks_elapsed, uint256 reward_tally) {
+    function distributeReward(address gauge_address)
+        public
+        isDistributing
+        returns (uint256 weeks_elapsed, uint256 reward_tally)
+    {
         require(gauge_whitelist[gauge_address], "Gauge not whitelisted");
 
         // Calculate the elapsed time in weeks. Truncation desired
         uint256 last_time_paid = last_time_gauge_paid[gauge_address];
 
         // Edge case for first reward for this gauge
-        if (last_time_paid == 0){
+        if (last_time_paid == 0) {
             weeks_elapsed = 1;
-        }
-        else {
+        } else {
             weeks_elapsed = (block.timestamp).sub(last_time_gauge_paid[gauge_address]) / ONE_WEEK;
 
             // Return early here for 0 weeks instead of throwing, as it could have bad effects in other contracts
@@ -128,15 +133,17 @@ contract GaugeRewardsDistributor is Ownable {
 
         // NOTE: This will always use the current global_emission_rate()
         reward_tally = 0;
-        for (uint i = 0; i < (weeks_elapsed); i++){
+        for (uint256 i = 0; i < (weeks_elapsed); i++) {
             uint256 rel_weight_at_week;
             if (i == 0) {
                 // Mutative, for the current week. Makes sure the weight is checkpointed. Also returns the weight.
                 rel_weight_at_week = gauge_controller.gauge_relative_weight_write(gauge_address, block.timestamp);
-            }
-            else {
+            } else {
                 // View
-                rel_weight_at_week = gauge_controller.gauge_relative_weight(gauge_address, (block.timestamp).sub(ONE_WEEK * i));
+                rel_weight_at_week = gauge_controller.gauge_relative_weight(
+                    gauge_address,
+                    (block.timestamp).sub(ONE_WEEK * i)
+                );
             }
             uint256 rwd_rate_at_week = (gauge_controller.global_emission_rate()).mul(rel_weight_at_week).div(1e18);
             reward_tally = reward_tally.add(rwd_rate_at_week.mul(ONE_WEEK));
@@ -145,7 +152,7 @@ contract GaugeRewardsDistributor is Ownable {
         // Update the last time paid
         last_time_gauge_paid[gauge_address] = block.timestamp;
 
-        if (is_middleman[gauge_address]){
+        if (is_middleman[gauge_address]) {
             // Cross chain: Pay out the rewards to the middleman contract
             // Approve for the middleman first
             ERC20(reward_token_address).approve(gauge_address, reward_tally);
@@ -153,8 +160,7 @@ contract GaugeRewardsDistributor is Ownable {
             // Trigger the middleman
             // FraxMiddlemanGauge(gauge_address).pullAndBridge(reward_tally);
             require(false, "Middleman Gauge not implemented!");
-        }
-        else {
+        } else {
             // Mainnet: Pay out the rewards directly to the gauge
             TransferHelper.safeTransfer(reward_token_address, gauge_address, reward_tally);
         }
@@ -180,7 +186,11 @@ contract GaugeRewardsDistributor is Ownable {
         emit RecoveredERC20(tokenAddress, tokenAmount);
     }
 
-    function setGaugeState(address _gauge_address, bool _is_middleman, bool _is_active) external onlyByOwnerOrGovernance {
+    function setGaugeState(
+        address _gauge_address,
+        bool _is_middleman,
+        bool _is_active
+    ) external onlyByOwnerOrGovernance {
         is_middleman[_gauge_address] = _is_middleman;
         gauge_whitelist[_gauge_address] = _is_active;
 
