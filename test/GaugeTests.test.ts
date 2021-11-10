@@ -350,10 +350,10 @@ describe('CRV Gauges', () => {
     // const {reserve0} = await UniswapFraxIqPool.getReserves()
     //
     // console.log(`getReserves: ${1}`)
-    console.log(`fraxPerLPToken: ${await UniswapIqFraxLpGauge.fraxPerLPToken()}`)
+    console.log(`fraxPerLPToken: ${await UniswapIqFraxLpGauge.iqPerLPToken()}`)
 
 
-    const stakedFrax = await UniswapIqFraxLpGauge.userStakedFrax(users[0].address)
+    const stakedFrax = await UniswapIqFraxLpGauge.userStakedIq(users[0].address)
     console.log(`stakedFrax: ${stakedFrax}`)
 
     await ethers.provider.send('evm_increaseTime', [secondsInADay * 14]);
