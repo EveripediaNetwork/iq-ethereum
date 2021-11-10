@@ -273,16 +273,16 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
     function hiIQMultiplier(address account) public view returns (uint256) {
         // The claimer gets a boost depending on amount of hiIQ they have relative to the amount of FRAX 'inside'
         // of their locked LP tokens
-        uint256 veFXS_needed_for_max_boost = minHiIQForMaxBoost(account);
-        if (veFXS_needed_for_max_boost > 0){
-            uint256 user_vefxs_fraction = (hiIQ.balanceOf(account)).mul(MULTIPLIER_PRECISION).div(veFXS_needed_for_max_boost);
+        uint256 hiIQ_needed_for_max_boost = minHiIQForMaxBoost(account);
+        if (hiIQ_needed_for_max_boost > 0){
+            uint256 user_hiiq_fraction = (hiIQ.balanceOf(account)).mul(MULTIPLIER_PRECISION).div(hiIQ_needed_for_max_boost);
 
-            uint256 vefxs_multiplier = ((user_vefxs_fraction).mul(hiiq_max_multiplier)).div(MULTIPLIER_PRECISION);
+            uint256 hiiq_multiplier = ((user_hiiq_fraction).mul(hiiq_max_multiplier)).div(MULTIPLIER_PRECISION);
 
             // Cap the boost to the hiiq_max_multiplier
-            if (vefxs_multiplier > hiiq_max_multiplier) vefxs_multiplier = hiiq_max_multiplier;
+            if (hiiq_multiplier > hiiq_max_multiplier) hiiq_multiplier = hiiq_max_multiplier;
 
-            return vefxs_multiplier;
+            return hiiq_multiplier;
         }
         else return 0; // This will happen with the first stake, when user_staked_frax is 0
     }
@@ -291,17 +291,17 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
     function calcCurCombinedWeight(address account) public view
     returns (
         uint256 old_combined_weight,
-        uint256 new_vefxs_multiplier,
+        uint256 new_hiiq_multiplier,
         uint256 new_combined_weight
     )
     {
         // Get the old combined weight
         old_combined_weight = _combined_weights[account];
 
-        // Get the veFXS multipliers
+        // Get the hiIQ multipliers
         // For the calculations, use the midpoint (analogous to midpoint Riemann sum)
-        new_vefxs_multiplier = hiIQMultiplier(account);
-        uint256 midpoint_vefxs_multiplier = ((new_vefxs_multiplier).add(_hiiqMultiplierStored[account])).div(2);
+        new_hiiq_multiplier = hiIQMultiplier(account);
+        uint256 midpoint_hiiq_multiplier = ((new_hiiq_multiplier).add(_hiiqMultiplierStored[account])).div(2);
 
         // Loop through the locked stakes, first by getting the liquidity * lock_multiplier portion
         new_combined_weight = 0;
@@ -327,7 +327,7 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
             }
 
             uint256 liquidity = thisStake.liquidity;
-            uint256 combined_boosted_amount = liquidity.mul(lock_multiplier.add(midpoint_vefxs_multiplier)).div(MULTIPLIER_PRECISION);
+            uint256 combined_boosted_amount = liquidity.mul(lock_multiplier.add(midpoint_hiiq_multiplier)).div(MULTIPLIER_PRECISION);
             new_combined_weight = new_combined_weight.add(combined_boosted_amount);
         }
     }
@@ -450,18 +450,18 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
 
         if (account != address(0)) {
             // To keep the math correct, the user's combined weight must be recomputed to account for their
-            // ever-changing veFXS balance.
+            // ever-changing hiIQ balance.
             (
             uint256 old_combined_weight,
-            uint256 new_vefxs_multiplier,
+            uint256 new_hiiq_multiplier,
             uint256 new_combined_weight
             ) = calcCurCombinedWeight(account);
 
             // Calculate the earnings first
             _syncEarned(account);
 
-            // Update the user's stored veFXS multipliers
-            _hiiqMultiplierStored[account] = new_vefxs_multiplier;
+            // Update the user's stored hiIQ multipliers
+            _hiiqMultiplierStored[account] = new_hiiq_multiplier;
 
             // Update the user's and the global combined weights
             if (new_combined_weight >= old_combined_weight) {
