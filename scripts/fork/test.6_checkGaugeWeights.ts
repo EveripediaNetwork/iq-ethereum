@@ -25,6 +25,15 @@ async function voteOnGauges() {
 
     const gaugeController = new hre.ethers.Contract(GAUGE_CONTROLLER_ADDR, gaugeABI, signer);
 
+    // let estGas;
+    //
+    // estGas = await gaugeController.change_gauge_weight(UNI_GAUGE_FRAX_IQ_ADDR, 5000);
+    // await gaugeController.change_gauge_weight(UNI_GAUGE_FRAX_IQ_ADDR, {gasLimit: estGas});
+    //
+    // estGas = await gaugeController.change_gauge_weight(UNI_GAUGE_ETH_IQ_ADDR, 5000);
+    // await gaugeController.change_gauge_weight(UNI_GAUGE_ETH_IQ_ADDR, {gasLimit: estGas});
+
+
     const iq_frax_gauge_weight = await gaugeController.get_gauge_weight(UNI_GAUGE_FRAX_IQ_ADDR, {gasLimit: 400000});
     const iq_eth_gauge_weight = await gaugeController.get_gauge_weight(UNI_GAUGE_ETH_IQ_ADDR, {gasLimit: 400000});
     const total_gauge_weight = await gaugeController.get_total_weight({gasLimit: 400000});

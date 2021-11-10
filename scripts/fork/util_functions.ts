@@ -32,14 +32,15 @@ export function contractAddress(name: string) {
   } else if (name == "UNISWAP_LP_IQ_ETH") {
     return "0xef9f994a74cb6ef21c38b13553caa2e3e15f69d0"; // mainnet
   } else if (name == "GAUGE_CONTROLLER") {
-    return "0x2b308cd243074e2f4a709e12c26039acecd4daa7"; // hardhat fork
-  } else if (name == "GAUGE_REWARDS_DISTRIBUTOR") {
     return "0xc2cd962e53afcdf574b409599a24724efbadb3d4"; // hardhat fork
-  } else if (name == "UNI_LP_GAUGE_IQ_FRAX") {
+  } else if (name == "GAUGE_REWARDS_DISTRIBUTOR") {
     return "0x839055d0fbee415e665dc500dd2af292c0692305"; // hardhat fork
-  } else if (name == "UNI_LP_GAUGE_IQ_ETH") {
+  } else if (name == "UNI_LP_GAUGE_IQ_FRAX") {
     return "0x65237882dd5fbb85d865eff3be26ac4e67da87aa"; // hardhat fork
+  } else if (name == "UNI_LP_GAUGE_IQ_ETH") {
+    return "0x2c477a64d2cb9f340e1f72ff76399432559e2199"; // hardhat fork
   }
+  return ""
 }
 
 /**

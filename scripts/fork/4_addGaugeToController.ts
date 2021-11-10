@@ -5,6 +5,7 @@ async function addGaugeToController() {
   const hre = require("hardhat");
   const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
   const gaugeABI = require('../../artifacts/src/Curve/HIIQGaugeController.vy/HIIQGaugeController').abi;
+  const rewardsDistABI = require('../../artifacts/src/Curve/GaugeRewardsDistributor.sol/GaugeRewardsDistributor').abi;
 
   const iqAddress = contractAddress("IQ");
   const hiiqAddress = contractAddress("HIIQ");
@@ -22,28 +23,40 @@ async function addGaugeToController() {
   // impersonate owner for hardhat fork
   const provider = new hre.ethers.providers.JsonRpcProvider(hre.network.config.url);
   await runwithImpersonation(OWNER_ADDR, provider, hre, async (signer: any) => {
+    let estGas;
     console.log('signer.address', signer.address)
 
+    const rewardsDistributor = new hre.ethers.Contract(REWARDS_DIST_ADDR, rewardsDistABI, signer);
     const gauge = new hre.ethers.Contract(GAUGE_CONTROLLER_ADDR, gaugeABI, signer);
 
     console.log('add gauge type')
-    const estGas1 = await gauge.estimateGas.add_type(0, 100);
-    await gauge.add_type(0, 100, {gasLimit: estGas1});
+    estGas = await gauge.estimateGas.add_type(0, 100);
+    await gauge.add_type(0, 100, {gasLimit: estGas});
 
     console.log('add frax iq gauge')
-    const estGas2 = await gauge.estimateGas.add_gauge(UNI_GAUGE_FRAX_IQ_ADDR, 0, 100);
-    await gauge.add_gauge(UNI_GAUGE_FRAX_IQ_ADDR, 0, 100, {gasLimit: estGas2});
+    estGas = await gauge.estimateGas.add_gauge(UNI_GAUGE_FRAX_IQ_ADDR, 0, 100);
+    await gauge.add_gauge(UNI_GAUGE_FRAX_IQ_ADDR, 0, 100, {gasLimit: estGas});
     console.log('added frax iq gauge')
 
     console.log('change frax iq gauge weight')
-    const estGas3 = await gauge.estimateGas.change_gauge_weight(UNI_GAUGE_FRAX_IQ_ADDR, 50);
-    await gauge.change_gauge_weight(UNI_GAUGE_FRAX_IQ_ADDR, 50, {gasLimit: estGas3});
+    estGas = await gauge.estimateGas.change_gauge_weight(UNI_GAUGE_FRAX_IQ_ADDR, 50);
+    await gauge.change_gauge_weight(UNI_GAUGE_FRAX_IQ_ADDR, 50, {gasLimit: estGas});
     console.log('changed frax iq gauge weight')
 
     console.log('add eth iq gauge')
-    const estGas4 = await gauge.estimateGas.add_gauge(UNI_GAUGE_ETH_IQ_ADDR, 0, 50);
-    await gauge.add_gauge(UNI_GAUGE_ETH_IQ_ADDR, 0, 50, {gasLimit: estGas4});
+    estGas = await gauge.estimateGas.add_gauge(UNI_GAUGE_ETH_IQ_ADDR, 0, 50);
+    await gauge.add_gauge(UNI_GAUGE_ETH_IQ_ADDR, 0, 50, {gasLimit: estGas});
     console.log('added eth iq gauge')
+
+    console.log('rewards dist whitelist frax iq gauge')
+    estGas = await rewardsDistributor.estimateGas.setGaugeState(UNI_GAUGE_FRAX_IQ_ADDR, false, true);
+    await rewardsDistributor.setGaugeState(UNI_GAUGE_FRAX_IQ_ADDR, false, true, {gasLimit: estGas});
+    console.log('rewards dist whitelisted frax iq gauge')
+
+    console.log('rewards dist whitelist eth iq gauge')
+    estGas = await rewardsDistributor.estimateGas.setGaugeState(UNI_GAUGE_ETH_IQ_ADDR, false, true);
+    await rewardsDistributor.setGaugeState(UNI_GAUGE_ETH_IQ_ADDR, false, true, {gasLimit: estGas});
+    console.log('rewards dist whitelisted eth iq gauge')
   });
 }
 

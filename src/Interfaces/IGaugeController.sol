@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 // https://github.com/swervefi/swerve/edit/master/packages/swerve-contracts/interfaces/IGaugeController.sol
 
-interface IFraxGaugeController {
+interface IGaugeController {
     struct Point {
         uint256 bias;
         uint256 slope;

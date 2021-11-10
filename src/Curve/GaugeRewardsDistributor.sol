@@ -30,11 +30,11 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../Rewards/TransferHelper.sol";
-import "../Interfaces/IFraxGaugeController.sol";
+import "../Interfaces/IGaugeController.sol";
 
 //import "./FraxMiddlemanGauge.sol";
 
-contract FraxGaugeFXSRewardsDistributor is Ownable {
+contract GaugeRewardsDistributor is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
@@ -42,7 +42,7 @@ contract FraxGaugeFXSRewardsDistributor is Ownable {
 
     // Instances and addresses
     address private reward_token_address;
-    IFraxGaugeController private gauge_controller;
+    IGaugeController private gauge_controller;
 
     // Admin addresses
     address public timelock_address;

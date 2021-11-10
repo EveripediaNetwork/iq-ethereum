@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.6.11;
 
-interface IFraxGaugeFXSRewardsDistributor {
+interface IGaugeFXSRewardsDistributor {
     function acceptOwnership() external;
     function curator_address() external view returns(address);
     function currentReward(address gauge_address) external view returns(uint256 reward_amount);

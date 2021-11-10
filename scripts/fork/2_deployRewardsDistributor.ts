@@ -19,7 +19,7 @@ async function deployRewardsDistributor() {
     console.log('signer.address', signer.address)
 
     // Deploy the Rewards Distributor
-    const RewardsDistributor = await hre.ethers.getContractFactory("FraxGaugeFXSRewardsDistributor", signer);
+    const RewardsDistributor = await hre.ethers.getContractFactory("GaugeRewardsDistributor", signer);
     console.log('RewardsDistributor.signer', RewardsDistributor.signer.address)
 
     const rewardsDistributor = await RewardsDistributor.deploy(

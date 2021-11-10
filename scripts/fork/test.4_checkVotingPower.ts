@@ -11,7 +11,7 @@ async function checkVotingPower() {
   const iqAddress = contractAddress("IQ");
   const OWNER_ADDR = contractAddress("OWNER");
 
-  const testUser = "0xAe65930180ef4d86dbD1844275433E9e1d6311ED";
+  const testUser = "0x208a110dDc5732f406B17E89bD92E06Db21c8CA1";
 
   // hardhat fork addresses
   const GAUGE_CONTROLLER_ADDR = contractAddress("GAUGE_CONTROLLER");
