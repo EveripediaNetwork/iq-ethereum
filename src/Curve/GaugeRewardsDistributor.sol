@@ -89,7 +89,7 @@ contract GaugeRewardsDistributor is Ownable {
         timelock_address = _timelock_address;
 
         reward_token_address = _reward_token_address;
-        gauge_controller = IFraxGaugeController(_gauge_controller_address);
+        gauge_controller = IGaugeController(_gauge_controller_address);
 
         distributionsOn = true;
 
@@ -196,7 +196,7 @@ contract GaugeRewardsDistributor is Ownable {
     }
 
     function setGaugeController(address _gauge_controller_address) external onlyByOwnerOrGovernance {
-        gauge_controller = IFraxGaugeController(_gauge_controller_address);
+        gauge_controller = IGaugeController(_gauge_controller_address);
     }
 
     /* ========== EVENTS ========== */

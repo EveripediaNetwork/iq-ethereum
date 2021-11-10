@@ -12,7 +12,7 @@ pragma experimental ABIEncoderV2;
 // ====================================================================
 // ===================== StakingRewardsMultiGauge =====================
 // ====================================================================
-// veFXS-enabled
+// hiIQ-enabled
 // Multiple tokens with different reward rates can be emitted
 // Multiple teams can set the reward rates for their token(s)
 // Those teams can also use a gauge, or an external function with
@@ -46,9 +46,6 @@ import '../Interfaces/IUniswapV2Pair.sol';
 import "../Interfaces/IGaugeController.sol";
 import "../Interfaces/IGaugeRewardsDistributor.sol";
 
-//import "../Curve/IveFXS.sol";
-
-
 contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
@@ -64,7 +61,7 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
     // // mStable
     // IFeederPool public stakingToken;
 
-    IFraxGaugeFXSRewardsDistributor public rewards_distributor;
+    IGaugeRewardsDistributor public rewards_distributor;
 
     // IQ
     address private constant iq_address = 0x579CEa1889991f68aCc35Ff5c3dd0621fF29b0C9;
@@ -82,7 +79,7 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
     uint256 public lock_time_min = 86400; // 1 * 86400  (1 day)
 
     // hiIQ related
-    uint256 public hiiq_per_iq_for_max_boost = uint256(4e18); // E18. 4e18 means 4 veFXS must be held by the staker per 1 FRAX
+    uint256 public hiiq_per_iq_for_max_boost = uint256(4e18); // E18. 4e18 means 4 hiIQ must be held by the staker per 1 IQ
     uint256 public hiiq_max_multiplier = uint256(2e18); // E18. 1x = 1e18
     mapping(address => uint256) private _hiiqMultiplierStored;
 
@@ -269,14 +266,14 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
         return (iqPerLPToken()).mul(_locked_liquidity[account]).div(1e18);
     }
 
-    function minVeFXSForMaxBoost(address account) public view returns (uint256) {
+    function minHiIQForMaxBoost(address account) public view returns (uint256) {
         return (userStakedIq(account)).mul(hiiq_per_iq_for_max_boost).div(MULTIPLIER_PRECISION);
     }
 
-    function veFXSMultiplier(address account) public view returns (uint256) {
-        // The claimer gets a boost depending on amount of veFXS they have relative to the amount of FRAX 'inside'
+    function hiIQMultiplier(address account) public view returns (uint256) {
+        // The claimer gets a boost depending on amount of hiIQ they have relative to the amount of FRAX 'inside'
         // of their locked LP tokens
-        uint256 veFXS_needed_for_max_boost = minVeFXSForMaxBoost(account);
+        uint256 veFXS_needed_for_max_boost = minHiIQForMaxBoost(account);
         if (veFXS_needed_for_max_boost > 0){
             uint256 user_vefxs_fraction = (hiIQ.balanceOf(account)).mul(MULTIPLIER_PRECISION).div(veFXS_needed_for_max_boost);
 
@@ -303,7 +300,7 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
 
         // Get the veFXS multipliers
         // For the calculations, use the midpoint (analogous to midpoint Riemann sum)
-        new_vefxs_multiplier = veFXSMultiplier(account);
+        new_vefxs_multiplier = hiIQMultiplier(account);
         uint256 midpoint_vefxs_multiplier = ((new_vefxs_multiplier).add(_hiiqMultiplierStored[account])).div(2);
 
         // Loop through the locked stakes, first by getting the liquidity * lock_multiplier portion
@@ -370,7 +367,7 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
     function rewardRates(uint256 token_idx) public view returns (uint256 rwd_rate) {
         address gauge_controller_address = gaugeControllers[token_idx];
         if (gauge_controller_address != address(0)) {
-            rwd_rate = (IFraxGaugeController(gauge_controller_address).global_emission_rate()).mul(last_gauge_relative_weights[token_idx]).div(1e18);
+            rwd_rate = (IGaugeController(gauge_controller_address).global_emission_rate()).mul(last_gauge_relative_weights[token_idx]).div(1e18);
         }
         else {
             rwd_rate = rewardRatesManual[token_idx];
@@ -658,8 +655,8 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
             if (gauge_controller_address != address(0)) {
                 if (force_update || (block.timestamp > last_gauge_time_totals[i])){
                     // Update the gauge_relative_weight
-                    last_gauge_relative_weights[i] = IFraxGaugeController(gauge_controller_address).gauge_relative_weight_write(address(this), block.timestamp);
-                    last_gauge_time_totals[i] = IFraxGaugeController(gauge_controller_address).time_total();
+                    last_gauge_relative_weights[i] = IGaugeController(gauge_controller_address).gauge_relative_weight_write(address(this), block.timestamp);
+                    last_gauge_time_totals[i] = IGaugeController(gauge_controller_address).time_total();
                 }
             }
         }
@@ -747,16 +744,16 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
 
     function setMultipliers(uint256 _lock_max_multiplier, uint256 _hiiq_max_multiplier, uint256 _hiiq_per_iq_for_max_boost) external onlyOwner {
         require(_lock_max_multiplier >= MULTIPLIER_PRECISION, "Mult must be >= MULTIPLIER_PRECISION");
-        require(_hiiq_max_multiplier >= 0, "veFXS mul must be >= 0");
-        require(_hiiq_per_iq_for_max_boost > 0, "veFXS pct max must be >= 0");
+        require(_hiiq_max_multiplier >= 0, "hiIQ mul must be >= 0");
+        require(_hiiq_per_iq_for_max_boost > 0, "hiIQ pct max must be >= 0");
 
         lock_max_multiplier = _lock_max_multiplier;
         hiiq_max_multiplier = _hiiq_max_multiplier;
         hiiq_per_iq_for_max_boost = _hiiq_per_iq_for_max_boost;
 
-        emit MaxVeFXSMultiplier(hiiq_max_multiplier);
+        emit MaxHIIQMultiplier(hiiq_max_multiplier);
         emit LockedStakeMaxMultiplierUpdated(lock_max_multiplier);
-        emit veFXSPerFraxForMaxBoostUpdated(hiiq_per_iq_for_max_boost);
+        emit HIIQPerFraxForMaxBoostUpdated(hiiq_per_iq_for_max_boost);
     }
 
     function setLockedStakeTimeForMinAndMaxMultiplier(uint256 _lock_time_for_max_multiplier, uint256 _lock_time_min) external onlyOwner {
@@ -806,7 +803,7 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
     // The owner or the reward token managers can set reward rates
     function setGaugeController(address reward_token_address, address _rewards_distributor_address, address _gauge_controller_address, bool sync_too) external onlyTknMgrs(reward_token_address) {
         gaugeControllers[rewardTokenAddrToIdx[reward_token_address]] = _gauge_controller_address;
-        rewards_distributor = IFraxGaugeFXSRewardsDistributor(_rewards_distributor_address);
+        rewards_distributor = IGaugeRewardsDistributor(_rewards_distributor_address);
 
         if (sync_too){
             sync();
@@ -829,6 +826,6 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
     event LockedStakeMaxMultiplierUpdated(uint256 multiplier);
     event LockedStakeTimeForMaxMultiplier(uint256 secs);
     event LockedStakeMinTime(uint256 secs);
-    event MaxVeFXSMultiplier(uint256 multiplier);
-    event veFXSPerFraxForMaxBoostUpdated(uint256 scale_factor);
+    event MaxHIIQMultiplier(uint256 multiplier);
+    event HIIQPerFraxForMaxBoostUpdated(uint256 scale_factor);
 }

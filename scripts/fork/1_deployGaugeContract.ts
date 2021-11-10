@@ -4,8 +4,6 @@ async function deployGaugeControllerContract() {
 
   const hre = require("hardhat");
 
-  const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
-
   const iqAddress = contractAddress("IQ");
   const hiiqAddress = contractAddress("HIIQ");
   const OWNER_ADDR = contractAddress("OWNER");

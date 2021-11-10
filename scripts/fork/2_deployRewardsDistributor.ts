@@ -3,10 +3,8 @@ import {runwithImpersonation, contractAddress} from "./util_functions";
 async function deployRewardsDistributor() {
 
   const hre = require("hardhat");
-  const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
 
   const iqAddress = contractAddress("IQ");
-  const hiiqAddress = contractAddress("HIIQ");
   const OWNER_ADDR = contractAddress("OWNER");
 
   // hardhat fork addresses

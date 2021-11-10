@@ -10,7 +10,7 @@ async function getHiIQTokens() {
   const IQOwner = contractAddress("OWNER");
   const IQERC20MainnetAddress = contractAddress("IQ");
 
-  const toAddress = "0x92cb421FA761f881a19F6794119989f5dFf05316"; // "0xfed53eB388c6FF138aA97D1F9d24F8fd4efC9C73" // "0x208a110dDc5732f406B17E89bD92E06Db21c8CA1"
+  const toAddress = "0xAe65930180ef4d86dbD1844275433E9e1d6311ED"; // "0xfed53eB388c6FF138aA97D1F9d24F8fd4efC9C73" // "0x208a110dDc5732f406B17E89bD92E06Db21c8CA1"
 
   const secondsInADay = 24 * 60 * 60;
   const lockTime = Math.round(new Date().getTime() / 1000) + secondsInADay * 60;

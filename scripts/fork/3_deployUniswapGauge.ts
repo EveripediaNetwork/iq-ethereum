@@ -3,11 +3,9 @@ import {runwithImpersonation, contractAddress} from "./util_functions";
 async function deployUniswapGauge() {
 
   const hre = require("hardhat");
-  const hiiqABI = require('../../artifacts/src/Lock/HIIQ.vy/HIIQ').abi;
   const gaugeABI = require('../../artifacts/src/Curve/HIIQGaugeController.vy/HIIQGaugeController').abi;
 
   const iqAddress = contractAddress("IQ");
-  const hiiqAddress = contractAddress("HIIQ");
   const OWNER_ADDR = contractAddress("OWNER");
 
   const IqFraxlpTokenAddress = contractAddress("UNISWAP_LP_IQ_FRAX");
