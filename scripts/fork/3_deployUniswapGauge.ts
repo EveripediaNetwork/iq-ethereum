@@ -44,7 +44,7 @@ async function deployUniswapGauge() {
       ['IQ'],
       [iqAddress],
       [OWNER_ADDR],
-      [11574074074074, 11574074074074],
+      [11574074074074],
       ['0x0000000000000000000000000000000000000000']
     );
     await stakingRewardsMultiGauge.deployed();

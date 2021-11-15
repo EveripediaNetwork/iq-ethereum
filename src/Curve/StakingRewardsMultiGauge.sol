@@ -205,7 +205,7 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
         }
 
         // Uniswap V2 ONLY
-        // Uniswap related. Need to know which token frax is (0 or 1)
+        // Uniswap related. Need to know which token iq is (0 or 1)
         address token0 = stakingToken.token0();
         if (token0 == iq_address) iq_is_token0 = true;
         else iq_is_token0 = false;
@@ -245,7 +245,7 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
     }
 
     function iqPerLPToken() public view returns (uint256) {
-        // Get the amount of FRAX 'inside' of the lp tokens
+        // Get the amount of IQ 'inside' of the lp tokens
         uint256 iq_per_lp_token;
 
         // Uniswap V2
@@ -271,7 +271,7 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
     }
 
     function hiIQMultiplier(address account) public view returns (uint256) {
-        // The claimer gets a boost depending on amount of hiIQ they have relative to the amount of FRAX 'inside'
+        // The claimer gets a boost depending on amount of hiIQ they have relative to the amount of IQ 'inside'
         // of their locked LP tokens
         uint256 hiIQ_needed_for_max_boost = minHiIQForMaxBoost(account);
         if (hiIQ_needed_for_max_boost > 0){
@@ -284,7 +284,7 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
 
             return hiiq_multiplier;
         }
-        else return 0; // This will happen with the first stake, when user_staked_frax is 0
+        else return 0; // This will happen with the first stake, when user_staked_iq is 0
     }
 
     // Calculated the combined weight for an account
@@ -753,7 +753,7 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
 
         emit MaxHIIQMultiplier(hiiq_max_multiplier);
         emit LockedStakeMaxMultiplierUpdated(lock_max_multiplier);
-        emit HIIQPerFraxForMaxBoostUpdated(hiiq_per_iq_for_max_boost);
+        emit HIIQPerIQForMaxBoostUpdated(hiiq_per_iq_for_max_boost);
     }
 
     function setLockedStakeTimeForMinAndMaxMultiplier(uint256 _lock_time_for_max_multiplier, uint256 _lock_time_min) external onlyOwner {
@@ -827,5 +827,5 @@ contract StakingRewardsMultiGauge is Ownable, ReentrancyGuard {
     event LockedStakeTimeForMaxMultiplier(uint256 secs);
     event LockedStakeMinTime(uint256 secs);
     event MaxHIIQMultiplier(uint256 multiplier);
-    event HIIQPerFraxForMaxBoostUpdated(uint256 scale_factor);
+    event HIIQPerIQForMaxBoostUpdated(uint256 scale_factor);
 }

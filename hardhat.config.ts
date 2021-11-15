@@ -59,6 +59,16 @@ const config: HardhatUserConfig = {
       rinkeby: '0xBe0B7Dedad660BdEE5CDE49b95a2811Dd6F03E9B',
       mainnet: '0xb55Dcc69d909103b4De773412A22AB8B86e8c602',
     },
+    iqFraxLpToken: {
+      goerli: '',
+      rinkeby: '',
+      mainnet: '0xd6c783b257e662ca949b441a4fcb08a53fc49914',
+    },
+    iqEthLpToken: {
+      goerli: '',
+      rinkeby: '',
+      mainnet: '0xef9f994a74cb6ef21c38b13553caa2e3e15f69d0',
+    },
   },
   defaultNetwork: "hardhat",
   networks: {
