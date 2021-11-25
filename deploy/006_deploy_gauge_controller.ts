@@ -21,17 +21,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   hre.deployments.log(
     `🚀 contract ${contractName} deployed at ${result.address} using ${result.receipt?.gasUsed} gas`
   );
-
-  const HIIQGaugeController = <HIIQGaugeController>await ethers.getContract(contractName, deployer);
-
-  // add gauge liquidity type
-  await HIIQGaugeController.add_type('Liquidity', 100);
-
-  // Change the global emission rate
-  const secondsInADay = 60 * 60 * 24;
-  const emissionsRateIQperDay = 1e6; // 1M IQ per day
-  const yieldPerSecond = parseEther(`${emissionsRateIQperDay}`).div(secondsInADay);
-  await HIIQGaugeController.change_global_emission_rate(yieldPerSecond);
 };
 
 export default func;

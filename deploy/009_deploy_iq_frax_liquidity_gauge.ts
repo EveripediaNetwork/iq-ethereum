@@ -8,6 +8,7 @@ const gaugeRewardsDistributorContractName = 'GaugeRewardsDistributor';
 const contractName = 'StakingRewardsMultiGauge';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  console.log('hre.network.name', hre.network.name)
   const {deployments, getNamedAccounts} = hre;
   const {deployer, iqFraxLpToken} = await getNamedAccounts();
   const {deploy} = deployments;
@@ -15,6 +16,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const hiiqGaugeController = <HIIQGaugeController>await ethers.getContract(hiiqGaugeControllerContractName, deployer)
   const gaugeRewardsDistributor = <GaugeRewardsDistributor>await ethers.getContract(gaugeRewardsDistributorContractName, deployer)
 
+  console.log('hiiqGaugeController', hiiqGaugeController.address);
+  console.log('gaugeRewardsDistributor', gaugeRewardsDistributor.address);
 
   const result = await deploy(contractName, {
     from: deployer,
@@ -30,7 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  hre.deployments.log(
+  console.log(
     `🚀 contract ${contractName} deployed at ${result.address} using ${result.receipt?.gasUsed} gas`
   );
 
