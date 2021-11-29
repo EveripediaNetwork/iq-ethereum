@@ -28,7 +28,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       [iQ.address],
       [deployer],
       [11574074074074],
-      ['0x0000000000000000000000000000000000000000'],
+      [hiiqGaugeController.address],
     ],
     log: true,
   });

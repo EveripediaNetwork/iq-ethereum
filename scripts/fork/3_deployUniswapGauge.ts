@@ -39,7 +39,7 @@ async function deployUniswapGauge() {
     ); //, signer)
 
     const stakingRewardsMultiGauge = await StakingRewardsMultiGauge.deploy(
-      IqEthLpTokenAddress,
+      IqFraxlpTokenAddress,
       REWARDS_DIST_ADDR,
       ['IQ'],
       [iqAddress],

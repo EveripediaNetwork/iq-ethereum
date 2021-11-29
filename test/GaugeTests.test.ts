@@ -36,18 +36,22 @@ async function runwithImpersonation(userAddress: any, func: any) {
   });
 }
 
-async function getGaugeWeights(HiIQGaugeController: any) {
+async function getGaugeWeights(HiIQGaugeController: any, checkWeights: any = false) {
   const numberOfGauges = await HiIQGaugeController.n_gauges();
-  console.log(`there are ${numberOfGauges} gauges in this gaugecontroller`);
+  !checkWeights && console.log(`there are ${numberOfGauges} gauges in this gaugecontroller`);
 
   let totalWeight = await HiIQGaugeController.get_total_weight();
   for (let g_idx = 0; g_idx < numberOfGauges; g_idx++) {
     const gaugeAddress = await HiIQGaugeController.gauges(g_idx);
     const gaugeWeight = await HiIQGaugeController.get_gauge_weight(gaugeAddress);
     const gaugeWeightPct = (Number(formatUnits(gaugeWeight, 18)) / Number(formatUnits(totalWeight, 18))) * 10000;
-    console.log(`${gaugeAddress} - ${formatUnits(gaugeWeight, 2)} ${gaugeWeightPct} %`);
+    !checkWeights && console.log(`${gaugeAddress} - ${formatUnits(gaugeWeight, 2)} ${gaugeWeightPct} %`);
+    !checkWeights && console.log(`totalWeight: ${formatUnits(totalWeight, 2)}`);
+    if (checkWeights && checkWeights[gaugeAddress]) {
+      expect(gaugeWeightPct).to.be.gt(checkWeights[gaugeAddress].low);
+      expect(gaugeWeightPct).to.be.lt(checkWeights[gaugeAddress].high);
+    }
   }
-  console.log(`totalWeight: ${formatUnits(totalWeight, 2)}`);
 }
 
 function timestampToString(timestamp: any) {
@@ -102,7 +106,7 @@ const setup = deployments.createFixture(async () => {
   const HiIQGaugeController = await ethers.getContract(hiIQGaugeController);
 
   console.log('add gauge type');
-  const estGas1 = await HiIQGaugeController.estimateGas.add_type(0, 100);
+  const estGas1 = await HiIQGaugeController.estimateGas.add_type('Liquidity', 100);
   await HiIQGaugeController.add_type(0, 100, {gasLimit: estGas1});
 
   // Change the global emission rate
@@ -317,8 +321,11 @@ describe('CRV Gauges', () => {
       const user0HiIQBalance = await users[0].HIIQ['balanceOfAt(address,uint256)'](users[0].address, blockNum);
       console.log(`user0HiIQBalance: ${user0HiIQBalance}`);
 
-      await outputBlockTimestamp();
-      await getGaugeWeights(HiIQGaugeController);
+      // await outputBlockTimestamp();
+      await getGaugeWeights(HiIQGaugeController, {
+        [`${UniswapIqFraxLpGauge.address}`]: {low: 40, high: 60},
+        [`${UniswapIqEthLpGauge.address}`]: {low: 40, high: 60}
+      });
 
       console.log(`balance HIIQ ${await users[0].HIIQ['balanceOf(address)'](users[0].address)}`)
 
@@ -330,8 +337,11 @@ describe('CRV Gauges', () => {
       const vote_user_slopes = await HiIQGaugeController.vote_user_slopes(users[0].address, UniswapIqFraxLpGauge.address);
       console.log(`vote_user_slopes: ${vote_user_slopes}`);
 
-      await outputBlockTimestamp();
-      await getGaugeWeights(HiIQGaugeController);
+      // await outputBlockTimestamp();
+      await getGaugeWeights(HiIQGaugeController, {
+        [`${UniswapIqFraxLpGauge.address}`]: {low: 19, high: 21},
+        [`${UniswapIqEthLpGauge.address}`]: {low: 79, high: 81}
+      });
 
       console.log(`balance HIIQ ${await users[1].HIIQ['balanceOf(address)'](users[1].address)}`)
 
@@ -339,8 +349,11 @@ describe('CRV Gauges', () => {
       await users[1].HiIQGaugeController.vote_for_gauge_weights(UniswapIqFraxLpGauge.address, 3000);
       await users[1].HiIQGaugeController.vote_for_gauge_weights(UniswapIqEthLpGauge.address, 7000);
 
-      await outputBlockTimestamp();
-      await getGaugeWeights(HiIQGaugeController);
+      // await outputBlockTimestamp();
+      await getGaugeWeights(HiIQGaugeController, {
+        [`${UniswapIqFraxLpGauge.address}`]: {low: 24, high: 26},
+        [`${UniswapIqEthLpGauge.address}`]: {low: 74, high: 76}
+      });
 
       console.log(`balance HIIQ ${await users[2].HIIQ['balanceOf(address)'](users[2].address)}`)
 
@@ -348,8 +361,11 @@ describe('CRV Gauges', () => {
       await users[2].HiIQGaugeController.vote_for_gauge_weights(UniswapIqFraxLpGauge.address, 4000);
       await users[2].HiIQGaugeController.vote_for_gauge_weights(UniswapIqEthLpGauge.address, 6000);
 
-      await outputBlockTimestamp();
-      await getGaugeWeights(HiIQGaugeController);
+      // await outputBlockTimestamp();
+      await getGaugeWeights(HiIQGaugeController, {
+        [`${UniswapIqFraxLpGauge.address}`]: {low: 29, high: 31},
+        [`${UniswapIqEthLpGauge.address}`]: {low: 69, high: 71}
+      });
 
       let useVotingPowerUsed = formatUnits(await HiIQGaugeController.vote_user_power(users[0].address), 2);
       console.log(`User Voting Power Used: ${useVotingPowerUsed} %`); // format for bps
@@ -371,8 +387,11 @@ describe('CRV Gauges', () => {
       // await users[1].HiIQGaugeController.vote_for_gauge_weights(UniswapIqFraxLpGauge.address, 5000);
       // await users[1].HiIQGaugeController.vote_for_gauge_weights(UniswapIqEthLpGauge.address, 5000);
 
-      await outputBlockTimestamp();
-      await getGaugeWeights(HiIQGaugeController);
+      // await outputBlockTimestamp();
+      await getGaugeWeights(HiIQGaugeController, {
+        [`${UniswapIqFraxLpGauge.address}`]: {low: 39, high: 41},
+        [`${UniswapIqEthLpGauge.address}`]: {low: 59, high: 61}
+      });
 
       useVotingPowerUsed = formatUnits(await HiIQGaugeController.vote_user_power(users[0].address), 2);
       expect(useVotingPowerUsed).to.be.eq('90.0'); // expect 10% left over after the changed votes
