@@ -16,10 +16,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // add gauge liquidity type
   const estGas = await HIIQGaugeController.estimateGas.add_type('Liquidity', 100);
-  console.log(`estGas: ${estGas} ${formatEther(estGas)}`)
+  hre.deployments.log(`estGas: ${estGas} ${formatEther(estGas)}`)
   await (await HIIQGaugeController.add_type('Liquidity', 100, {gasLimit: estGas})).wait();
 
-  console.log('added type')
+  hre.deployments.log('added type')
 
   // Change the global emission rate
   const secondsInADay = 60 * 60 * 24;
@@ -27,7 +27,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const yieldPerSecond = parseEther(`${emissionsRateIQperDay}`).div(secondsInADay);
   await (await HIIQGaugeController.change_global_emission_rate(yieldPerSecond)).wait();
 
-  console.log('change_global_emission_rate')
+  hre.deployments.log('change_global_emission_rate')
 };
 
 export default func;

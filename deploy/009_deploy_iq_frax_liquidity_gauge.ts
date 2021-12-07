@@ -5,10 +5,11 @@ import {ethers} from "hardhat";
 
 const hiiqGaugeControllerContractName = 'HIIQGaugeController';
 const gaugeRewardsDistributorContractName = 'GaugeRewardsDistributor';
-const contractName = 'StakingRewardsMultiGauge';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('hre.network.name', hre.network.name)
+  // FRAX not on rinkeby? deploy the Simple Gauge instead
+  const contractName = hre.network.name == 'rinkeby' ? 'SimpleGauge' : 'StakingRewardsMultiGauge';
+  // const contractName = 'StakingRewardsMultiGauge';
   const {deployments, getNamedAccounts} = hre;
   const {deployer, iqFraxLpToken} = await getNamedAccounts();
   const {deploy} = deployments;
@@ -16,8 +17,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const hiiqGaugeController = <HIIQGaugeController>await ethers.getContract(hiiqGaugeControllerContractName, deployer)
   const gaugeRewardsDistributor = <GaugeRewardsDistributor>await ethers.getContract(gaugeRewardsDistributorContractName, deployer)
 
-  console.log('hiiqGaugeController', hiiqGaugeController.address);
-  console.log('gaugeRewardsDistributor', gaugeRewardsDistributor.address);
+  hre.deployments.log('hiiqGaugeController', hiiqGaugeController.address);
+  hre.deployments.log('gaugeRewardsDistributor', gaugeRewardsDistributor.address);
 
   const result = await deploy(contractName, {
     from: deployer,
@@ -33,15 +34,26 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  console.log(
-    `🚀 contract ${contractName} deployed at ${result.address} using ${result.receipt?.gasUsed} gas`
+  hre.deployments.log(
+    `🚀 contract IQ FRAX Gauge deployed at ${result.address} using ${result.receipt?.gasUsed} gas`
   );
 
+  let baseNonce = hre.ethers.provider.getTransactionCount(deployer);
+  let nonceOffset = 0;
+
+  function getNonce() {
+    return baseNonce.then((nonce) => (nonce + (nonceOffset++)));
+  }
+
+  // let estGas;
+
   // add the gauge to the gauge controller
-  await hiiqGaugeController.add_gauge(result.address, 0, 5000);
+  // estGas = await hiiqGaugeController.estimateGas.add_gauge(result.address, 0, 5000);
+  await hiiqGaugeController.add_gauge(result.address, 0, 5000, {gasLimit: 250000, nonce: getNonce()});
 
   // set the gauge active for the rewards distributor
-  await gaugeRewardsDistributor.setGaugeState(result.address, false, true);
+  // estGas = await gaugeRewardsDistributor.estimateGas.setGaugeState(result.address, false, true);
+  await gaugeRewardsDistributor.setGaugeState(result.address, false, true, {gasLimit: 250000, nonce: getNonce()});
 };
 
 export default func;
