@@ -20,10 +20,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   hre.deployments.log('hiiqGaugeController', hiiqGaugeController.address);
   hre.deployments.log('gaugeRewardsDistributor', gaugeRewardsDistributor.address);
 
+  let stakingToken = '0x0000000000000000000000000000000000000000';
+  if (contractName == "StakingRewardsMultiGauge") {
+    stakingToken = iqFraxLpToken;
+  }
+
   const result = await deploy(contractName, {
     from: deployer,
     args: [
-      iqFraxLpToken,
+      stakingToken,
       gaugeRewardsDistributor.address,
       ['IQ'],
       [iQ.address],
@@ -38,24 +43,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     `🚀 contract IQ FRAX Gauge deployed at ${result.address} using ${result.receipt?.gasUsed} gas`
   );
 
-  let baseNonce = hre.ethers.provider.getTransactionCount(deployer);
+  const baseNonce = hre.ethers.provider.getTransactionCount(deployer);
   let nonceOffset = 0;
 
   function getNonce() {
     return baseNonce.then((nonce) => (nonce + (nonceOffset++)));
   }
 
-  // let estGas;
+  if (result.newlyDeployed) {
 
-  // add the gauge to the gauge controller
-  // estGas = await hiiqGaugeController.estimateGas.add_gauge(result.address, 0, 5000);
-  await hiiqGaugeController.add_gauge(result.address, 0, 5000, {gasLimit: 250000, nonce: getNonce()});
+    // let estGas;
 
-  // set the gauge active for the rewards distributor
-  // estGas = await gaugeRewardsDistributor.estimateGas.setGaugeState(result.address, false, true);
-  await gaugeRewardsDistributor.setGaugeState(result.address, false, true, {gasLimit: 250000, nonce: getNonce()});
+    // add the gauge to the gauge controller
+    // estGas = await hiiqGaugeController.estimateGas.add_gauge(result.address, 0, 5000);
+    await hiiqGaugeController.add_gauge(result.address, 0, 5000, {gasLimit: 250000, nonce: getNonce()});
+
+    // set the gauge active for the rewards distributor
+    // estGas = await gaugeRewardsDistributor.estimateGas.setGaugeState(result.address, false, true);
+    await gaugeRewardsDistributor.setGaugeState(result.address, false, true, {gasLimit: 250000, nonce: getNonce()});
+  }
 };
 
 export default func;
-func.tags = ['IQ/FRAX Gauge'];
+func.tags = ['IQFRAX Gauge'];
 func.dependencies = ['IQERC20', hiiqGaugeControllerContractName, gaugeRewardsDistributorContractName];
