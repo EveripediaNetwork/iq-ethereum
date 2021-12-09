@@ -7,9 +7,14 @@ import {DeployFunction} from 'hardhat-deploy/types';
 //   args: [iQ, 'hiIQ', 'hiIQ', '1.0.0'],
 //   remove: func.dependencies = ['IQERC20'];
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployer} = await hre.getNamedAccounts();
+  const {deployer, hiIQ} = await hre.getNamedAccounts();
   const {deploy} = hre.deployments;
   const iQ = await hre.deployments.get('IQERC20');
+
+  if (hiIQ) {
+    hre.deployments.log(`🚀 found contract HIIQ in namedAccounts at ${hiIQ}`)
+    return;
+  }
 
   const result = await deploy('HIIQ', {
     from: deployer,
