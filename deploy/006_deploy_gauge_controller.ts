@@ -8,9 +8,17 @@ const contractName = 'HIIQGaugeController';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deployer, hiIQ} = await getNamedAccounts();
+  const {deployer, hiIQ, hiIQGaugeController} = await getNamedAccounts();
   const {deploy} = deployments;
   const iQ = await deployments.get('IQERC20');
+
+  console.log('IQ address:', iQ.address);
+  console.log('hiIQ address:', hiIQ);
+
+  if (hiIQGaugeController) {
+    hre.deployments.log(`🚀 found contract hiIQGaugeController in namedAccounts at ${hiIQGaugeController}`)
+    return;
+  }
 
   const result = await deploy(contractName, {
     from: deployer,

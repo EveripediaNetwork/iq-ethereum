@@ -48,7 +48,7 @@ const config: HardhatUserConfig = {
       goerli: '0x0552D756a3E92Aa874EF60F61b7a29030373e869', // everipediaIQ
     },
     hiIQ: {
-      default: 2,
+      // default: 2,
       mainnet: '0x1bf5457ecaa14ff63cc89efd560e251e814e16ba',
       matic: '0xfC0fA725E8fB4D87c38EcE56e8852258219C64Ee',
       goerli: '0xc03bcacc5377b7cc6634537650a7a1d14711c1a3',
@@ -59,14 +59,17 @@ const config: HardhatUserConfig = {
       rinkeby: '0xBe0B7Dedad660BdEE5CDE49b95a2811Dd6F03E9B',
       mainnet: '0xb55Dcc69d909103b4De773412A22AB8B86e8c602',
     },
+    hiIQGaugeController: {
+      rinkeby: '0xaFDC13561A4f4Fcfbd49f1EC3ce7f2393fbE5BD7',
+    },
     iqFraxLpToken: {
       goerli: '',
-      rinkeby: '',
+      rinkeby: '0x9072371ffd2ed7a9b929d8ec21ceb4684af7c086',
       mainnet: '0xd6c783b257e662ca949b441a4fcb08a53fc49914',
     },
     iqEthLpToken: {
       goerli: '',
-      rinkeby: '',
+      rinkeby: '0x520e3b23345c2a22262a4b6d041d969dcb71f3ff',
       mainnet: '0xef9f994a74cb6ef21c38b13553caa2e3e15f69d0',
     },
   },

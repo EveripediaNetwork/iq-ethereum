@@ -6,18 +6,17 @@ const contractName = 'GaugeRewardsDistributor';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, hiIQGaugeController} = await getNamedAccounts();
   const {deploy} = deployments;
   const iQ = await deployments.get('IQERC20');
-  const hiiqGaugeController = await deployments.get(hiiqGaugeControllerContractName);
-
+  
   const result = await deploy(contractName, {
     from: deployer,
     args: [
       deployer,
       deployer,
       iQ.address,
-      hiiqGaugeController.address,
+      hiIQGaugeController,
     ],
     log: true,
   });

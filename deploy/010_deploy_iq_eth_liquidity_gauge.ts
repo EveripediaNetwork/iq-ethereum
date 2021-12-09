@@ -9,11 +9,15 @@ const gaugeRewardsDistributorContractName = 'GaugeRewardsDistributor';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const contractName = 'StakingRewardsMultiGauge'; // hre.network.name == 'rinkeby' ? 'SimpleGauge' : 'StakingRewardsMultiGauge';
   const {deployments, getNamedAccounts} = hre;
-  const {deployer, iqEthLpToken} = await getNamedAccounts();
+  const {deployer, hiIQGaugeController, iqEthLpToken} = await getNamedAccounts();
   const {deploy} = deployments;
   const iQ = await deployments.get('IQERC20');
   const hiiqGaugeController = <HIIQGaugeController>await ethers.getContract(hiiqGaugeControllerContractName, deployer)
   const gaugeRewardsDistributor = <GaugeRewardsDistributor>await ethers.getContract(gaugeRewardsDistributorContractName, deployer)
+
+  if (hiiqGaugeController.address != hiIQGaugeController) {
+    throw new Error('GaugeController is different than the expected deployment');
+  }
 
   const result = await deploy(contractName, {
     from: deployer,

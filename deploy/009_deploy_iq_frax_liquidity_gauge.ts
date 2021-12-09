@@ -8,10 +8,10 @@ const gaugeRewardsDistributorContractName = 'GaugeRewardsDistributor';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // FRAX not on rinkeby? deploy the Simple Gauge instead
-  const contractName = hre.network.name == 'rinkeby' ? 'SimpleGauge' : 'StakingRewardsMultiGauge';
-  // const contractName = 'StakingRewardsMultiGauge';
+  // const contractName = hre.network.name == 'rinkeby' ? 'SimpleGauge' : 'StakingRewardsMultiGauge';
+  const contractName = 'StakingRewardsMultiGauge';
   const {deployments, getNamedAccounts} = hre;
-  const {deployer, iqFraxLpToken} = await getNamedAccounts();
+  const {deployer, hiIQGaugeController, iqFraxLpToken} = await getNamedAccounts();
   const {deploy} = deployments;
   const iQ = await deployments.get('IQERC20');
   const hiiqGaugeController = <HIIQGaugeController>await ethers.getContract(hiiqGaugeControllerContractName, deployer)
@@ -19,6 +19,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   hre.deployments.log('hiiqGaugeController', hiiqGaugeController.address);
   hre.deployments.log('gaugeRewardsDistributor', gaugeRewardsDistributor.address);
+
+  if (hiiqGaugeController.address != hiIQGaugeController) {
+    throw new Error('GaugeController is different than the expected deployment');
+  }
 
   let stakingToken = '0x0000000000000000000000000000000000000000';
   if (contractName == "StakingRewardsMultiGauge") {
