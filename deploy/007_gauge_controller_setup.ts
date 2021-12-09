@@ -10,9 +10,9 @@ const contractName = 'HIIQGaugeController';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   return; // SKIP THIS WHOLE THING
-  
+
   const {deployments, getNamedAccounts} = hre;
-  const {deployer, hiIQ} = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
   const {deploy} = deployments;
   const iQ = await deployments.get('IQERC20');
 
