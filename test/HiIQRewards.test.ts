@@ -167,13 +167,30 @@ describe(contractName, () => {
       }
 
       console.log('block.timestamp: ', block.timestamp);
-      console.log('weeks ellapsed: ', firstBlock ? (block.timestamp - firstBlock.timestamp) / (secondsInADay * 7) : '');
+      console.log(
+        'weeks ellapsed: ',
+        firstBlock
+          ? (block.timestamp - firstBlock.timestamp) / (secondsInADay * 7)
+          : ''
+      );
       console.log('BlockNum: ', blockNum);
       console.log('user1IQBal', formatEther(user1IQBal));
-      console.log('HIIQ.totalSupply', formatEther(await user.HIIQ.totalSupplyAt(blockNum)));
-      console.log('HiIQRewards.totalSupply', formatEther(await user.HiIQRewards.totalHiIQSupplyStored()));
-      console.log('HiIQRewards.userYieldPerTokenPaid', formatEther(await user.HiIQRewards.userYieldPerTokenPaid(user.address)));
-      console.log('HiIQRewards.yieldPerHiIQ', formatEther(await user.HiIQRewards.yieldPerHiIQ()));
+      console.log(
+        'HIIQ.totalSupply',
+        formatEther(await user.HIIQ.totalSupplyAt(blockNum))
+      );
+      console.log(
+        'HiIQRewards.totalSupply',
+        formatEther(await user.HiIQRewards.totalHiIQSupplyStored())
+      );
+      console.log(
+        'HiIQRewards.userYieldPerTokenPaid',
+        formatEther(await user.HiIQRewards.userYieldPerTokenPaid(user.address))
+      );
+      console.log(
+        'HiIQRewards.yieldPerHiIQ',
+        formatEther(await user.HiIQRewards.yieldPerHiIQ())
+      );
       console.log('earned1', formatEther(earned1));
       console.log('expectedEarned1', expectedEarned1);
       console.log('expectedEarned2', expectedEarned2);
@@ -329,7 +346,10 @@ describe(contractName, () => {
     ); // 1M per day
 
     await deployer.IQERC20.mint(user.address, amount);
-    await deployer.IQERC20.mint(HiIQRewards.address, BigNumber.from(parseEther('10000000000'))); // 10,000M
+    await deployer.IQERC20.mint(
+      HiIQRewards.address,
+      BigNumber.from(parseEther('10000000000'))
+    ); // 10,000M
 
     await user.IQERC20.approve(HIIQ.address, lockedAmount);
     await user.HIIQ.create_lock(lockedAmount, lockTime);
@@ -436,7 +456,9 @@ describe(contractName, () => {
       // await user.HiIQRewards.checkpoint();
       await user2.HiIQRewards.checkpoint();
 
-      const lockTimeUser = await (await user.HIIQ.locked__end(user.address)).toNumber();
+      const lockTimeUser = await (
+        await user.HIIQ.locked__end(user.address)
+      ).toNumber();
       // expected amount tops after lockTime
       if (lockTimeUser >= block.timestamp) {
         expectedEarned1 = (6000000 * weeksTest) / 7 / 2;
@@ -484,7 +506,10 @@ describe(contractName, () => {
 
     await deployer.IQERC20.mint(user.address, amount);
     await deployer.IQERC20.mint(user2.address, amount);
-    await deployer.IQERC20.mint(HiIQRewards.address, BigNumber.from(parseEther('10000000000'))); // 10,000M
+    await deployer.IQERC20.mint(
+      HiIQRewards.address,
+      BigNumber.from(parseEther('10000000000'))
+    ); // 10,000M
 
     await user.IQERC20.approve(HIIQ.address, lockedAmount);
     await user.HIIQ.create_lock(lockedAmount, lockTime);
@@ -528,14 +553,24 @@ describe(contractName, () => {
       block = await ethers.provider.getBlock(blockNum);
 
       if (weeksTest <= WEEKS_TO_STAKE) {
-        expectedEarned1 = 6500000 * weeksTest / 2;
-        expectedEarned2 = 7500000 * weeksTest / 2;
+        expectedEarned1 = (6500000 * weeksTest) / 2;
+        expectedEarned2 = (7500000 * weeksTest) / 2;
       }
       const earned1 = await user.HiIQRewards.earned(user.address);
 
       console.log('block.timestamp: ', block.timestamp);
-      console.log('days ellapsed: ', firstBlock ? (block.timestamp - firstBlock.timestamp) / secondsInADay : '');
-      console.log('weeks ellapsed: ', firstBlock ? (block.timestamp - firstBlock.timestamp) / (secondsInADay * 7) : '');
+      console.log(
+        'days ellapsed: ',
+        firstBlock
+          ? (block.timestamp - firstBlock.timestamp) / secondsInADay
+          : ''
+      );
+      console.log(
+        'weeks ellapsed: ',
+        firstBlock
+          ? (block.timestamp - firstBlock.timestamp) / (secondsInADay * 7)
+          : ''
+      );
       // console.log('BlockNum: ', blockNum);
       // console.log('user1IQBal', formatEther(user1IQBal));
       // console.log('HIIQ.totalSupply', formatEther(await user.HIIQ.totalSupplyAt(blockNum)));
@@ -578,8 +613,10 @@ describe(contractName, () => {
 
     await deployer.IQERC20.mint(users[0].address, amount);
     await users[0].IQERC20.approve(HIIQ.address, lockedAmount);
-    const userLockTime = Math.round(new Date().getTime() / 1000) + secondsInADay * 30;
-    const userLockTime2 = Math.round(new Date().getTime() / 1000) + secondsInADay * 60;
+    const userLockTime =
+      Math.round(new Date().getTime() / 1000) + secondsInADay * 30;
+    const userLockTime2 =
+      Math.round(new Date().getTime() / 1000) + secondsInADay * 60;
     await users[0].HIIQ.create_lock(lockedAmount, userLockTime);
     await users[0].HIIQ.checkpoint();
 
@@ -611,7 +648,6 @@ describe(contractName, () => {
       const earned2 = await users[i].HiIQRewards.earned(users[i].address);
       console.log(`earned2 . user: ${i}`, formatEther(earned2));
     }
-
   });
 
   it('Greylist and pause', async () => {

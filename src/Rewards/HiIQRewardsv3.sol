@@ -86,7 +86,7 @@ contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
     /* ========== MODIFIERS ========== */
 
     modifier onlyByOwnGov() {
-        require( msg.sender == owner() || msg.sender == timelock_address, "Not owner or timelock");
+        require(msg.sender == owner() || msg.sender == timelock_address, "Not owner or timelock");
         _;
     }
 
@@ -102,10 +102,7 @@ contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor (
-        address _emittedToken,
-        address _veFXS_address
-    ) {
+    constructor(address _emittedToken, address _veFXS_address) {
         emitted_token_address = _emittedToken;
         emittedToken = ERC20(_emittedToken);
 
@@ -131,8 +128,7 @@ contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
         // Only unexpired veFXS should be eligible
         if (int256(curr_locked_bal_pack.amount) == int256(curr_vefxs_bal)) {
             return 0;
-        }
-        else {
+        } else {
             return curr_vefxs_bal;
         }
     }
@@ -146,13 +142,9 @@ contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
             return yieldPerVeFXSStored;
         } else {
             return (
-            yieldPerVeFXSStored.add(
-                lastTimeYieldApplicable()
-                .sub(lastUpdateTime)
-                .mul(yieldRate)
-                .mul(1e18)
-                .div(totalVeFXSSupplyStored)
-            )
+                yieldPerVeFXSStored.add(
+                    lastTimeYieldApplicable().sub(lastUpdateTime).mul(yieldRate).mul(1e18).div(totalVeFXSSupplyStored)
+                )
             );
         }
     }
@@ -170,12 +162,7 @@ contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
         // Analogous to midpoint Riemann sum
         uint256 midpoint_vefxs_balance = ((new_vefxs_balance).add(old_vefxs_balance)).div(2);
 
-        return (
-        midpoint_vefxs_balance
-        .mul(yield0.sub(userYieldPerTokenPaid[account]))
-        .div(1e18)
-        .add(yields[account])
-        );
+        return (midpoint_vefxs_balance.mul(yield0.sub(userYieldPerTokenPaid[account])).div(1e18).add(yields[account]));
     }
 
     function getYieldForDuration() external view returns (uint256) {
@@ -224,17 +211,19 @@ contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
         _checkpointUser(msg.sender);
     }
 
-    function getYield() external nonReentrant notYieldCollectionPaused checkpointUser(msg.sender) returns (uint256 yield0) {
+    function getYield()
+        external
+        nonReentrant
+        notYieldCollectionPaused
+        checkpointUser(msg.sender)
+        returns (uint256 yield0)
+    {
         require(greylist[msg.sender] == false, "Address has been greylisted");
 
         yield0 = yields[msg.sender];
         if (yield0 > 0) {
             yields[msg.sender] = 0;
-            TransferHelper.safeTransfer(
-                emitted_token_address,
-                msg.sender,
-                yield0
-            );
+            TransferHelper.safeTransfer(emitted_token_address, msg.sender, yield0);
             emit YieldCollected(msg.sender, yield0, emitted_token_address);
         }
     }
@@ -251,14 +240,11 @@ contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
         uint256 num_periods_elapsed = uint256(block.timestamp.sub(periodFinish)) / yieldDuration; // Floor division to the nearest period
         uint256 balance0 = emittedToken.balanceOf(address(this));
         require(
-            yieldRate.mul(yieldDuration).mul(num_periods_elapsed + 1) <=
-            balance0,
+            yieldRate.mul(yieldDuration).mul(num_periods_elapsed + 1) <= balance0,
             "Not enough emittedToken available for yield distribution!"
         );
 
-        periodFinish = periodFinish.add(
-            (num_periods_elapsed.add(1)).mul(yieldDuration)
-        );
+        periodFinish = periodFinish.add((num_periods_elapsed.add(1)).mul(yieldDuration));
 
         uint256 yield0 = yieldPerVeFXS();
         yieldPerVeFXSStored = yield0;
@@ -290,7 +276,10 @@ contract HiIQRewardsv3 is Ownable, ReentrancyGuard {
     }
 
     function setYieldDuration(uint256 _yieldDuration) external onlyByOwnGov {
-        require( periodFinish == 0 || block.timestamp > periodFinish, "Previous yield period must be complete before changing the duration for the new period");
+        require(
+            periodFinish == 0 || block.timestamp > periodFinish,
+            "Previous yield period must be complete before changing the duration for the new period"
+        );
         yieldDuration = _yieldDuration;
         emit YieldDurationUpdated(yieldDuration);
     }

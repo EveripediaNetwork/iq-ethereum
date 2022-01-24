@@ -148,7 +148,6 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
             eligible_current_hiiq = hiIQ.balanceOf(account);
         }
 
-
         // If your hiIQ is unlocked
         uint256 eligible_time_fraction = PRICE_PRECISION;
         if (eligible_current_hiiq == 0) {
@@ -179,9 +178,8 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
                 // it should not go to zero, use ending point hiIQ and prev checkpoint amount
                 uint256 balanceOf = 0;
                 try hiIQ.balanceOf(account, user_locking_ending_time) returns (uint256 balance) {
-                   balanceOf = balance;
-                } catch(bytes memory _err) {
-                }
+                    balanceOf = balance;
+                } catch (bytes memory _err) {}
                 hiiq_balance_to_use = ((balanceOf).add(old_hiiq_balance)).div(2);
             } else {
                 hiiq_balance_to_use = ((eligible_current_hiiq).add(old_hiiq_balance)).div(2);
@@ -191,11 +189,12 @@ contract HiIQRewards is Ownable, ReentrancyGuard {
         return calculateEarn(account, hiiq_balance_to_use, yieldPerHiIQToUse);
     }
 
-    function calculateEarn(address account, uint256 hiiq_balance_to_use, uint256 yieldPerHiIQToUse) internal view returns (uint256) {
-        return hiiq_balance_to_use
-        .mul(yieldPerHiIQToUse)
-        .div(1e18 * PRICE_PRECISION)
-        .add(yields[account]);
+    function calculateEarn(
+        address account,
+        uint256 hiiq_balance_to_use,
+        uint256 yieldPerHiIQToUse
+    ) internal view returns (uint256) {
+        return hiiq_balance_to_use.mul(yieldPerHiIQToUse).div(1e18 * PRICE_PRECISION).add(yields[account]);
     }
 
     function getYieldForDuration() external view returns (uint256) {
