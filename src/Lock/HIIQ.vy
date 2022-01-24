@@ -208,7 +208,6 @@ def recoverERC20(token_addr: address, amount: uint256):
     @dev Used to recover non-IQ ERC20 tokens
     """
     assert msg.sender == self.admin  # dev: admin only
-    assert token_addr != self.token  # Cannot recover IQ. Use toggleEmergencyUnlock instead and have users pull theirs out individually
     ERC20(token_addr).transfer(self.admin, amount)
 
 @internal
