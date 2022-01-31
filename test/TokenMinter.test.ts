@@ -3,7 +3,8 @@ import {
   deployments,
   ethers,
   getNamedAccounts,
-  getUnnamedAccounts, network,
+  getUnnamedAccounts,
+  network,
 } from 'hardhat';
 import {DummyERC20, IQERC20, TokenMinter} from '../typechain';
 import {setupUser, setupUsers} from './utils';
@@ -40,10 +41,10 @@ const setup = deployments.createFixture(async () => {
 describe('TokenMinter', function () {
   beforeEach(async function () {
     await network.provider.request({
-      method: "hardhat_reset",
+      method: 'hardhat_reset',
       params: [],
     });
-  })
+  });
   it('TokenMinter can mint and burn', async function () {
     const {users, TokenMinter, deployer} = await setup();
     const user = users[3];

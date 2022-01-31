@@ -3,7 +3,8 @@ import {
   deployments,
   ethers,
   getNamedAccounts,
-  getUnnamedAccounts, network,
+  getUnnamedAccounts,
+  network,
 } from 'hardhat';
 import {IQERC20} from '../typechain';
 import {setupUser, setupUsers} from './utils';
@@ -24,10 +25,10 @@ const setup = deployments.createFixture(async () => {
 describe('IQERC20', function () {
   beforeEach(async function () {
     await network.provider.request({
-      method: "hardhat_reset",
+      method: 'hardhat_reset',
       params: [],
     });
-  })
+  });
   it('owner can mint and burn', async function () {
     const {users, deployer} = await setup();
     await expect(deployer.IQERC20.mint(users[0].address, 1000)).to.be.not

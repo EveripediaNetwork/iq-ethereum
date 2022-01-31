@@ -4,7 +4,8 @@ import {
   deployments,
   ethers,
   getNamedAccounts,
-  getUnnamedAccounts, network,
+  getUnnamedAccounts,
+  network,
 } from 'hardhat';
 import {setupUser, setupUsers} from './utils';
 import {BigNumber} from 'ethers';
@@ -41,10 +42,10 @@ const setup = deployments.createFixture(async () => {
 describe(contractName, () => {
   beforeEach(async function () {
     await network.provider.request({
-      method: "hardhat_reset",
+      method: 'hardhat_reset',
       params: [],
     });
-  })
+  });
   it('Only owner can call restrictive functions', async () => {
     const {users, deployer} = await setup();
     const temp = users[0];
@@ -498,7 +499,7 @@ describe(contractName, () => {
   });
 
   it('2 user, 2 week lock, 2 year simulation, user2 withdraws & checkpoints last week of sim', async () => {
-    return // TODO: fix test
+    return; // TODO: fix test
     const {users, deployer, HIIQ, HiIQRewards} = await setup();
 
     const user = users[0];

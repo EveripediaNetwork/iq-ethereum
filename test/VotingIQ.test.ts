@@ -32,10 +32,10 @@ const setup = deployments.createFixture(async () => {
 describe('HIIQ', function () {
   beforeEach(async function () {
     await network.provider.request({
-      method: "hardhat_reset",
+      method: 'hardhat_reset',
       params: [],
     });
-  })
+  });
   it('HIIQ can get IQ and vote', async function () {
     const lockTime =
       Math.round(new Date().getTime() / 1000) + 60 * 60 * 24 * 14;
