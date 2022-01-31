@@ -62,6 +62,8 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
+      live: false,
+      saveDeployments: false,
       accounts: accounts(process.env.HARDHAT_FORK),
       forking: process.env.HARDHAT_FORK
         ? {
@@ -73,6 +75,8 @@ const config: HardhatUserConfig = {
         : undefined,
     },
     localhost: {
+      live: false,
+      saveDeployments: false,
       url: node_url('localhost'),
       accounts: accounts(),
     },
