@@ -19,7 +19,11 @@ contract TokenMinterLimit is IMinter {
         locked = false;
     }
 
-    constructor(IIQERC20 iQ, IERC20 wrappedIQ, uint256 limit) {
+    constructor(
+        IIQERC20 iQ,
+        IERC20 wrappedIQ,
+        uint256 limit
+    ) {
         _iQ = iQ;
         _wrappedIQ = wrappedIQ;
         _limitWrappedTokens = limit;
