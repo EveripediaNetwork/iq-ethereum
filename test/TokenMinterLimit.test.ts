@@ -51,6 +51,7 @@ describe('TokenMinterLimit', function () {
       params: [],
     });
   });
+  const TEST_VALUE = BigNumber.from(parseEther('1000'));
   // TODO: test new functions: setLimitWrappedTokens / setCurrentWrappedTokens / test limits hits
   it('TokenMinter can mint and burn', async function () {
     const {users, TokenMinter, deployer} = await setup();
@@ -112,15 +113,25 @@ describe('TokenMinterLimit', function () {
     const {users, TokenMinter, deployer} = await setup();
     const user = users[2];
     await expect(
-      user.TokenMinter.setLimitWrappedTokens(1000)
+      user.TokenMinter.setLimitWrappedTokens(TEST_VALUE)
     ).to.be.revertedWith('Only IQ owner can limit wrapped tokens');
-    await expect(
-      deployer.TokenMinter.setLimitWrappedTokens(
-        BigNumber.from(parseEther('1000'))
-      )
-    ).to.be.not.reverted;
+    await expect(deployer.TokenMinter.setLimitWrappedTokens(TEST_VALUE)).to.be
+      .not.reverted;
     expect(
       ethers.utils.formatEther(await TokenMinter._limitWrappedTokens())
+    ).to.equal('1000.0');
+  });
+
+  it('Owner can set current wrapped token', async function () {
+    const {users, TokenMinter, deployer} = await setup();
+    const user = users[2];
+    await expect(
+      user.TokenMinter.setCurrentWrappedTokens(TEST_VALUE)
+    ).to.be.revertedWith('Only IQ owner can set current wrapped tokens');
+    await expect(deployer.TokenMinter.setCurrentWrappedTokens(TEST_VALUE)).to.be
+      .not.reverted;
+    expect(
+      ethers.utils.formatEther(await TokenMinter._currentWrappedTokens())
     ).to.equal('1000.0');
   });
 });
