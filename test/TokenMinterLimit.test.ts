@@ -109,13 +109,18 @@ describe('TokenMinterLimit', function () {
   });
 
   it('Owner can set limit on wrapped token', async function () {
-    const {users, TokenMinter, deployer} = await setup(); 
+    const {users, TokenMinter, deployer} = await setup();
     const user = users[2];
     await expect(
       user.TokenMinter.setLimitWrappedTokens(1000)
     ).to.be.revertedWith('Only IQ owner can limit wrapped tokens');
-    await expect(deployer.TokenMinter.setLimitWrappedTokens(BigNumber.from(parseEther('1000')))).to
-      .be.not.reverted;
-    expect(ethers.utils.formatEther(await TokenMinter._limitWrappedTokens())).to.equal('1000.0');
+    await expect(
+      deployer.TokenMinter.setLimitWrappedTokens(
+        BigNumber.from(parseEther('1000'))
+      )
+    ).to.be.not.reverted;
+    expect(
+      ethers.utils.formatEther(await TokenMinter._limitWrappedTokens())
+    ).to.equal('1000.0');
   });
 });
