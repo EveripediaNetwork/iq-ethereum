@@ -51,7 +51,7 @@ describe('TokenMinterLimit', function () {
       params: [],
     });
   });
-  const TEST_VALUE = BigNumber.from(parseEther('1000'));
+  const TEST_VALUE = 2000
   // TODO: test new functions: setLimitWrappedTokens / setCurrentWrappedTokens / test limits hits
   it('TokenMinter can mint and burn', async function () {
     const {users, TokenMinter, deployer} = await setup();
@@ -65,6 +65,9 @@ describe('TokenMinterLimit', function () {
     expect(await user.PTOKEN.balanceOf(user.address)).to.equal(5000);
     await expect(user.PTOKEN.approve(TokenMinter.address, 1000)).to.be.not
       .reverted;
+    await expect(deployer.TokenMinter.setLimitWrappedTokens(TEST_VALUE)).to.be
+      .not.reverted;
+    await expect(user.TokenMinter.mint(2001)).to.be.revertedWith("Limit max tokens");
     await expect(user.TokenMinter.mint(1000)).to.be.not.reverted;
     await expect(user.TokenMinter.mint(1000)).to.be.revertedWith(
       'ERC20: transfer amount exceeds allowance'
@@ -118,8 +121,8 @@ describe('TokenMinterLimit', function () {
     await expect(deployer.TokenMinter.setLimitWrappedTokens(TEST_VALUE)).to.be
       .not.reverted;
     expect(
-      ethers.utils.formatEther(await TokenMinter._limitWrappedTokens())
-    ).to.equal('1000.0');
+      Number(await TokenMinter._limitWrappedTokens())
+    ).to.equal(2000);
   });
 
   it('Owner can set current wrapped token', async function () {
@@ -131,7 +134,7 @@ describe('TokenMinterLimit', function () {
     await expect(deployer.TokenMinter.setCurrentWrappedTokens(TEST_VALUE)).to.be
       .not.reverted;
     expect(
-      ethers.utils.formatEther(await TokenMinter._currentWrappedTokens())
-    ).to.equal('1000.0');
+      Number(await TokenMinter._currentWrappedTokens())
+    ).to.equal(2000);
   });
 });
