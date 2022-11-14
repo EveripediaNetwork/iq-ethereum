@@ -51,7 +51,7 @@ describe('TokenMinterLimit', function () {
       params: [],
     });
   });
-  const TEST_VALUE = 2000
+  const TEST_VALUE = 2000;
   // TODO: test new functions: setLimitWrappedTokens / setCurrentWrappedTokens / test limits hits
   it('TokenMinter can mint and burn', async function () {
     const {users, TokenMinter, deployer} = await setup();
@@ -67,7 +67,9 @@ describe('TokenMinterLimit', function () {
       .reverted;
     await expect(deployer.TokenMinter.setLimitWrappedTokens(TEST_VALUE)).to.be
       .not.reverted;
-    await expect(user.TokenMinter.mint(2001)).to.be.revertedWith("Limit max tokens");
+    await expect(user.TokenMinter.mint(2001)).to.be.revertedWith(
+      'Limit max tokens'
+    );
     await expect(user.TokenMinter.mint(1000)).to.be.not.reverted;
     await expect(user.TokenMinter.mint(1000)).to.be.revertedWith(
       'ERC20: transfer amount exceeds allowance'
@@ -120,9 +122,7 @@ describe('TokenMinterLimit', function () {
     ).to.be.revertedWith('Only IQ owner can limit wrapped tokens');
     await expect(deployer.TokenMinter.setLimitWrappedTokens(TEST_VALUE)).to.be
       .not.reverted;
-    expect(
-      Number(await TokenMinter._limitWrappedTokens())
-    ).to.equal(2000);
+    expect(Number(await TokenMinter._limitWrappedTokens())).to.equal(2000);
   });
 
   it('Owner can set current wrapped token', async function () {
@@ -133,8 +133,6 @@ describe('TokenMinterLimit', function () {
     ).to.be.revertedWith('Only IQ owner can set current wrapped tokens');
     await expect(deployer.TokenMinter.setCurrentWrappedTokens(TEST_VALUE)).to.be
       .not.reverted;
-    expect(
-      Number(await TokenMinter._currentWrappedTokens())
-    ).to.equal(2000);
+    expect(Number(await TokenMinter._currentWrappedTokens())).to.equal(2000);
   });
 });
