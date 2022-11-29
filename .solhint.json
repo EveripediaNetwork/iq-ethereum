@@ -9,7 +9,7 @@
       }
     ],
     "code-complexity": ["warn", 7],
-    "compiler-version": ["error", "^0.7.0"],
+    "compiler-version": ["warn", "^0.7.0"],
     "const-name-snakecase": "off",
     "func-name-mixedcase": "off",
     "constructor-syntax": "error",
