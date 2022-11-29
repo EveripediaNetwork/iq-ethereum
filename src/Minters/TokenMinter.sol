@@ -10,7 +10,7 @@ contract TokenMinter is IMinter {
     IERC20 private _wrappedIQ;
     bool internal locked;
 
-    modifier blockReentrancy {
+    modifier blockReentrancy() {
         require(!locked, "Contract is locked");
         locked = true;
         _;

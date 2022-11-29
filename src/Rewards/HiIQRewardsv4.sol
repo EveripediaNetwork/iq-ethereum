@@ -115,11 +115,9 @@ contract HiIQRewardsv4 is Ownable, ReentrancyGuard {
 
     // Only positions with locked hiIQ can accrue yield. Otherwise, expired-locked hiIQ
     // is de-facto rewards for IQ.
-    function eligibleCurrentHiIQ(address account)
-        public
-        view
-        returns (uint256 eligible_hiiq_bal, uint256 stored_ending_timestamp)
-    {
+    function eligibleCurrentHiIQ(
+        address account
+    ) public view returns (uint256 eligible_hiiq_bal, uint256 stored_ending_timestamp) {
         uint256 curr_hiiq_bal = hiIQ.balanceOf(account);
 
         // Stored is used to prevent abuse

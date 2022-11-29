@@ -1,43 +1,98 @@
 // SPDX-License-Identifier: AGPL-3.0
-pragma solidity 0.7.1;
+pragma solidity ^0.8.13;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+interface IERC20 {
+    function transfer(address recipient, uint256 amount) external returns (bool);
+}
 
-contract Inflation is Ownable {
-    IERC20 private _iQ;
-    uint256 public _lastClaimed;
-    Reward[] public _rewards;
+/// @title Inflation
+/// @author kesar.eth
+/// @notice A contract for inflation
+contract Inflation {
+    /// -----------------------------------------------------------------------
+    /// Errors
+    /// -----------------------------------------------------------------------
+
+    error MaxOneCallEachTenMinutes();
+    error TransferFailed();
+    error NotOwner();
+
+    /// -----------------------------------------------------------------------
+    /// Events
+    /// -----------------------------------------------------------------------
+
+    event Inflate(address indexed _destination, uint256 _amount);
+
+    /// -----------------------------------------------------------------------
+    /// Storage variables
+    /// -----------------------------------------------------------------------
+
+    uint256 private _lastClaimed;
+    Reward[] private _rewards;
+    address private _owner;
+
+    /// -----------------------------------------------------------------------
+    /// Immutable parameters
+    /// -----------------------------------------------------------------------
+
+    IERC20 immutable _iQ;
+    uint256 constant MIN_AMOUNT_INFLATE = 600;
+
+    /// -----------------------------------------------------------------------
+    /// Structs
+    /// -----------------------------------------------------------------------
 
     struct Reward {
         address destination;
         uint256 emissionsPerSecond;
     }
 
-    event Inflate(address _destination, uint256 _amount);
+    /// -----------------------------------------------------------------------
+    /// Modifiers
+    /// -----------------------------------------------------------------------
 
-    constructor(IERC20 iQ, Reward[] memory rewards) public Ownable() {
+    modifier onlyOwner() {
+        if (_owner != msg.sender) {
+            revert NotOwner();
+        }
+        _;
+    }
+
+    /// -----------------------------------------------------------------------
+    /// Constructor
+    /// -----------------------------------------------------------------------
+
+    constructor(IERC20 iQ, Reward[] memory rewards, address owner) {
         _iQ = iQ;
         _lastClaimed = block.timestamp;
+        _owner = owner;
         uint256 rewardsLength = rewards.length;
         for (uint256 i = 0; i < rewardsLength; i++) {
             _rewards.push(rewards[i]);
         }
     }
 
+    /// -----------------------------------------------------------------------
+    /// External functions
+    /// -----------------------------------------------------------------------
+
     function inflate() external {
         uint256 rewardsLength = _rewards.length;
         uint256 currentTimestamp = block.timestamp;
         uint256 diffSeconds = currentTimestamp - _lastClaimed;
-        require(diffSeconds > 600, "maximum one call each 10 minutes");
+        if (diffSeconds <= MIN_AMOUNT_INFLATE) {
+            revert MaxOneCallEachTenMinutes();
+        }
+        _lastClaimed = currentTimestamp;
         for (uint256 i = 0; i < rewardsLength; i++) {
             Reward memory reward = _rewards[i];
             uint256 emission = reward.emissionsPerSecond * diffSeconds;
-            require(_iQ.transfer(reward.destination, emission), "Transfer has failed");
+            if (_iQ.transfer(reward.destination, emission) == false) {
+                revert TransferFailed();
+            }
             emit Inflate(reward.destination, emission);
         }
-        _lastClaimed = currentTimestamp;
     }
 
     function changeInflation(Reward[] memory rewards) external onlyOwner {
@@ -47,7 +102,29 @@ contract Inflation is Ownable {
         }
     }
 
-    function rescue(uint256 _amount) external onlyOwner {
-        require(_iQ.transfer(msg.sender, _amount), "Transfer has failed");
+    function rescue(IERC20 erc20, uint256 _amount) external onlyOwner {
+        if (erc20.transfer(msg.sender, _amount) == false) {
+            revert TransferFailed();
+        }
+    }
+
+    function transferOwnership(address newOwner) public onlyOwner {
+        _owner = newOwner;
+    }
+
+    /// -----------------------------------------------------------------------
+    /// Getters
+    /// -----------------------------------------------------------------------
+
+    function rewards() external view returns (Reward[] memory) {
+        return _rewards;
+    }
+
+    function lastClaimed() external view returns (uint256) {
+        return _lastClaimed;
+    }
+
+    function owner() external view returns (address) {
+        return _owner;
     }
 }

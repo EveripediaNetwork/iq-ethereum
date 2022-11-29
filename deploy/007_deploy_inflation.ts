@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const rewards: never[] = [];
   const result = await deploy('Inflation', {
     from: deployer,
-    args: [iQ.address, rewards],
+    args: [iQ.address, rewards, deployer],
     log: true,
   });
   hre.deployments.log(

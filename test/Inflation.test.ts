@@ -23,7 +23,7 @@ const setup = deployments.createFixture(async () => {
 
   await deployments.deploy('Inflation', {
     from: deployer,
-    args: [IQERC20.address, []], // TODO: add rewards
+    args: [IQERC20.address, [], deployer],
     log: true,
   });
   const contracts = {
@@ -47,15 +47,15 @@ describe('Inflation', function () {
   });
   //TODO: add tests
   it('Inflation can inflate', async function () {
-    /*
-    const {users, TokenMinter, deployer} = await setup();
-    const user = users[3];
-    expect(await TokenMinter.iQ()).to.equal(user.IQERC20.address);
-    expect(await TokenMinter.wrappedIQ()).to.equal(user.PTOKEN.address);
-    await deployer.PTOKEN.mint(user.address, 5000);
-    await expect(deployer.IQERC20.setMinter(TokenMinter.address)).to.be.not
-      .reverted;
-
-     */
+    const {users, deployer} = await setup();
+    console.log(await deployer.Inflation.rewards());
+    await deployer.Inflation.changeInflation([
+      {
+        destination: users[0].address,
+        emissionsPerSecond: BigNumber.from('1000000000000000000'),
+      },
+    ]);
+    console.log(await deployer.Inflation.rewards());
+    // TODO: test change inflation, permissions, rescue, inflate
   });
 });

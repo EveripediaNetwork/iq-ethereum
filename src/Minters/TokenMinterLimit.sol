@@ -12,18 +12,14 @@ contract TokenMinterLimit is IMinter {
     uint256 public _currentWrappedTokens;
     bool internal locked;
 
-    modifier blockReentrancy {
+    modifier blockReentrancy() {
         require(!locked, "Contract is locked");
         locked = true;
         _;
         locked = false;
     }
 
-    constructor(
-        IIQERC20 iQ,
-        IERC20 wrappedIQ,
-        uint256 limit
-    ) {
+    constructor(IIQERC20 iQ, IERC20 wrappedIQ, uint256 limit) {
         _iQ = iQ;
         _wrappedIQ = wrappedIQ;
         _limitWrappedTokens = limit;

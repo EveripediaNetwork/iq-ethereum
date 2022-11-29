@@ -12,7 +12,7 @@ contract IQERC20 is IIQERC20, ERC20, Ownable {
     // solhint-disable-next-line no-empty-blocks
     constructor() ERC20("Everipedia IQ", "IQ") {}
 
-    modifier ownerOrMinter {
+    modifier ownerOrMinter() {
         require(
             (address(_minter) != address(0) && msg.sender == address(_minter)) || msg.sender == owner(),
             "You are not owner or minter"
