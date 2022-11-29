@@ -1,4 +1,3 @@
-import {expect} from './chai-setup';
 import {
   deployments,
   ethers,
@@ -6,9 +5,8 @@ import {
   getUnnamedAccounts,
   network,
 } from 'hardhat';
-import {DummyERC20, Inflation, IQERC20, TokenMinterLimit} from '../typechain';
+import {DummyERC20, Inflation, IQERC20} from '../typechain';
 import {setupUser, setupUsers} from './utils';
-import {parseEther} from 'ethers/lib/utils';
 import {BigNumber} from 'ethers';
 
 const setup = deployments.createFixture(async () => {
