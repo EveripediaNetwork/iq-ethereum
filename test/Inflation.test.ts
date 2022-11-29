@@ -23,10 +23,7 @@ const setup = deployments.createFixture(async () => {
 
   await deployments.deploy('Inflation', {
     from: deployer,
-    args: [
-      IQERC20.address,
-      []
-    ], // TODO: add rewards
+    args: [IQERC20.address, []], // TODO: add rewards
     log: true,
   });
   const contracts = {
