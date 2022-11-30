@@ -88,14 +88,17 @@ contract Inflation {
         for (uint256 i = 0; i < rewardsLength; i++) {
             Reward memory reward = _rewards[i];
             uint256 emission = reward.emissionsPerSecond * diffSeconds;
-            if (_iQ.transfer(reward.destination, emission) == false) {
-                revert TransferFailed();
+            if (emission > 0) {
+                if (_iQ.transfer(reward.destination, emission) == false) {
+                    revert TransferFailed();
+                }
+                emit Inflate(reward.destination, emission);
             }
-            emit Inflate(reward.destination, emission);
         }
     }
 
     function changeInflation(Reward[] memory rewards) external onlyOwner {
+        inflate();
         delete _rewards;
         for (uint256 i = 0; i < rewards.length; i++) {
             _rewards.push(rewards[i]);
