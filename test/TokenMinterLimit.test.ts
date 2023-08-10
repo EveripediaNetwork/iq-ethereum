@@ -51,6 +51,7 @@ describe('TokenMinterLimit', function () {
       params: [],
     });
   });
+  const TEST_VALUE = 2000;
   // TODO: test new functions: setLimitWrappedTokens / setCurrentWrappedTokens / test limits hits
   it('TokenMinter can mint and burn', async function () {
     const {users, TokenMinter, deployer} = await setup();
@@ -64,6 +65,11 @@ describe('TokenMinterLimit', function () {
     expect(await user.PTOKEN.balanceOf(user.address)).to.equal(5000);
     await expect(user.PTOKEN.approve(TokenMinter.address, 1000)).to.be.not
       .reverted;
+    await expect(deployer.TokenMinter.setLimitWrappedTokens(TEST_VALUE)).to.be
+      .not.reverted;
+    await expect(user.TokenMinter.mint(2001)).to.be.revertedWith(
+      'Limit max tokens'
+    );
     await expect(user.TokenMinter.mint(1000)).to.be.not.reverted;
     await expect(user.TokenMinter.mint(1000)).to.be.revertedWith(
       'ERC20: transfer amount exceeds allowance'
@@ -106,5 +112,27 @@ describe('TokenMinterLimit', function () {
     await expect(user.TokenMinter.burn(500)).to.be.revertedWith(
       'You are not owner or minter'
     );
+  });
+
+  it('Owner can set limit on wrapped token', async function () {
+    const {users, TokenMinter, deployer} = await setup();
+    const user = users[2];
+    await expect(
+      user.TokenMinter.setLimitWrappedTokens(TEST_VALUE)
+    ).to.be.revertedWith('Only IQ owner can limit wrapped tokens');
+    await expect(deployer.TokenMinter.setLimitWrappedTokens(TEST_VALUE)).to.be
+      .not.reverted;
+    expect(Number(await TokenMinter._limitWrappedTokens())).to.equal(2000);
+  });
+
+  it('Owner can set current wrapped token', async function () {
+    const {users, TokenMinter, deployer} = await setup();
+    const user = users[2];
+    await expect(
+      user.TokenMinter.setCurrentWrappedTokens(TEST_VALUE)
+    ).to.be.revertedWith('Only IQ owner can set current wrapped tokens');
+    await expect(deployer.TokenMinter.setCurrentWrappedTokens(TEST_VALUE)).to.be
+      .not.reverted;
+    expect(Number(await TokenMinter._currentWrappedTokens())).to.equal(2000);
   });
 });
