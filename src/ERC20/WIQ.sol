@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: AGPL-3.0
-pragma solidity ^0.4.18;
+// SPDX-License-Identifier: GPL-3.0-only
+pragma solidity >=0.7.0 <0.8;
 
-contract WIQ {
+contract WETH9 {
     string public name     = "Wrapped IQ";
     string public symbol   = "WIQ";
     uint8  public decimals = 18;
@@ -14,10 +14,10 @@ contract WIQ {
     mapping (address => uint)                       public  balanceOf;
     mapping (address => mapping (address => uint))  public  allowance;
 
-    function() public payable {
+    receive() external payable {
         deposit();
     }
-    
+
     function deposit() public payable {
         balanceOf[msg.sender] += msg.value;
         emit Deposit(msg.sender, msg.value);
