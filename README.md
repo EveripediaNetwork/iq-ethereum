@@ -16,7 +16,7 @@ yarn test
 
 Next is the list of npm scripts you can execute.
 
-Some of them relies on [./scripts.js](./scripts.js) to allow parameterizing it via command line argument (have a look inside if you need modifications).
+Some of them rely on [./scripts.js](./scripts.js) to allow parameterizing it via command line argument (have a look inside if you need modifications).
 <br/><br/>
 
 ### `yarn prepare`
@@ -26,7 +26,7 @@ As a standard lifecycle npm script, it is executed automatically upon install. I
 
 ### `yarn lint`, `yarn lint:fix`, `yarn format` and `yarn format:fix`
 
-These commands will lint and format your code. The `:fix` version will modifiy the files to match the requirement specified in `.eslintrc` and `.prettierrc`.
+These commands will lint and format your code. The `:fix` version will modify the files to match the requirement specified in `.eslintrc` and `.prettierrc`.
 <br/><br/>
 
 ### `yarn compile`
@@ -61,7 +61,7 @@ These will run a local hardhat network on `localhost:8545` and deploy your contr
 
 ### `yarn local:dev`
 
-This assumes a local node it running on `localhost:8545`. It will deploy your contracts on it. Plus it will watch for any changes and redeploy them.
+This assumes a local node is running on `localhost:8545`. It will deploy your contracts on it. Plus it will watch for any changes and redeploy them.
 <br/><br/>
 
 ### `yarn exec <network> <file.ts> [args...]`
@@ -133,7 +133,7 @@ yarn
 yarn run exec rinkeby scripts/deployDummyERC20
 ```
 
-### Add erc20 addresss to `hardhat.config.ts` file for pIQ and deploy other contracts:
+### Add erc20 address to `hardhat.config.ts` file for pIQ and deploy other contracts:
 
 ```bash
 yarn deploy rinkeby
