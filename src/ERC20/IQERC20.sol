@@ -1,65 +1,38 @@
 // SPDX-License-Identifier: AGPL-3.0
-pragma solidity ^0.4.18;
+pragma solidity 0.7.1;
 
-contract WIQ {
-    string public name     = "Wrapped IQ";
-    string public symbol   = "WIQ";
-    uint8  public decimals = 18;
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "../Interfaces/IIQERC20.sol";
+import "../Interfaces/IMinter.sol";
 
-    event  Approval(address indexed src, address indexed guy, uint wad);
-    event  Transfer(address indexed src, address indexed dst, uint wad);
-    event  Deposit(address indexed dst, uint wad);
-    event  Withdrawal(address indexed src, uint wad);
+contract IQERC20 is IIQERC20, ERC20, Ownable {
+    IMinter private _minter;
 
-    mapping (address => uint)                       public  balanceOf;
-    mapping (address => mapping (address => uint))  public  allowance;
+    // solhint-disable-next-line no-empty-blocks
+    constructor() ERC20("Everipedia IQ", "IQ") {}
 
-    function() public payable {
-        deposit();
-    }
-    
-    function deposit() public payable {
-        balanceOf[msg.sender] += msg.value;
-        emit Deposit(msg.sender, msg.value);
-    }
-    
-    function withdraw(uint wad) public {
-        require(balanceOf[msg.sender] >= wad);
-        balanceOf[msg.sender] -= wad;
-        msg.sender.transfer(wad);
-        emit Withdrawal(msg.sender, wad);
+    modifier ownerOrMinter {
+        require(
+            (address(_minter) != address(0) && msg.sender == address(_minter)) || msg.sender == owner(),
+            "You are not owner or minter"
+        );
+        _;
     }
 
-    function totalSupply() public view returns (uint) {
-        return address(this).balance;
+    function minter() external view override returns (address) {
+        return address(_minter);
     }
 
-    function approve(address guy, uint wad) public returns (bool) {
-        allowance[msg.sender][guy] = wad;
-        emit Approval(msg.sender, guy, wad);
-        return true;
+    function mint(address _addr, uint256 _amount) external override ownerOrMinter {
+        _mint(_addr, _amount);
     }
 
-    function transfer(address dst, uint wad) public returns (bool) {
-        return transferFrom(msg.sender, dst, wad);
+    function burn(address _addr, uint256 _amount) external override ownerOrMinter {
+        _burn(_addr, _amount);
     }
 
-    function transferFrom(address src, address dst, uint wad)
-        public
-        returns (bool)
-    {
-        require(balanceOf[src] >= wad);
-
-        if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
-            require(allowance[src][msg.sender] >= wad);
-            allowance[src][msg.sender] -= wad;
-        }
-
-        balanceOf[src] -= wad;
-        balanceOf[dst] += wad;
-
-        emit Transfer(src, dst, wad);
-
-        return true;
+    function setMinter(IMinter _addr) external override onlyOwner {
+        _minter = _addr;
     }
 }
